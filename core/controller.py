@@ -66,6 +66,8 @@ class Controller():
         
         if valor:
             equipo.valor = valor
+        else:
+            equipo.valor = 0
         
         if id_mod:
             mod = Mod.get(Mod.id == id_mod)
@@ -76,11 +78,19 @@ class Controller():
         return equipo
     
     def editar_equipo(self, id_equipo, nombre, descripcion = None, 
-                        valor = None, mod = None):
+                        valor = None, id_mod = None):
         equipo = Equipo.get(Equipo.id == id_equipo)
         equipo.nombre = nombre
         equipo.descripcion = descripcion
-        equipo.valor = valor
+        
+        if valor:
+            equipo.valor = valor
+        else:
+            equipo.valor = 0
+        
+        if id_mod:
+            mod = Mod.get(Mod.id == id_mod)
+            equipo.mod = mod
         
         equipo.save()
         return equipo
@@ -169,7 +179,9 @@ class Controller():
         
         if 'fuerza' in datos:
             personaje.fuerza = datos['fuerza']
-            personaje.hp = personaje.fuerza * 5
+        
+        if 'hp' in datos:
+            personaje.fuerza = datos['hp']
         
         if 'agilidad' in datos:
             personaje.agilidad = datos['agilidad']
@@ -371,10 +383,11 @@ class Controller():
         equipom_bonus_pnj = self.bonus_equipo_personaje(mod_magia,
                                                         adversario)
         
-        
+        # sumamos bonus de entrada con bonus por equipo
         total_bonus_pj1 = bonus_pj + equipo_bonus_pj1
         total_bonus_pnj = bonus_pnj + equipo_bonus_pnj
         
+        # el total de magia es el valor del pj y su equipo mágico
         total_magia_pj1 = magia_pjvalue + equipom_bonus_pj1
         total_magia_pnj = magia_pnjvalue + equipom_bonus_pnj
         
@@ -389,11 +402,11 @@ class Controller():
             )
         else:
             ret_tirada = self.core.iniciativa_m(
-                pjvalue, 
-                total_magia_pj1, 
+                pjvalue, # su valor en agilidad
+                total_magia_pj1, # su valor en magia
                 pnjvalue, 
                 total_magia_pnj, 
-                total_bonus_pj1, 
+                total_bonus_pj1, # bonus de agilidad
                 total_bonus_pnj
             )
         
@@ -405,7 +418,74 @@ class Controller():
         
         return ret
     
-    def combate(self, id_pataca, bonus_ata, id_pdefiende, bonus_def, 
-                magia=False):
-        pass
+    def combate(self, id_pataca, id_pdefiende, magia=False, 
+                bonus_ata=0, bonus_def=0):
+        pataca      = self.get_personaje(id_pataca)
+        pdefiende   = self.get_personaje(id_pdefiende)
+        mod_ataque  = Mod.get(Mod.nombre == MOD_TYPE[1][1])
+        mod_defensa = Mod.get(Mod.nombre == MOD_TYPE[2][1])
+        mod_magia   = Mod.get(Mod.nombre == MOD_TYPE[9][1])
+        
+        # obtener valores
+        pataca_val    = self.bonus_mod_personaje(mod_ataque, pataca)
+        pdefiende_val = self.bonus_mod_personaje(mod_defensa, pdefiende)
+        
+        pataca_magia    = self.bonus_mod_personaje(mod_magia, pataca)
+        pdefiende_magia = self.bonus_mod_personaje(mod_magia, pdefiende)
+        
+        # obtener bonus por equipo
+        equipo_bonus_pata = self.bonus_equipo_personaje(mod_ataque,
+                                                        pataca)
+        equipo_bonus_pdef = self.bonus_equipo_personaje(mod_defensa,
+                                                        pdefiende)
+        equipom_bonus_pata = self.bonus_equipo_personaje(mod_magia,
+                                                        pataca)
+        equipom_bonus_pdef = self.bonus_equipo_personaje(mod_magia,
+                                                        pdefiende)
+        
+        total_bonus_pata = equipo_bonus_pata + bonus_ata
+        total_bonus_pdef = equipo_bonus_pdef + bonus_def
+        total_bonusm_pata = equipom_bonus_pata + bonus_ata
+        total_bonusm_pdef = equipom_bonus_pdef + bonus_def
+        
+        
+        ret_tirada = None
+        
+        if not magia:
+            ret_tirada = self.core.combate(
+                pataca_val, 
+                pdefiende_val, 
+                total_bonus_pata, 
+                total_bonus_pdef
+            )
+        else:
+            ret_tirada = self.core.combatem_m(
+                pataca_magia, 
+                pdefiende_magia, 
+                total_bonusm_pata, 
+                total_bonusm_pdef
+            )
+        
+        # aplicar heridas
+        herido = pdefiende
+        
+        if ret_tirada[0] != 0:
+            datos = {  }
+            
+            if ret_tirada[1]: # Overkill
+                datos['hp'] = 0
+            elif ret_tirada[0] > 0: # heridas
+                datos['hp'] = herido.hp - ret_tirada[0]
+            elif ret_tirada[0] < 0: # ataque patético
+                herido = pataca
+                datos['hp'] = herido.hp + ret_tirada[0]
+            
+            self.editar_personaje(herido.id, datos)
+        
+        ret = {
+            'resultado': ret_tirada[0],
+            'overkill' : ret_tirada[1],
+        }
+        
+        return ret
     

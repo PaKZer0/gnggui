@@ -17,8 +17,34 @@ class ControllerTestCase(unittest.TestCase):
         return self.con.crear_equipo(
             'Hacha', 
             'Hacha guerrera muy antigua', 
-            1,
+            4,
             1, # ataque
+        )
+    
+    def crear_equipo2(self):
+        return self.con.crear_equipo(
+            'Escudo de cartón', 
+            'Si se moja adiós', 
+            -1,
+            2, # defensa
+        )
+    
+    def crear_equipom1(self):
+        mod_magia = self.con.get_mod(9)
+        return self.con.crear_equipo(
+            'Báculo de napalm', 
+            'Magia abrasadora', 
+            4,
+            mod_magia.id,
+        )
+    
+    def crear_equipom2(self):
+        mod_magia = self.con.get_mod(9)
+        return self.con.crear_equipo(
+            'Cardo borriquero', 
+            'Dicen que da suerte', 
+            0,
+            mod_magia.id,
         )
     
     def crear_personaje(self):
@@ -247,6 +273,7 @@ class ControllerTestCase(unittest.TestCase):
         self.con.asignar_equipo(adversario.id, equipo2.id)
         self.con.asignar_equipo(adversario.id, equipom2.id)
         
+        # iniciativa normal
         ret_tirada = self.con.iniciativa(
             personaje.id,
             adversario.id,
@@ -266,6 +293,45 @@ class ControllerTestCase(unittest.TestCase):
         
         # debería de empezar el pj
         self.assertTrue(ret_tirada['resultado'])
+    
+    def test_combate(self):
+        self.crear_partida()
+        personaje = self.crear_personaje()
+        adversario = self.crear_adversario()
+        
+        equipo1 = self.crear_equipo()
+        equipo2 = self.crear_equipo2()
+        equipom1 = self.crear_equipom1()
+        equipom2 = self.crear_equipom2()
+        
+        self.con.asignar_equipo(personaje.id, equipo1.id)
+        self.con.asignar_equipo(personaje.id, equipom1.id)
+        self.con.asignar_equipo(adversario.id, equipo2.id)
+        self.con.asignar_equipo(adversario.id, equipom2.id)
+        
+        # combate normal
+        ret_tirada = self.con.combate(
+            personaje.id, 
+            adversario.id, 
+            magia=False, 
+            bonus_ata=2, # got higher ground
+            bonus_def=-2,
+        )
+        
+        # debería de golpear el pj
+        self.assertTrue( ret_tirada['resultado'] > 0 )
+        
+        # combate mágico
+        ret_tirada = self.con.combate(
+            personaje.id, 
+            adversario.id, 
+            magia=True, 
+            bonus_ata=2, # got higher ground
+            bonus_def=-2,
+        )
+        
+        # debería de golpear el pj
+        self.assertTrue( ret_tirada['resultado'] > 0 )
 
 
 if __name__ == '__main__':
