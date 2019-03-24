@@ -254,7 +254,7 @@ class Controller():
         return ret
     
     ### TIRADAS ###
-    def bonus_mod_pjvalue(self, mod, personaje):
+    def bonus_mod_personaje(self, mod, personaje):
         pjvalue = 0
         
         if mod.nombre == MOD_TYPE[0]:   # Ataque
@@ -280,22 +280,27 @@ class Controller():
         
         return pjvalue
     
-    def tirada_sin_oposicion(self, id_personaje, bonus, id_dificultad, 
-                                id_mod):
+    def bonus_equipo_personaje(self, mod, personaje):
+        equipos = Equipo.select().join(PlayerEquipo).join(Player)\
+            .where(Equipo.mod == mod, PlayerEquipo.player == personaje)
+        
+        equipo_bonus = 0
+        for equipo in equipos:
+            equipo_bonus = equipo_bonus + equipo.valor
+        
+        return equipo_bonus
+    
+    def tirada_sin_oposicion(self, id_personaje, id_dificultad, 
+                                id_mod, bonus=0):
         personaje = self.get_personaje(id_personaje)
         dificultad = self.get_dificultad(id_dificultad)
         mod = Mod.get(Mod.id == id_mod)
         
         # obtener valor personaje
-        pjvalue = self.bonus_mod_pjvalue(mod, personaje)
+        pjvalue = self.bonus_mod_personaje(mod, personaje)
         
         # obtener bonus por equipo
-        equipos = Equipo.select().join(PlayerEquipo).join(Player)\
-            .where(mod == mod)
-        
-        equipo_bonus = 0
-        for equipo in equipos:
-            equipo_bonus = equipo_bonus + equipo.valor
+        equipo_bonus = self.bonus_equipo_personaje(mod, personaje)
         
         total_bonus = bonus + equipo_bonus
         ret_tirada = self.core.sin_oposicion(pjvalue, dificultad.valor,\
@@ -309,9 +314,32 @@ class Controller():
         return ret
         
     
-    def tirada_con_oposicion(self, id_personaje, bonus_pj, id_pnj, 
-                                bonus_pnj, skill):
-        pass
+    def tirada_con_oposicion(self, id_personaje, id_pnj, 
+                                id_mod, bonus_pj=0, bonus_pnj=0):
+        personaje = self.get_personaje(id_personaje)
+        adversario = self.get_personaje(id_pnj)
+        mod = Mod.get(Mod.id == id_mod)
+        
+        # obtener valor personaje
+        pjvalue = self.bonus_mod_personaje(mod, personaje)
+        pnjvalue = self.bonus_mod_personaje(mod, adversario)
+        
+        # obtener bonus por equipo
+        equipo_bonus_pj1 = self.bonus_equipo_personaje(mod, personaje)
+        equipo_bonus_pnj = self.bonus_equipo_personaje(mod, adversario)
+        
+        total_bonus_pj1 = bonus_pj + equipo_bonus_pj1
+        total_bonus_pnj = bonus_pnj + equipo_bonus_pnj
+        
+        ret_tirada = self.core.con_oposicion(pjvalue, pnjvalue, total_bonus_pj1, total_bonus_pnj)
+        
+        ret = {
+            'resultado': ret_tirada,
+            'dado1': self.core.dado1,
+            'dado2': self.core.dado2,
+        }
+        
+        return ret
     
     ### COMBATES ###
     

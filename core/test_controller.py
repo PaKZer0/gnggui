@@ -40,6 +40,28 @@ class ControllerTestCase(unittest.TestCase):
         }
         
         personaje = self.con.crear_personaje(datos)
+        return personaje
+    
+    def crear_adversario(self):
+        datos = {
+            'nombre': 'Gork',
+            'profesion': 'Artillero',
+            'raza': 6, # Humano
+            'pueblo': 'Morgul',
+            'fuerza': 2,
+            'agilidad': 2,
+            'inteligencia': 2,
+            'carisma': 1,
+            'combate': 2,
+            'conocimientos': 1,
+            'latrocinio': 5,
+            'magia': 1,
+            'sociales': 1,
+            'partida': 1,
+        }
+        
+        adversario = self.con.crear_personaje(datos)
+        return adversario
     
     def test_partida(self):
         # gets
@@ -138,8 +160,7 @@ class ControllerTestCase(unittest.TestCase):
     
     def test_tirada_sin(self):
         self.crear_partida()
-        self.crear_personaje()
-        personaje = self.con.get_personaje(1)
+        personaje = self.crear_personaje()
         dificultad = self.con.get_dificultad(1)
         
         # create cuerda
@@ -147,18 +168,46 @@ class ControllerTestCase(unittest.TestCase):
         equipo = self.con.crear_equipo(
             'Cuerda', 
             'Sirve para escalar', 
+            4,
             mod_agilidad.id,
-            1, # ataque
         )
         
         self.con.asignar_equipo(personaje.id, equipo.id)
         
         ret_tirada = self.con.tirada_sin_oposicion(
             personaje.id,
-            2,
             dificultad.id,
             mod_agilidad.id
         )
+        
+        # debería de lograrlo
+        self.assertTrue(ret_tirada['resultado'])
+    
+    def test_tirada_con(self):
+        self.crear_partida()
+        personaje = self.crear_personaje()
+        adversario = self.crear_adversario()
+        
+        # create libro
+        mod_inteligencia = self.con.get_mod(4)
+        equipo = self.con.crear_equipo(
+            'Libro', 
+            'Te hace mas inteligente',
+            4,
+            mod_inteligencia.id,
+        )
+        
+        self.con.asignar_equipo(personaje.id, equipo.id)
+        
+        ret_tirada = self.con.tirada_con_oposicion(
+            personaje.id,
+            adversario.id,
+            mod_inteligencia.id,
+            2
+        )
+        
+        # debería de lograrlo
+        self.assertTrue(ret_tirada['resultado'])
 
 
 if __name__ == '__main__':
