@@ -39,7 +39,7 @@ class ControllerTestCase(unittest.TestCase):
             'partida': 1,
         }
         
-        self.con.crear_personaje(datos)
+        personaje = self.con.crear_personaje(datos)
     
     def test_partida(self):
         # gets
@@ -100,6 +100,65 @@ class ControllerTestCase(unittest.TestCase):
         self.crear_personaje()
         personajes = self.con.get_personajes()
         self.assertEqual(len(personajes), 1)
+        
+        # get
+        personaje = self.con.get_personaje(1)
+        self.assertEqual(personajes[0], personaje)
+        
+        # edit
+        datos = {
+            'nombre': 'Nunambaril',
+        }
+        personaje = self.con.editar_personaje(1, datos)
+        self.assertEqual(personaje.nombre, 'Nunambaril')
+        
+        # delete
+        self.con.borrar_personaje(personaje.id)
+        personajes = self.con.get_personajes()
+        self.assertEqual(len(personajes), 0)
+    
+    def test_asignar_robar(self):
+        self.crear_partida()
+        self.crear_equipo()
+        self.crear_personaje()
+        
+        personaje = self.con.get_personaje(1)
+        equipo = self.con.get_equipo(1)
+        
+        equipos = self.con.get_equipos_personaje(personaje.id)
+        self.assertEqual(len(equipos), 0)
+        
+        self.con.asignar_equipo(personaje.id, equipo.id)
+        equipos = self.con.get_equipos_personaje(personaje.id)
+        self.assertEqual(len(equipos), 1)
+        
+        self.con.robar_equipo(personaje.id, equipo.id)
+        equipos = self.con.get_equipos_personaje(personaje.id)
+        self.assertEqual(len(equipos), 0)
+    
+    def test_tirada_sin(self):
+        self.crear_partida()
+        self.crear_personaje()
+        personaje = self.con.get_personaje(1)
+        dificultad = self.con.get_dificultad(1)
+        
+        # create cuerda
+        mod_agilidad = self.con.get_mod(4)
+        equipo = self.con.crear_equipo(
+            'Cuerda', 
+            'Sirve para escalar', 
+            mod_agilidad.id,
+            1, # ataque
+        )
+        
+        self.con.asignar_equipo(personaje.id, equipo.id)
+        
+        ret_tirada = self.con.tirada_sin_oposicion(
+            personaje.id,
+            2,
+            dificultad.id,
+            mod_agilidad.id
+        )
 
 
 if __name__ == '__main__':

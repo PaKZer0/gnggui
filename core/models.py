@@ -163,6 +163,9 @@ class Player(BaseModel):
 class PlayerEquipo(BaseModel):
     player = ForeignKeyField(Player)
     equipo = ForeignKeyField(Equipo)
+    
+    def __str__(self):
+        return '{} | {}'.format(self.player, self.equipo)
 
 
 MODELS = [Dificultad, Partida, Raza, Mod, Equipo, Player, PlayerEquipo]

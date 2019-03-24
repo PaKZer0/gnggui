@@ -152,17 +152,164 @@ class Controller():
         return personaje
     
     def editar_personaje(self, id_personaje, datos):
-        pass
+        personaje = Player.get(Player.id == id_personaje)
+        
+        if 'nombre' in datos:
+            personaje.nombre = datos['nombre']
+        
+        if 'profesion' in datos:
+            personaje.profesion = datos['profesion']
+        
+        if 'raza' in datos:
+            raza = Raza.get(Raza.id == datos['raza'])
+            personaje.raza = raza
+        
+        if 'pueblo' in datos:
+            personaje.pueblo = datos['pueblo']
+        
+        if 'fuerza' in datos:
+            personaje.fuerza = datos['fuerza']
+            personaje.hp = personaje.fuerza * 5
+        
+        if 'agilidad' in datos:
+            personaje.agilidad = datos['agilidad']
+        
+        if 'inteligencia' in datos:
+            personaje.inteligencia = datos['inteligencia']
+        
+        if 'carisma' in datos:
+            personaje.carisma = datos['carisma']
+        
+        if 'combate' in datos:
+            personaje.combate = datos['combate']
+        
+        if 'conocimientos' in datos:
+            personaje.conocimientos = datos['conocimientos']
+        
+        if 'latrocinio' in datos:
+            personaje.latrocinio = datos['latrocinio']
+        
+        if 'magia' in datos:
+            personaje.magia = datos['magia']
+        
+        if 'sociales' in datos:
+            personaje.sociales = datos['sociales']
+        
+        if 'partida' in datos:
+            partida = Partida.get(Partida.id == datos['partida'])
+            personaje.partida = partida
+        
+        personaje.save()
+        return personaje
     
     def borrar_personaje(self, id_personaje):
-        pass
+        self.get_personaje(id_personaje).delete_instance()
+    
+    def get_equipos_personaje(self, id_personaje):
+        equipos = Equipo.select().join(PlayerEquipo).join(Player)\
+                    .where(Player.id == id_personaje).execute()
+        ret = [equipo for equipo in equipos]
+        
+        return ret
+    
+    def asignar_equipo(self, id_personaje, id_equipo):
+        personaje = self.get_personaje(id_personaje)
+        equipo = self.get_equipo(id_equipo)
+        
+        rel = PlayerEquipo()
+        rel.player=personaje
+        rel.equipo=equipo
+        rel.save()
+    
+    def robar_equipo(self, id_personaje, id_equipo):
+        personaje = self.get_personaje(id_personaje)
+        equipo = self.get_equipo(id_equipo)
+        
+        PlayerEquipo.delete().where(
+            PlayerEquipo.player==personaje,
+            PlayerEquipo.equipo==equipo,
+        ).execute()
+    
+    ### COMBOS ###
+    def get_dificultad(self, id_dificultad):
+        dificultad = Dificultad.get(Dificultad.id == id_dificultad)
+        
+        return dificultad
+    
+    def get_dificultades(self, id_dificultad):
+        dificultades = Dificultad.select()
+        ret = [dificultad for dificultad in dificultades]
+        
+        return ret
+    
+    def get_mod(self, id_mod):
+        mod = Mod.get(Mod.id == id_mod)
+        
+        return mod
+    
+    def get_mods(self):
+        mods = Mod.select()
+        ret = [mod for mod in mods]
+        
+        return ret
     
     ### TIRADAS ###
-    def tirada_sin_oposicion(self, id_personaje, bonus, dificultad, 
-                                skill):
-        pass
+    def bonus_mod_pjvalue(self, mod, personaje):
+        pjvalue = 0
+        
+        if mod.nombre == MOD_TYPE[0]:   # Ataque
+            pjvalue = personaje.combate
+        elif mod.nombre == MOD_TYPE[1]: # Defensa
+            pjvalue = personaje.combate
+        elif mod.nombre == MOD_TYPE[2]: # Fuerza
+            pjvalue = personaje.fuerza
+        elif mod.nombre == MOD_TYPE[3]: # Agilidad
+            pjvalue = personaje.agilidad
+        elif mod.nombre == MOD_TYPE[4]: # Inteligencia
+            pjvalue = personaje.inteligencia
+        elif mod.nombre == MOD_TYPE[5]: # Carisma
+            pjvalue = personaje.carisma
+        elif mod.nombre == MOD_TYPE[6]: # Conocimientos
+            pjvalue = personaje.conocimientos
+        elif mod.nombre == MOD_TYPE[7]: # Latrocinio
+            pjvalue = personaje.latrocinio
+        elif mod.nombre == MOD_TYPE[8]: # Magia
+            pjvalue = personaje.magia
+        elif mod.nombre == MOD_TYPE[9]: # Sociales
+            pjvalue = personaje.sociales
+        
+        return pjvalue
     
-    def tirada_con_oposicion(self, id_personaje, bonuspj_, id_pnj, 
+    def tirada_sin_oposicion(self, id_personaje, bonus, id_dificultad, 
+                                id_mod):
+        personaje = self.get_personaje(id_personaje)
+        dificultad = self.get_dificultad(id_dificultad)
+        mod = Mod.get(Mod.id == id_mod)
+        
+        # obtener valor personaje
+        pjvalue = self.bonus_mod_pjvalue(mod, personaje)
+        
+        # obtener bonus por equipo
+        equipos = Equipo.select().join(PlayerEquipo).join(Player)\
+            .where(mod == mod)
+        
+        equipo_bonus = 0
+        for equipo in equipos:
+            equipo_bonus = equipo_bonus + equipo.valor
+        
+        total_bonus = bonus + equipo_bonus
+        ret_tirada = self.core.sin_oposicion(pjvalue, dificultad.valor,\
+                                                total_bonus)
+        
+        ret = {
+            'resultado': ret_tirada,
+            'dado': self.core.ultimo_dado,
+        }
+        
+        return ret
+        
+    
+    def tirada_con_oposicion(self, id_personaje, bonus_pj, id_pnj, 
                                 bonus_pnj, skill):
         pass
     
