@@ -11,10 +11,10 @@ class ControllerTestCase(unittest.TestCase):
         self.con.drop_db()
     
     def crear_partida(self):
-        self.con.crear_partida('El bosque', 'En un bosque oscuro...')
+        return self.con.crear_partida('El bosque', 'En un bosque oscuro...')
     
     def crear_equipo(self):
-        self.con.crear_equipo(
+        return self.con.crear_equipo(
             'Hacha', 
             'Hacha guerrera muy antigua', 
             1,
@@ -141,11 +141,8 @@ class ControllerTestCase(unittest.TestCase):
     
     def test_asignar_robar(self):
         self.crear_partida()
-        self.crear_equipo()
-        self.crear_personaje()
-        
-        personaje = self.con.get_personaje(1)
-        equipo = self.con.get_equipo(1)
+        equipo =self.crear_equipo()
+        personaje = self.crear_personaje()
         
         equipos = self.con.get_equipos_personaje(personaje.id)
         self.assertEqual(len(equipos), 0)
@@ -207,6 +204,67 @@ class ControllerTestCase(unittest.TestCase):
         )
         
         # debería de lograrlo
+        self.assertTrue(ret_tirada['resultado'])
+    
+    def test_iniciativa(self):
+        self.crear_partida()
+        personaje = self.crear_personaje()
+        adversario = self.crear_adversario()
+        mod_agilidad = self.con.get_mod(4)
+        mod_magia = self.con.get_mod(9)
+        
+        equipo1 = self.con.crear_equipo(
+            'Zapatos de puma', 
+            'Superágil al instante', 
+            4,
+            mod_agilidad.id,
+        )
+        
+        equipom1 = self.con.crear_equipo(
+            'Báculo de napalm', 
+            'Magia abrasadora', 
+            4,
+            mod_magia.id,
+        )
+        
+        self.con.asignar_equipo(personaje.id, equipo1.id)
+        self.con.asignar_equipo(personaje.id, equipom1.id)
+        
+        equipo2 = self.con.crear_equipo(
+            'Zapatos de plomo', 
+            'Clavado al suelo', 
+            -4,
+            mod_agilidad.id,
+        )
+        
+        equipom2 = self.con.crear_equipo(
+            'Cardo borriquero', 
+            'Dicen que da suerte', 
+            0,
+            mod_magia.id,
+        )
+        
+        self.con.asignar_equipo(adversario.id, equipo2.id)
+        self.con.asignar_equipo(adversario.id, equipom2.id)
+        
+        ret_tirada = self.con.iniciativa(
+            personaje.id,
+            adversario.id,
+        )
+        
+        # debería de empezar el pj
+        self.assertTrue(ret_tirada['resultado'])
+        
+        # iniciativa magica
+        ret_tirada = self.con.iniciativa(
+            personaje.id,
+            adversario.id,
+            True,
+            4,
+            -4,
+        )
+        
+        # debería de empezar el pj
         self.assertTrue(ret_tirada['resultado'])
 
 

@@ -257,25 +257,25 @@ class Controller():
     def bonus_mod_personaje(self, mod, personaje):
         pjvalue = 0
         
-        if mod.nombre == MOD_TYPE[0]:   # Ataque
+        if mod.nombre == MOD_TYPE[0][1]:   # Ataque
             pjvalue = personaje.combate
-        elif mod.nombre == MOD_TYPE[1]: # Defensa
+        elif mod.nombre == MOD_TYPE[1][1]: # Defensa
             pjvalue = personaje.combate
-        elif mod.nombre == MOD_TYPE[2]: # Fuerza
+        elif mod.nombre == MOD_TYPE[2][1]: # Fuerza
             pjvalue = personaje.fuerza
-        elif mod.nombre == MOD_TYPE[3]: # Agilidad
+        elif mod.nombre == MOD_TYPE[3][1]: # Agilidad
             pjvalue = personaje.agilidad
-        elif mod.nombre == MOD_TYPE[4]: # Inteligencia
+        elif mod.nombre == MOD_TYPE[4][1]: # Inteligencia
             pjvalue = personaje.inteligencia
-        elif mod.nombre == MOD_TYPE[5]: # Carisma
+        elif mod.nombre == MOD_TYPE[5][1]: # Carisma
             pjvalue = personaje.carisma
-        elif mod.nombre == MOD_TYPE[6]: # Conocimientos
+        elif mod.nombre == MOD_TYPE[6][1]: # Conocimientos
             pjvalue = personaje.conocimientos
-        elif mod.nombre == MOD_TYPE[7]: # Latrocinio
+        elif mod.nombre == MOD_TYPE[7][1]: # Latrocinio
             pjvalue = personaje.latrocinio
-        elif mod.nombre == MOD_TYPE[8]: # Magia
+        elif mod.nombre == MOD_TYPE[8][1]: # Magia
             pjvalue = personaje.magia
-        elif mod.nombre == MOD_TYPE[9]: # Sociales
+        elif mod.nombre == MOD_TYPE[9][1]: # Sociales
             pjvalue = personaje.sociales
         
         return pjvalue
@@ -331,7 +331,12 @@ class Controller():
         total_bonus_pj1 = bonus_pj + equipo_bonus_pj1
         total_bonus_pnj = bonus_pnj + equipo_bonus_pnj
         
-        ret_tirada = self.core.con_oposicion(pjvalue, pnjvalue, total_bonus_pj1, total_bonus_pnj)
+        ret_tirada = self.core.con_oposicion(
+            pjvalue, 
+            pnjvalue, 
+            total_bonus_pj1, 
+            total_bonus_pnj
+        )
         
         ret = {
             'resultado': ret_tirada,
@@ -342,10 +347,63 @@ class Controller():
         return ret
     
     ### COMBATES ###
-    
-    def iniciativa(self, id_pj, bonus_pj, id_pnj, bonus_pnj, 
-                    magia=False):
-        pass
+    def iniciativa(self, id_pj, id_pnj, magia=False, bonus_pj=0, 
+                    bonus_pnj=0):
+        personaje    = self.get_personaje(id_pj)
+        adversario   = self.get_personaje(id_pnj)
+        mod_agilidad = Mod.get(Mod.nombre == MOD_TYPE[3][1])
+        mod_magia    = Mod.get(Mod.nombre == MOD_TYPE[9][1])
+        
+        # obtener valor personaje
+        pjvalue  = self.bonus_mod_personaje(mod_agilidad, personaje)
+        pnjvalue = self.bonus_mod_personaje(mod_agilidad, adversario)
+        
+        magia_pjvalue  = self.bonus_mod_personaje(mod_magia, personaje)
+        magia_pnjvalue = self.bonus_mod_personaje(mod_magia, adversario)
+        
+        # obtener bonus por equipo
+        equipo_bonus_pj1 = self.bonus_equipo_personaje(mod_agilidad,
+                                                        personaje)
+        equipo_bonus_pnj = self.bonus_equipo_personaje(mod_agilidad,
+                                                        adversario)
+        equipom_bonus_pj1 = self.bonus_equipo_personaje(mod_magia,
+                                                        personaje)
+        equipom_bonus_pnj = self.bonus_equipo_personaje(mod_magia,
+                                                        adversario)
+        
+        
+        total_bonus_pj1 = bonus_pj + equipo_bonus_pj1
+        total_bonus_pnj = bonus_pnj + equipo_bonus_pnj
+        
+        total_magia_pj1 = magia_pjvalue + equipom_bonus_pj1
+        total_magia_pnj = magia_pnjvalue + equipom_bonus_pnj
+        
+        ret_tirada = None
+        
+        if not magia:
+            ret_tirada = self.core.iniciativa(
+                pjvalue, 
+                pnjvalue, 
+                total_bonus_pj1, 
+                total_bonus_pnj
+            )
+        else:
+            ret_tirada = self.core.iniciativa_m(
+                pjvalue, 
+                total_magia_pj1, 
+                pnjvalue, 
+                total_magia_pnj, 
+                total_bonus_pj1, 
+                total_bonus_pnj
+            )
+        
+        ret = {
+            'resultado': ret_tirada,
+            'dado1': self.core.dado1,
+            'dado2': self.core.dado2,
+        }
+        
+        return ret
     
     def combate(self, id_pataca, bonus_ata, id_pdefiende, bonus_def, 
                 magia=False):
