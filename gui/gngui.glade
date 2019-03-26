@@ -18,7 +18,7 @@
       <placeholder/>
     </child>
     <child>
-      <object class="GtkNotebook">
+      <object class="GtkNotebook" id="notebook">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <child>
@@ -88,7 +88,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox">
+                  <object class="GtkComboBox" id="combo-partida">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>
@@ -118,7 +118,7 @@
           </object>
         </child>
         <child type="tab">
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="tab-select">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Seleccionar</property>
@@ -192,7 +192,7 @@
           </packing>
         </child>
         <child type="tab">
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="tab-partida">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Partida</property>
@@ -369,7 +369,7 @@
           </packing>
         </child>
         <child type="tab">
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="tab-equipo">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Equipo</property>
@@ -910,7 +910,7 @@
           </packing>
         </child>
         <child type="tab">
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="tab-personaje">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Personaje</property>
@@ -1345,7 +1345,7 @@
           </packing>
         </child>
         <child type="tab">
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="tab-tiradas">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Tiradas</property>
@@ -1846,7 +1846,7 @@
           </packing>
         </child>
         <child type="tab">
-          <object class="GtkLabel">
+          <object class="GtkLabel" id="tab-combate">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Combate</property>
