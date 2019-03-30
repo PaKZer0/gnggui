@@ -20,13 +20,18 @@ class GnGGladeGui(AbstractGui):
         mods = self.con.get_mods()
         ret = Gtk.ListStore(int, str)
 
+        # iniciar iter list mods equipo
+        self.eqmod_iters = {}
+
         # append empty
-        ret.append([-1, ''])
+        empty_iter = ret.append([-1, ''])
+        self.eqmod_iters[-1] = empty_iter
 
         for mod in mods:
             logger.debug('Cargando partida id {} nombre {}'.format(
                             mod.id, mod.nombre))
-            ret.append([mod.id, mod.nombre])
+            new_iter = ret.append([mod.id, mod.nombre])
+            self.eqmod_iters[mod.id] = new_iter
 
         return ret
 
@@ -66,6 +71,9 @@ class GnGGladeGui(AbstractGui):
         # cargar mods
         self.load_mods_combo()
         self.load_spiners()
+
+        # cargar lista equipo
+        self.load_list_equipo()
 
     def bind_signals(self):
         ## window ##
@@ -147,8 +155,55 @@ class GnGGladeGui(AbstractGui):
     def cargar_form_equipo(self, id_equipo):
         self.id_equipo_sel = id_equipo
 
-    def cargar_list_equipo(self):
-        pass
+    def load_list_equipo(self):
+        list_equipo = self.get_object("equipos-list")
+        equipos = self.con.get_equipos()
+
+        self.equipos_rows = {}
+
+        for equipo in equipos:
+            row = Gtk.ListBoxRow()
+            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+            row.add(hbox)
+
+            texto_mod = ''
+            if equipo.mod:
+                if equipo.valor > 0:
+                    texto_mod = ' +{} en {}'.format(equipo.valor, equipo.mod.nombre)
+                elif equipo.valor < 0:
+                    texto_mod = ' {} en {}'.format(equipo.valor, equipo.mod.nombre)
+
+            texto_nombre = '{}{}'.format(
+                equipo.nombre,
+                texto_mod,
+            )
+            label_datos = Gtk.Label(texto_nombre, xalign=0)
+            hbox.pack_start(label_datos, True, True, 0)
+
+            label_descrip = Gtk.Label(equipo.descripcion, xalign=0)
+            hbox.pack_start(label_descrip, True, True, 0)
+
+            button_editar = Gtk.Button.new_with_label("Editar")
+            button_editar.connect('clicked', Handler.onEditarEquipoButton, {'id_equipo': equipo.id})
+            hbox.pack_start(button_editar, True, True, 0)
+
+            button_borrar = Gtk.Button.new_with_label("Borrar")
+            button_borrar.connect('clicked', Handler.onBorrarEquipoButton, {'id_equipo': equipo.id})
+            hbox.pack_start(button_borrar, True, True, 0)
+
+            list_equipo.add(row)
+            self.equipos_rows[equipo.id] = row
+
+        list_equipo.show_all()
+
+    def refrescar_lista_equipo(self):
+        logger.debug('Refrescando lista equipo')
+        list_equipo = self.get_object("equipos-list")
+        children = list_equipo.get_children()
+        for child in children:
+            list_equipo.remove(child)
+
+        self.load_list_equipo()
 
     def tabs_start(self, sensitive):
         tab1 = self.builder.get_object("tab-partida")
@@ -271,17 +326,57 @@ class Handler:
         if mod_active_iter:
             id_mod = combo_mod.get_model()[mod_active_iter][-2]
 
+        is_create = False
+
         if not hasattr(gui, 'id_equipo_sel'):
+            is_create = True
+        elif not gui.id_equipo_sel:
+            is_create = True
+
+        if is_create:
             # create
-            logger.warn('''Crear equipo: nombre {} / descripcion {} / id_mod {} / valor {}
+            logger.debug('''Crear equipo: nombre {} / descripcion {} / id_mod {} / valor {}
             '''.format(nombre, descripcion, id_mod, valor))
             con.crear_equipo(nombre, descripcion, id_mod, valor)
         else:
-            pass
             # edit
+            logger.debug('''Editar equipo: nombre {} / descripcion {} / id_mod {} / valor {}
+            '''.format(nombre, descripcion, id_mod, valor))
+            con.editar_equipo(gui.id_equipo_sel, nombre, descripcion, id_mod, valor)
+            gui.id_equipo_sel = None
 
         gui.limpiar_form_equipo()
-        gui.cargar_list_equipo()
+        gui.refrescar_lista_equipo()
+
+    def onEditarEquipoButton(self, *args):
+        gui, con = get_utils()
+
+        # cargar valores en formulario
+        entry_nombre = gui.get_object("entry-equipo-nombre")
+        combo_mod = gui.get_object("combo-equipo-mod")
+        spin_valor = gui.get_object("spin-equipo-valor")
+        equipo_descripcion = gui.get_object("equipo-text-descripcion")
+
+        equipo = con.get_equipo(args[0]['id_equipo'])
+
+        entry_nombre.set_text(equipo.nombre)
+        new_buffer = Gtk.TextBuffer()
+        new_buffer.set_text(equipo.descripcion)
+        equipo_descripcion.set_buffer(new_buffer)
+        spin_valor.set_value(equipo.valor)
+        # get active iter
+        active_iter = gui.eqmod_iters[equipo.mod.id]
+        combo_mod.set_active_iter(active_iter)
+
+        # setear id_equipo_sel
+        gui.id_equipo_sel = equipo.id
+
+    def onBorrarEquipoButton(self, *args):
+        gui, con = get_utils()
+        id_equipo = args[0]['id_equipo']
+        logger.warn('Borrando equipo con id {}'.format(id_equipo))
+        con.borrar_equipo(id_equipo)
+        gui.refrescar_lista_equipo()
 
 
 def run_gui():
