@@ -28,7 +28,7 @@ class GnGGladeGui(AbstractGui):
         self.eqmod_iters[-1] = empty_iter
 
         for mod in mods:
-            logger.debug('Cargando partida id {} nombre {}'.format(
+            logger.debug('Cargando mod id {} nombre {}'.format(
                             mod.id, mod.nombre))
             new_iter = ret.append([mod.id, mod.nombre])
             self.eqmod_iters[mod.id] = new_iter
@@ -45,31 +45,110 @@ class GnGGladeGui(AbstractGui):
         combo_mods.pack_start(renderer_text, True)
         combo_mods.add_attribute(renderer_text, "text", 1)
 
+    def get_razas_options(self):
+        razas = self.con.get_razas()
+        ret = Gtk.ListStore(int, str)
+
+        # iniciar iter list razas pj
+        self.pjraza_iters = {}
+
+        for raza in razas:
+            logger.debug('Cargando raza id {} nombre {}'.format(
+                            raza.id, raza.nombre))
+            new_iter = ret.append([raza.id, raza.nombre])
+            self.pjraza_iters[raza.id] = new_iter
+
+        return ret
+
+    def load_razas_combo(self):
+        # cargar combo partida
+        renderer_text = Gtk.CellRendererCombo()
+        mods_store = self.get_razas_options()
+        combo_mods = self.builder.get_object("combo-personaje-raza")
+        combo_mods.clear()
+        combo_mods.set_model(mods_store)
+        combo_mods.pack_start(renderer_text, True)
+        combo_mods.add_attribute(renderer_text, "text", 1)
+
+    def get_equipos_options(self):
+        equipos = self.con.get_equipos()
+        ret = Gtk.ListStore(int, str)
+
+        # iniciar iter list equipo pj
+        self.pjequi_iters = {}
+
+        for equipo in equipos:
+            texto_mod = ''
+            if equipo.mod:
+                if equipo.valor > 0:
+                    texto_mod = ' +{} en {}'.format(equipo.valor, equipo.mod.nombre)
+                elif equipo.valor < 0:
+                    texto_mod = ' {} en {}'.format(equipo.valor, equipo.mod.nombre)
+
+            texto_nombre = '{}{}'.format(
+                equipo.nombre,
+                texto_mod,
+            )
+            logger.debug('Cargando equipo id {} nombre {}'.format(
+                            equipo.id, texto_nombre))
+            new_iter = ret.append([equipo.id, texto_nombre])
+
+        return ret
+
+    def load_equipos_combo(self):
+        # cargar combo equipos
+        renderer_text = Gtk.CellRendererCombo()
+        mods_store = self.get_equipos_options()
+        combo_mods = self.builder.get_object("combo-personaje-equipo")
+        combo_mods.clear()
+        combo_mods.set_model(mods_store)
+        combo_mods.pack_start(renderer_text, True)
+        combo_mods.add_attribute(renderer_text, "text", 1)
+
     def load_spiners(self):
         # get spinners
         equipo_valor = self.get_object("spin-equipo-valor")
+        pj_hp = self.get_object("spinner-personaje-hp")
+        pj_fuerza = self.get_object("spinner-personaje-fuerza")
+        pj_agilidad = self.get_object("spinner-personaje-agilidad")
+        pj_inteligencia = self.get_object("spinner-personaje-inteligencia")
+        pj_carisma = self.get_object("spinner-personaje-carisma")
+        pj_combate = self.get_object("spinner-personaje-combate")
+        pj_conocimientos = self.get_object("spinner-personaje-conocimientos")
+        pj_latrocinio = self.get_object("spinner-personaje-latrocinio")
+        pj_magia = self.get_object("spinner-personaje-magia")
+        pj_sociales = self.get_object("spinner-personaje-sociales")
 
-        all_spiners = [equipo_valor]
-        skill_spiners = []
-
-        unlimited_adjustment = Gtk.Adjustment(0, -100, 100, 1, 0, 0)
-        limited_adjustment   = None
+        skill_spiners = [pj_fuerza, pj_agilidad, pj_inteligencia,
+                            pj_inteligencia, pj_carisma, pj_combate,
+                            pj_conocimientos, pj_latrocinio, pj_magia,
+                            pj_sociales]
+        all_spiners = [pj_hp, equipo_valor] + skill_spiners
 
         # set all to integer spinners
         for spiner in all_spiners:
             spiner.set_digits(0)
             spiner.set_numeric(True)
 
-        # set rango al spiner de equipo
-        equipo_valor.set_adjustment(unlimited_adjustment)
+        # set adjustements
+        for spiner in all_spiners:
+            spiner.set_adjustment(Gtk.Adjustment(0, -1000, 1000, 1, 0, 0))
+
+        for spiner in skill_spiners:
+            spiner.set_adjustment(Gtk.Adjustment(0, 1, 8, 1, 0, 0))
+
+        pj_hp.set_adjustment(Gtk.Adjustment(0, 0, 1000, 1, 0, 0))
 
     def build(self):
         # build glade
         self.builder = Gtk.Builder()
         self.builder.add_from_file("gui/gngui.glade")
 
-        # cargar mods
+        # cargar combos
+        self.load_partidas_combo()
         self.load_mods_combo()
+        self.load_razas_combo()
+        self.load_equipos_combo()
         self.load_spiners()
 
         # cargar lista equipo
@@ -152,9 +231,6 @@ class GnGGladeGui(AbstractGui):
         spin_valor.set_value(0)
         combo_mod.set_active_iter(None)
 
-    def cargar_form_equipo(self, id_equipo):
-        self.id_equipo_sel = id_equipo
-
     def load_list_equipo(self):
         list_equipo = self.get_object("equipos-list")
         equipos = self.con.get_equipos()
@@ -233,9 +309,6 @@ class Handler:
         gui, con = get_utils()
         # oscurecer otras pestañas
         gui.tabs_start(False)
-
-        # load partidas combo
-        gui.load_partidas_combo()
 
     def onCrearPartida(self, *args):
         gui, con = get_utils()
@@ -378,6 +451,70 @@ class Handler:
         con.borrar_equipo(id_equipo)
         gui.refrescar_lista_equipo()
 
+    def onGuardarPersonajeButton(self, *args):
+        gui, con = get_utils()
+        entry_nombre = gui.get_object("entry-personaje-nombre")
+        entry_profesion = gui.get_object("entry-personaje-profesion")
+        combo_raza = gui.get_object("combo-personaje-raza")
+        entry_pueblo = gui.get_object("entry-personaje-pueblo")
+        spinner_hp = gui.get_object("spinner-personaje-hp")
+        spinner_fuerza = gui.get_object("spinner-personaje-fuerza")
+        spinner_agilidad = gui.get_object("spinner-personaje-agilidad")
+        spinner_inteligencia = gui.get_object("spinner-personaje-inteligencia")
+        spinner_carisma = gui.get_object("spinner-personaje-carisma")
+        spinner_combate = gui.get_object("spinner-personaje-combate")
+        spinner_conocimientos = gui.get_object("spinner-personaje-conocimientos")
+        spinner_latrocinio = gui.get_object("spinner-personaje-latrocinio")
+        spinner_magia = gui.get_object("spinner-personaje-magia")
+        spinner_sociales = gui.get_object("spinner-personaje-sociales")
+        text_notas = gui.get_object("text-personaje-notas")
+
+        ## llenando data
+        data = {}
+        # entries
+        data['nombre'] = entry_nombre.get_text()
+        data['profesion'] = entry_profesion.get_text()
+        data['pueblo'] = entry_pueblo.get_text()
+        # combo
+        data['raza'] = 0
+        valor = spin_valor.get_value_as_int()
+
+        mod_active_iter = combo_mod.get_active_iter()
+        if mod_active_iter:
+            data['raza'] = combo_mod.get_model()[mod_active_iter][-2]
+        # spinners
+        data['hp'] = spinner_hp.get_value_as_int()
+        data['fuerza'] = spinner_fuerza.get_value_as_int()
+        data['agilidad'] = spinner_agilidad.get_value_as_int()
+        data['inteligencia'] = spinner_inteligencia.get_value_as_int()
+        data['carisma'] = spinner_carisma.get_value_as_int()
+        data['combate'] = spinner_combate.get_value_as_int()
+        data['conocimientos'] = spinner_conocimientos.get_value_as_int()
+        data['latrocinio'] = spinner_latrocinio.get_value_as_int()
+        data['magia'] = spinner_magia.get_value_as_int()
+        data['sociales'] = spinner_sociales.get_value_as_int()
+
+        # notas
+        data['notas'] = text_notas.get_buffer().get_text(
+            text_notas.get_buffer().get_start_iter(),
+            text_notas.get_buffer().get_end_iter(),
+            False
+        )
+
+        is_create = False
+
+        if not hasattr(gui, 'id_personaje_sel'):
+            is_create = True
+        elif not gui.id_personaje_sel:
+            is_create = True
+
+        if is_create:
+            logger.warn('Crear personaje')
+        else:
+            logger.warn('Editar personaje')
+
+        #gui.limpiar_form_personaje()
+        #gui.refrescar_lista_personajes()
 
 def run_gui():
     gui = GnGGladeGui.get_instance()

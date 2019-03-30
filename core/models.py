@@ -48,26 +48,26 @@ def init_db(test=False):
         db = SqliteDatabase(':memory:')
     else:
         db = SqliteDatabase('gng.db')
-    
+
     db.bind(MODELS, bind_refs=False, bind_backrefs=False)
     db.connect()
-    
+
     # init tables
     db.create_tables(MODELS)
-    
+
     # create primitives
     try:
         r_humano = Raza.get(Raza.nombre == 'Humano')
     except:
         for raza in RAZAS:
             Raza.create(nombre=raza[1])
-    
+
     try:
         mod_1 = Mod.get(Mod.nombre == 'Ataque')
     except:
         for modtype in MOD_TYPE:
             Mod.create(nombre=modtype[1])
-    
+
     try:
         diff_1 = Dificultad.get(Dificultad.valor == 2)
     except:
@@ -75,7 +75,7 @@ def init_db(test=False):
             Dificultad.create(valor=dif[0], texto=dif[1])
 
 def drop_db():
-    db.drop_tables([Partida, Dificultad, Raza, Mod, Player, 
+    db.drop_tables([Partida, Dificultad, Raza, Mod, Player,
             PlayerEquipo])
 
 def close_db():
@@ -89,7 +89,7 @@ class BaseModel(Model):
 class Partida(BaseModel):
     nombre = CharField()
     descripcion = CharField(null = True)
-    
+
     def __str__(self):
         return self.nombre
 
@@ -97,21 +97,21 @@ class Partida(BaseModel):
 class Dificultad(BaseModel):
     valor = IntegerField()
     texto = CharField()
-    
+
     def __str__(self):
         return '{} {}'.format(self.valor, self.texto)
 
 
 class Raza(BaseModel):
     nombre = CharField()
-    
+
     def __str__(self):
         return self.nombre
 
 
 class Mod(BaseModel):
     nombre = CharField()
-    
+
     def __str__(self):
         return self.nombre
 
@@ -121,16 +121,16 @@ class Equipo(BaseModel):
     descripcion = CharField(null = True)
     valor = IntegerField(null = True)
     mod = ForeignKeyField(Mod, null = True)
-    
+
     def __str__(self):
         mod_txt = ''
-        
+
         if self.valor > 0:
             mod_txt = ' +{} en {}'.format(
                 self.valor,
                 self.mod,
             )
-        
+
         return '{}{}'.format(self.nombre, mod_txt)
 
 
@@ -149,8 +149,9 @@ class Player(BaseModel):
     latrocinio = IntegerField()
     magia = IntegerField()
     sociales = IntegerField()
+    notas = TextField(null = True)
     partida = ForeignKeyField(Partida)
-    
+
     def __str__(self):
         return '{} | {} | {} | HP {}'.format(
             self.nombre,
@@ -163,7 +164,7 @@ class Player(BaseModel):
 class PlayerEquipo(BaseModel):
     player = ForeignKeyField(Player)
     equipo = ForeignKeyField(Equipo)
-    
+
     def __str__(self):
         return '{} | {}'.format(self.player, self.equipo)
 
