@@ -96,7 +96,9 @@ class Controller():
         return equipo
 
     def borrar_equipo(self, id_equipo):
-        self.get_equipo(id_equipo).delete_instance()
+        equipo = self.get_equipo(id_equipo)
+        PlayerEquipo.delete().where(PlayerEquipo.equipo == equipo).execute()
+        equipo.delete_instance()
 
     ### PERSONAJES ###
     def get_personajes(self, id_partida = None):
@@ -228,6 +230,8 @@ class Controller():
         return personaje
 
     def borrar_personaje(self, id_personaje):
+        player = self.get_personaje(id_personaje)
+        PlayerEquipo.delete().where(PlayerEquipo.player == player).execute()
         self.get_personaje(id_personaje).delete_instance()
 
     def get_equipos_personaje(self, id_personaje):

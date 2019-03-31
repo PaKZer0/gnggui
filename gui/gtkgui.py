@@ -336,6 +336,50 @@ class GnGGladeGui(AbstractGui):
 
         self.load_list_personajes()
 
+    def load_list_equipos_pj(self):
+        list_equipo = self.get_object("list-personaje-equipo")
+        equipos = self.con.get_equipos_personaje(self.id_personaje_sel)
+
+        for equipo in equipos:
+            row = Gtk.ListBoxRow()
+            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+            row.add(hbox)
+
+            texto_mod = ''
+            if equipo.mod:
+                if equipo.valor > 0:
+                    texto_mod = ' +{} en {}'.format(equipo.valor, equipo.mod.nombre)
+                elif equipo.valor < 0:
+                    texto_mod = ' {} en {}'.format(equipo.valor, equipo.mod.nombre)
+
+            texto_nombre = '{}{}'.format(
+                equipo.nombre,
+                texto_mod,
+            )
+            label_datos = Gtk.Label(texto_nombre, xalign=0)
+            hbox.pack_start(label_datos, True, True, 0)
+
+            label_descrip = Gtk.Label(equipo.descripcion, xalign=0)
+            hbox.pack_start(label_descrip, True, True, 0)
+
+            button_borrar = Gtk.Button.new_with_label("Borrar")
+            button_borrar.connect('clicked', Handler.onBorrarEquipoPjButton, {'id_equipo': equipo.id})
+            hbox.pack_start(button_borrar, True, True, 0)
+
+            list_equipo.add(row)
+
+        list_equipo.show_all()
+
+    def refrescar_lista_equipos_pj(self, delete=False):
+        logger.debug('Refrescando lista equipos asignados')
+        list_equipo = self.get_object("list-personaje-equipo")
+        children = list_equipo.get_children()
+        for child in children:
+            list_equipo.remove(child)
+
+        if not delete:
+            self.load_list_equipos_pj()
+
     def limpiar_form_personaje(self):
         entry_nombre = self.get_object("entry-personaje-nombre")
         entry_profesion = self.get_object("entry-personaje-profesion")
@@ -352,6 +396,7 @@ class GnGGladeGui(AbstractGui):
         spinner_magia = self.get_object("spinner-personaje-magia")
         spinner_sociales = self.get_object("spinner-personaje-sociales")
         text_notas = self.get_object("text-personaje-notas")
+        button_asignar = self.get_object("button-personaje-equipo")
 
         entry_nombre.set_text('')
         entry_profesion.set_text('')
@@ -368,6 +413,10 @@ class GnGGladeGui(AbstractGui):
         spinner_magia.set_value(1)
         spinner_sociales.set_value(1)
         combo_raza.set_active_iter(None)
+
+        button_asignar.set_sensitive(False)
+        button_asignar.connect("clicked", Handler.voidCallback)
+        self.refrescar_lista_equipos_pj(True)
 
     def tabs_start(self, sensitive):
         tab1 = self.builder.get_object("tab-partida")
@@ -429,6 +478,7 @@ class Handler:
             # cargar widgets pestaña partida
             gui.load_partida_info()
             gui.load_list_personajes()
+            gui.limpiar_form_personaje()
 
     def onBorrarPartida(self, *args):
         gui, con = get_utils()
@@ -499,12 +549,12 @@ class Handler:
             # create
             logger.debug('''Crear equipo: nombre {} / descripcion {} / id_mod {} / valor {}
             '''.format(nombre, descripcion, id_mod, valor))
-            con.crear_equipo(nombre, descripcion, id_mod, valor)
+            con.crear_equipo(nombre, descripcion, valor, id_mod)
         else:
             # edit
             logger.debug('''Editar equipo: nombre {} / descripcion {} / id_mod {} / valor {}
             '''.format(nombre, descripcion, id_mod, valor))
-            con.editar_equipo(gui.id_equipo_sel, nombre, descripcion, id_mod, valor)
+            con.editar_equipo(gui.id_equipo_sel, nombre, descripcion, valor, id_mod)
             gui.id_equipo_sel = None
 
         gui.limpiar_form_equipo()
@@ -599,11 +649,11 @@ class Handler:
 
         if is_create:
             logger.debug('Crear personaje:')
-            logger.debug(pprint(data))
+            logger.debug(data)
             con.crear_personaje(data)
         else:
             logger.debug('Editar personaje')
-            logger.debug(pprint(data))
+            logger.debug(data)
             con.editar_personaje(gui.id_personaje_sel, data)
             gui.id_personaje_sel = None
 
@@ -652,8 +702,13 @@ class Handler:
         active_iter = gui.pjraza_iters[personaje.raza.id]
         combo_raza.set_active_iter(active_iter)
 
+        # activar botón asignar equipo
+        button_asignar = gui.get_object("button-personaje-equipo")
+        button_asignar.set_sensitive(True)
+        button_asignar.connect("clicked", Handler.onAsignarEquipo)
         # setear id_personaje_sel
         gui.id_personaje_sel = personaje.id
+        gui.load_list_equipos_pj()
 
     def onBorrarPersonajeButton(self, *args):
         gui, con = get_utils()
@@ -661,6 +716,30 @@ class Handler:
         logger.debug('Borrando personaje con id {}'.format(id_personaje))
         con.borrar_personaje(id_personaje)
         gui.refrescar_lista_personajes()
+
+    def onAsignarEquipo(self, *args):
+        gui, con = get_utils()
+        # obtener partida seleccionada
+        combo_equipo = gui.get_object("combo-personaje-equipo")
+        active_iter = combo_equipo.get_active_iter()
+
+        # si no es null, cargar partida y habilitar pestañas
+        if active_iter:
+            id_equipo = combo_equipo.get_model()[active_iter][-2]
+            logger.warn("Asignando equipo id {} a pj {}".format(id_equipo, gui.id_personaje_sel))
+            con.asignar_equipo(gui.id_personaje_sel, id_equipo)
+            gui.refrescar_lista_equipos_pj()
+
+    def onBorrarEquipoPjButton(self, *args):
+        gui, con = get_utils()
+        id_equipo = args[0]['id_equipo']
+        logger.debug('Borrando equipo con id {} del pj {}'.format(id_equipo, gui.id_personaje_sel))
+        con.robar_equipo(gui.id_personaje_sel, id_equipo)
+        gui.refrescar_lista_equipos_pj()
+
+    def voidCallback(self, *args):
+        pass
+
 
 def run_gui():
     gui = GnGGladeGui.get_instance()
