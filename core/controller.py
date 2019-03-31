@@ -272,7 +272,7 @@ class Controller():
 
         return dificultad
 
-    def get_dificultades(self, id_dificultad):
+    def get_dificultades(self):
         dificultades = Dificultad.select()
         ret = [dificultad for dificultad in dificultades]
 
@@ -354,8 +354,11 @@ class Controller():
                                                 total_bonus)
 
         ret = {
+            'pjvalue': pjvalue,
             'resultado': ret_tirada,
             'dado': self.core.ultimo_dado,
+            'equipo_bonus': equipo_bonus,
+            'dif': dificultad.valor,
         }
 
         return ret
@@ -386,9 +389,13 @@ class Controller():
         )
 
         ret = {
+            'pjvalue': pjvalue,
+            'pnjvalue': pnjvalue,
             'resultado': ret_tirada,
             'dado1': self.core.dado1,
             'dado2': self.core.dado2,
+            'equipo_bonus_pj1': equipo_bonus_pj1,
+            'equipo_bonus_pnj': equipo_bonus_pnj,
         }
 
         return ret

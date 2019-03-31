@@ -16,34 +16,40 @@ def get_utils():
     return gui, con
 
 class GnGGladeGui(AbstractGui):
-    def get_mods_options(self):
+    def get_mods_options(self, with_empty=True):
         mods = self.con.get_mods()
         ret = Gtk.ListStore(int, str)
 
         # iniciar iter list mods equipo
-        self.eqmod_iters = {}
+        if with_empty:
+            self.eqmod_iters = {}
 
-        # append empty
-        empty_iter = ret.append([-1, ''])
-        self.eqmod_iters[-1] = empty_iter
+            # append empty
+            empty_iter = ret.append([-1, ''])
+            self.eqmod_iters[-1] = empty_iter
 
         for mod in mods:
             logger.debug('Cargando mod id {} nombre {}'.format(
                             mod.id, mod.nombre))
             new_iter = ret.append([mod.id, mod.nombre])
-            self.eqmod_iters[mod.id] = new_iter
+            if with_empty:
+                self.eqmod_iters[mod.id] = new_iter
 
         return ret
 
     def load_mods_combo(self):
         # cargar combo partida
         renderer_text = Gtk.CellRendererCombo()
-        mods_store = self.get_mods_options()
-        combo_mods = self.builder.get_object("combo-equipo-mod")
-        combo_mods.clear()
-        combo_mods.set_model(mods_store)
-        combo_mods.pack_start(renderer_text, True)
-        combo_mods.add_attribute(renderer_text, "text", 1)
+        mods_combos = []
+        mods_combos.append((self.builder.get_object("combo-equipo-mod"), True))
+        mods_combos.append((self.builder.get_object("combo-mod-tirada"), False))
+
+        for combo, with_empty in mods_combos:
+            mods_store = self.get_mods_options(with_empty)
+            combo.clear()
+            combo.set_model(mods_store)
+            combo.pack_start(renderer_text, True)
+            combo.add_attribute(renderer_text, "text", 1)
 
     def get_razas_options(self):
         razas = self.con.get_razas()
@@ -142,6 +148,27 @@ class GnGGladeGui(AbstractGui):
             combo.pack_start(renderer_text, True)
             combo.add_attribute(renderer_text, "text", 1)
 
+    def get_dificultades_options(self):
+        dificultades = self.con.get_dificultades()
+        ret = Gtk.ListStore(int, str)
+
+        for dificultad in dificultades:
+            txt_dificultad = '{} ({})'.format(dificultad.texto, dificultad.valor)
+            logger.debug('Cargando dificultad  {}'.format(txt_dificultad))
+            new_iter = ret.append([dificultad.id, txt_dificultad])
+
+        return ret
+
+    def load_dificultades_combo(self):
+        # cargar combo equipos
+        renderer_text = Gtk.CellRendererCombo()
+        mods_store = self.get_dificultades_options()
+        combo_mods = self.builder.get_object("combo-dificultad-tirada")
+        combo_mods.clear()
+        combo_mods.set_model(mods_store)
+        combo_mods.pack_start(renderer_text, True)
+        combo_mods.add_attribute(renderer_text, "text", 1)
+
     def load_spiners(self):
         # get spinners
         equipo_valor = self.get_object("spin-equipo-valor")
@@ -155,12 +182,16 @@ class GnGGladeGui(AbstractGui):
         pj_latrocinio = self.get_object("spinner-personaje-latrocinio")
         pj_magia = self.get_object("spinner-personaje-magia")
         pj_sociales = self.get_object("spinner-personaje-sociales")
+        bonuspj_tirada = self.get_object("spinner-bonuspj-tirada")
+        bonuspnj_tirada = self.get_object("spinner-bonuspnj-tirada")
 
         skill_spiners = [pj_fuerza, pj_agilidad, pj_inteligencia,
                             pj_inteligencia, pj_carisma, pj_combate,
                             pj_conocimientos, pj_latrocinio, pj_magia,
                             pj_sociales]
-        all_spiners = [pj_hp, equipo_valor] + skill_spiners
+        all_spiners = [pj_hp, equipo_valor, bonuspj_tirada, bonuspnj_tirada
+                        ]\
+                        + skill_spiners
 
         # set all to integer spinners
         for spiner in all_spiners:
@@ -186,6 +217,7 @@ class GnGGladeGui(AbstractGui):
         self.load_mods_combo()
         self.load_razas_combo()
         self.load_equipos_combo()
+        self.load_dificultades_combo()
         self.load_spiners()
 
         # cargar lista equipo
@@ -222,6 +254,13 @@ class GnGGladeGui(AbstractGui):
         ## tab personajes ##
         bguardarpj = self.builder.get_object("button-personaje-guardar")
         bguardarpj.connect("clicked", Handler.onGuardarPersonajeButton)
+
+        ## tab tiradas ##
+        btirarso = self.builder.get_object("button-tirarso-tiradas")
+        btirarso.connect("clicked", Handler.onTirarSinOposicion)
+
+        bborrarso = self.builder.get_object("button-borrarso-tiradas")
+        bborrarso.connect("clicked", Handler.onBorrarSinOposicion)
 
         self.bt_asignar_activado = False
 
@@ -825,6 +864,70 @@ class Handler:
         con.desasignar_equipo(id_pj_equipo)
         gui.refrescar_lista_equipos_pj()
         Handler.cargarLabelsAtaqueDefensa()
+
+    def onTirarSinOposicion(self, *args):
+        gui, con = get_utils()
+
+        # obtener personaje
+        cpjtirada = gui.get_object("combo-pj-tirada")
+        cpjtirada_ai = cpjtirada.get_active_iter()
+
+        # obtener mod
+        cmodtirada = gui.get_object("combo-mod-tirada")
+        cmodtirada_ai = cmodtirada.get_active_iter()
+
+        # obtener dificultad
+        cdiftirada = gui.get_object("combo-dificultad-tirada")
+        cdiftirada_ai = cdiftirada.get_active_iter()
+
+        # obtener valor bonus
+        spbonuspj = gui.get_object("spinner-bonuspj-tirada")
+        bonus = spbonuspj.get_value_as_int()
+
+        # tirar
+        if cpjtirada_ai and cmodtirada_ai and cdiftirada_ai:
+            id_personaje = cpjtirada.get_model()[cpjtirada_ai][-2]
+            id_mod = cmodtirada.get_model()[cmodtirada_ai][-2]
+            id_dificultad = cdiftirada.get_model()[cdiftirada_ai][-2]
+
+            res = con.tirada_sin_oposicion(
+                id_personaje, id_dificultad, id_mod, bonus
+            )
+
+            cuenta = res['pjvalue'] + res['dado'] + res['equipo_bonus'] + bonus
+
+            # formatear texto tirada
+            txt_tirada = 'S{}+[{}]+E{}+B{} = {} > D{}'.format(
+                res['pjvalue'],
+                res['dado'],
+                res['equipo_bonus'],
+                bonus,
+                cuenta,
+                res['dif'],
+            )
+
+            # formatear texto resultado
+            txt_resultado = 'OK' if res['resultado'] else 'KO'
+
+            # mostrar texto
+            label_tirada = gui.get_object("label-tirso-tirada")
+            label_resultado = gui.get_object("label-resso-tirada")
+            label_tirada.set_text(txt_tirada)
+            label_resultado.set_text(txt_resultado)
+
+    def onBorrarSinOposicion(self, *args):
+        gui, con = get_utils()
+
+        label_tirada = gui.get_object("label-tirso-tirada")
+        label_resultado = gui.get_object("label-resso-tirada")
+        label_tirada.set_text('')
+        label_resultado.set_text('')
+
+    def onTirarConOposicion(self, *args):
+        gui, con = get_utils()
+
+    def onBorrarConOposicion(self, *args):
+        gui, con = get_utils()
 
     def voidCallback(self, *args):
         pass
