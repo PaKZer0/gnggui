@@ -262,6 +262,12 @@ class GnGGladeGui(AbstractGui):
         bborrarso = self.builder.get_object("button-borrarso-tiradas")
         bborrarso.connect("clicked", Handler.onBorrarSinOposicion)
 
+        btirarco = self.builder.get_object("button-tirarco-tiradas")
+        btirarco.connect("clicked", Handler.onTirarConOposicion)
+
+        bborrarco = self.builder.get_object("button-borrarco-tiradas")
+        bborrarco.connect("clicked", Handler.onBorrarConOposicion)
+
         self.bt_asignar_activado = False
 
     def get_object(self, object_id):
@@ -926,8 +932,74 @@ class Handler:
     def onTirarConOposicion(self, *args):
         gui, con = get_utils()
 
+        # obtener personaje
+        cpjtirada = gui.get_object("combo-pj-tirada")
+        cpjtirada_ai = cpjtirada.get_active_iter()
+
+        # obtener mod
+        cmodtirada = gui.get_object("combo-mod-tirada")
+        cmodtirada_ai = cmodtirada.get_active_iter()
+
+        # obtener pnj
+        cpnjtirada = gui.get_object("combo-pnj-tirada")
+        cpnjtirada_ai = cpnjtirada.get_active_iter()
+
+        # obtener valor bonus pj
+        spbonuspj = gui.get_object("spinner-bonuspj-tirada")
+        bonus_pj = spbonuspj.get_value_as_int()
+
+        # obtener valor bonus pnj
+        spbonuspnj = gui.get_object("spinner-bonuspnj-tirada")
+        bonus_pnj = spbonuspnj.get_value_as_int()
+
+        # tirar
+        if cpjtirada_ai and cmodtirada_ai and cpnjtirada:
+            id_personaje = cpjtirada.get_model()[cpjtirada_ai][-2]
+            id_pnj = cpnjtirada.get_model()[cpnjtirada_ai][-2]
+            id_mod = cmodtirada.get_model()[cmodtirada_ai][-2]
+
+            res = con.tirada_con_oposicion(
+                id_personaje,
+                id_pnj,
+                id_mod,
+                bonus_pj,
+                bonus_pnj
+            )
+
+            cuenta_pj = res['pjvalue'] + res['dado1'] + res['equipo_bonus_pj1'] + bonus_pj
+            cuenta_pnj = res['pnjvalue'] + res['dado2'] + res['equipo_bonus_pnj'] + bonus_pj
+            symbol = '>' if res['resultado'] else '<'
+
+            # formatear texto tirada
+            txt_tirada = 'S{}+[{}]+E{}+B{} = {} {} {} = S{}+[{}]+E{}+B{}'.format(
+                res['pjvalue'],
+                res['dado1'],
+                res['equipo_bonus_pj1'],
+                bonus_pj,
+                cuenta_pj,
+                symbol,
+                cuenta_pnj,
+                res['pnjvalue'],
+                res['dado2'],
+                res['equipo_bonus_pnj'],
+                bonus_pnj,
+            )
+
+            # formatear texto resultado
+            txt_resultado = 'PJ GANA' if res['resultado'] else 'PJ PIERDE'
+
+            # mostrar texto
+            label_tirada = gui.get_object("label-tirco-tirada")
+            label_resultado = gui.get_object("label-resco-tirada")
+            label_tirada.set_text(txt_tirada)
+            label_resultado.set_text(txt_resultado)
+
     def onBorrarConOposicion(self, *args):
         gui, con = get_utils()
+        label_tirada = gui.get_object("label-tirco-tirada")
+        label_resultado = gui.get_object("label-resco-tirada")
+        label_tirada.set_text('')
+        label_resultado.set_text('')
 
     def voidCallback(self, *args):
         pass
