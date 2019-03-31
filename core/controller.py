@@ -235,9 +235,13 @@ class Controller():
         self.get_personaje(id_personaje).delete_instance()
 
     def get_equipos_personaje(self, id_personaje):
-        equipos = Equipo.select().join(PlayerEquipo).join(Player)\
+        equipospj = PlayerEquipo.select().join(Player)\
                     .where(Player.id == id_personaje).execute()
-        ret = [equipo for equipo in equipos]
+        ret = []
+        for equipopj in equipospj:
+            equipo = equipopj.equipo
+            equipo.id_pj_equipo = equipopj.id
+            ret.append(equipo)
 
         return ret
 
@@ -250,14 +254,17 @@ class Controller():
         rel.equipo=equipo
         rel.save()
 
-    def robar_equipo(self, id_personaje, id_equipo):
+        return rel
+
+    def borrar_equipo_pj(self, id_personaje):
         personaje = self.get_personaje(id_personaje)
-        equipo = self.get_equipo(id_equipo)
 
         PlayerEquipo.delete().where(
             PlayerEquipo.player==personaje,
-            PlayerEquipo.equipo==equipo,
         ).execute()
+
+    def desasignar_equipo(self, id_pj_equipo):
+        PlayerEquipo.get(PlayerEquipo.id == id_pj_equipo).delete_instance()
 
     ### COMBOS ###
     def get_dificultad(self, id_dificultad):

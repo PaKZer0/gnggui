@@ -47,7 +47,7 @@ def init_db(test=False):
     if test:
         db = SqliteDatabase(':memory:')
     else:
-        db = SqliteDatabase('gng.db')
+        db = SqliteDatabase('gng.db', pragmas={'foreign_keys': 1})
 
     db.bind(MODELS, bind_refs=False, bind_backrefs=False)
     db.connect()

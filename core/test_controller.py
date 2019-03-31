@@ -173,11 +173,11 @@ class ControllerTestCase(unittest.TestCase):
         equipos = self.con.get_equipos_personaje(personaje.id)
         self.assertEqual(len(equipos), 0)
 
-        self.con.asignar_equipo(personaje.id, equipo.id)
+        rel = self.con.asignar_equipo(personaje.id, equipo.id)
         equipos = self.con.get_equipos_personaje(personaje.id)
         self.assertEqual(len(equipos), 1)
-
-        self.con.robar_equipo(personaje.id, equipo.id)
+        
+        self.con.desasignar_equipo(rel.id)
         equipos = self.con.get_equipos_personaje(personaje.id)
         self.assertEqual(len(equipos), 0)
 

@@ -403,7 +403,7 @@ class GnGGladeGui(AbstractGui):
             hbox.pack_start(label_descrip, True, True, 0)
 
             button_borrar = Gtk.Button.new_with_label("Borrar")
-            button_borrar.connect('clicked', Handler.onBorrarEquipoPjButton, {'id_equipo': equipo.id})
+            button_borrar.connect('clicked', Handler.onBorrarEquipoPjButton, {'id_pj_equipo': equipo.id_pj_equipo})
             hbox.pack_start(button_borrar, True, True, 0)
 
             list_equipo.add(row)
@@ -723,12 +723,11 @@ class Handler:
             if mod.nombre == 'Defensa':
                 mod_defensa = mod
 
-        ataque, defensa = personaje.combate, personaje.combate
-        for equipo in equipos:
-            if equipo.mod.id == mod_ataque.id:
-                ataque = ataque + equipo.valor
-            if equipo.mod.id == mod_defensa.id:
-                defensa = defensa + equipo.valor
+        bonus_ataque = con.bonus_equipo_personaje(mod_ataque, personaje)
+        bonus_defensa = con.bonus_equipo_personaje(mod_defensa, personaje)
+
+        ataque  = personaje.combate + bonus_ataque
+        defensa = personaje.combate + bonus_defensa
 
         label_ataque.set_text(str(ataque))
         label_defensa.set_text(str(defensa))
@@ -811,9 +810,9 @@ class Handler:
 
     def onBorrarEquipoPjButton(self, *args):
         gui, con = get_utils()
-        id_equipo = args[0]['id_equipo']
-        logger.debug('Borrando equipo con id {} del pj {}'.format(id_equipo, gui.id_personaje_sel))
-        con.robar_equipo(gui.id_personaje_sel, id_equipo)
+        id_pj_equipo = args[0]['id_pj_equipo']
+        logger.debug('Desasignando equipo con id {}'.format(id_pj_equipo))
+        con.desasignar_equipo(id_pj_equipo)
         gui.refrescar_lista_equipos_pj()
         Handler.cargarLabelsAtaqueDefensa()
 
