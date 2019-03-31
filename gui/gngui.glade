@@ -1103,7 +1103,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox">
+                  <object class="GtkComboBox" id="combo-pj-tirada">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>
@@ -1353,7 +1353,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBox">
+                              <object class="GtkComboBox" id="combo-pnj-tirada">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                               </object>
@@ -1527,7 +1527,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox">
+                  <object class="GtkComboBox" id="combo-pj-combate">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>
@@ -1537,7 +1537,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox">
+                  <object class="GtkComboBox" id="combo-pnj-combate">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>

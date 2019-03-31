@@ -105,6 +105,43 @@ class GnGGladeGui(AbstractGui):
         combo_mods.pack_start(renderer_text, True)
         combo_mods.add_attribute(renderer_text, "text", 1)
 
+    def get_personajes_options(self):
+        personajes = self.con.get_personajes()
+        ret = Gtk.ListStore(int, str)
+
+        # iniciar iter list equipo pj
+        self.pj_iters = {}
+
+        for personaje in personajes:
+            txt_nombre = '{} lu {} : {} : ({})'.format(
+                personaje.nombre,
+                personaje.profesion,
+                personaje.raza.nombre,
+                personaje.pueblo,
+            )
+            logger.debug('Cargando personaje id {} nombre {}'.format(
+                            personaje.id, txt_nombre))
+            new_iter = ret.append([personaje.id, txt_nombre])
+
+        return ret
+
+    def load_personajes_combos(self):
+        # cargar combo equipos
+        renderer_text = Gtk.CellRendererCombo()
+
+        combos_pj = []
+        combos_pj.append(self.builder.get_object("combo-pj-tirada"))
+        combos_pj.append(self.builder.get_object("combo-pnj-tirada"))
+        combos_pj.append(self.builder.get_object("combo-pj-combate"))
+        combos_pj.append(self.builder.get_object("combo-pnj-combate"))
+
+        for combo in combos_pj:
+            pjs_store = self.get_personajes_options()
+            combo.clear()
+            combo.set_model(pjs_store)
+            combo.pack_start(renderer_text, True)
+            combo.add_attribute(renderer_text, "text", 1)
+
     def load_spiners(self):
         # get spinners
         equipo_valor = self.get_object("spin-equipo-valor")
@@ -182,6 +219,8 @@ class GnGGladeGui(AbstractGui):
         ## tab personajes ##
         bguardarpj = self.builder.get_object("button-personaje-guardar")
         bguardarpj.connect("clicked", Handler.onGuardarPersonajeButton)
+
+        self.bt_asignar_activado = False
 
     def get_object(self, object_id):
         return self.builder.get_object(object_id)
@@ -337,6 +376,7 @@ class GnGGladeGui(AbstractGui):
         self.load_list_personajes()
 
     def load_list_equipos_pj(self):
+        self.refrescar_lista_equipos_pj(True)
         list_equipo = self.get_object("list-personaje-equipo")
         equipos = self.con.get_equipos_personaje(self.id_personaje_sel)
 
@@ -397,6 +437,8 @@ class GnGGladeGui(AbstractGui):
         spinner_sociales = self.get_object("spinner-personaje-sociales")
         text_notas = self.get_object("text-personaje-notas")
         button_asignar = self.get_object("button-personaje-equipo")
+        label_ataque = self.get_object("label-personaje-ataque")
+        label_defensa = self.get_object("label-personaje-defensa")
 
         entry_nombre.set_text('')
         entry_profesion.set_text('')
@@ -413,9 +455,12 @@ class GnGGladeGui(AbstractGui):
         spinner_magia.set_value(1)
         spinner_sociales.set_value(1)
         combo_raza.set_active_iter(None)
+        label_ataque.set_text('_')
+        label_defensa.set_text('_')
 
         button_asignar.set_sensitive(False)
         button_asignar.connect("clicked", Handler.voidCallback)
+        self.bt_asignar_activado = False
         self.refrescar_lista_equipos_pj(True)
 
     def tabs_start(self, sensitive):
@@ -659,6 +704,34 @@ class Handler:
 
         gui.limpiar_form_personaje()
         gui.refrescar_lista_personajes()
+        gui.load_personajes_combos()
+
+    @classmethod
+    def cargarLabelsAtaqueDefensa(cls):
+        gui, con = get_utils()
+        label_ataque = gui.get_object("label-personaje-ataque")
+        label_defensa = gui.get_object("label-personaje-defensa")
+
+        # calcular ataque y defensa (a lo cazurro)
+        personaje = con.get_personaje(gui.id_personaje_sel)
+        equipos = con.get_equipos_personaje(personaje.id)
+        mods = con.get_mods()
+        mod_ataque, mod_defensa = None, None
+        for mod in mods:
+            if mod.nombre == 'Ataque':
+                mod_ataque = mod
+            if mod.nombre == 'Defensa':
+                mod_defensa = mod
+
+        ataque, defensa = personaje.combate, personaje.combate
+        for equipo in equipos:
+            if equipo.mod.id == mod_ataque.id:
+                ataque = ataque + equipo.valor
+            if equipo.mod.id == mod_defensa.id:
+                defensa = defensa + equipo.valor
+
+        label_ataque.set_text(str(ataque))
+        label_defensa.set_text(str(defensa))
 
     def onEditarPersonajeButton(self, *args):
         gui, con = get_utils()
@@ -705,10 +778,14 @@ class Handler:
         # activar botón asignar equipo
         button_asignar = gui.get_object("button-personaje-equipo")
         button_asignar.set_sensitive(True)
-        button_asignar.connect("clicked", Handler.onAsignarEquipo)
+        if not gui.bt_asignar_activado:
+            gui.bt_asignar_activado = True
+            button_asignar.connect("clicked", Handler.onAsignarEquipo)
+
         # setear id_personaje_sel
         gui.id_personaje_sel = personaje.id
         gui.load_list_equipos_pj()
+        Handler.cargarLabelsAtaqueDefensa()
 
     def onBorrarPersonajeButton(self, *args):
         gui, con = get_utils()
@@ -716,6 +793,7 @@ class Handler:
         logger.debug('Borrando personaje con id {}'.format(id_personaje))
         con.borrar_personaje(id_personaje)
         gui.refrescar_lista_personajes()
+        gui.load_personajes_combos()
 
     def onAsignarEquipo(self, *args):
         gui, con = get_utils()
@@ -726,9 +804,10 @@ class Handler:
         # si no es null, cargar partida y habilitar pestañas
         if active_iter:
             id_equipo = combo_equipo.get_model()[active_iter][-2]
-            logger.warn("Asignando equipo id {} a pj {}".format(id_equipo, gui.id_personaje_sel))
+            logger.debug("Asignando equipo id {} a pj {}".format(id_equipo, gui.id_personaje_sel))
             con.asignar_equipo(gui.id_personaje_sel, id_equipo)
             gui.refrescar_lista_equipos_pj()
+            Handler.cargarLabelsAtaqueDefensa()
 
     def onBorrarEquipoPjButton(self, *args):
         gui, con = get_utils()
@@ -736,6 +815,7 @@ class Handler:
         logger.debug('Borrando equipo con id {} del pj {}'.format(id_equipo, gui.id_personaje_sel))
         con.robar_equipo(gui.id_personaje_sel, id_equipo)
         gui.refrescar_lista_equipos_pj()
+        Handler.cargarLabelsAtaqueDefensa()
 
     def voidCallback(self, *args):
         pass
