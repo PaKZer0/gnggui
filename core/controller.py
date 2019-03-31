@@ -99,8 +99,11 @@ class Controller():
         self.get_equipo(id_equipo).delete_instance()
 
     ### PERSONAJES ###
-    def get_personajes(self):
+    def get_personajes(self, id_partida = None):
         personajes = Player.select()
+        if id_partida:
+            personajes = Player.select().join(Partida).where(
+                            Partida.id == id_partida)
         ret = [personaje for personaje in personajes]
 
         return ret

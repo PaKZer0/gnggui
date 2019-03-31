@@ -179,6 +179,10 @@ class GnGGladeGui(AbstractGui):
         bguardarequ = self.builder.get_object("button-equipo-guardar")
         bguardarequ.connect("clicked", Handler.onGuardarEquipo)
 
+        ## tab personajes ##
+        bguardarpj = self.builder.get_object("button-personaje-guardar")
+        bguardarpj.connect("clicked", Handler.onGuardarPersonajeButton)
+
     def get_object(self, object_id):
         return self.builder.get_object(object_id)
 
@@ -235,8 +239,6 @@ class GnGGladeGui(AbstractGui):
         list_equipo = self.get_object("equipos-list")
         equipos = self.con.get_equipos()
 
-        self.equipos_rows = {}
-
         for equipo in equipos:
             row = Gtk.ListBoxRow()
             hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
@@ -268,7 +270,6 @@ class GnGGladeGui(AbstractGui):
             hbox.pack_start(button_borrar, True, True, 0)
 
             list_equipo.add(row)
-            self.equipos_rows[equipo.id] = row
 
         list_equipo.show_all()
 
@@ -280,6 +281,93 @@ class GnGGladeGui(AbstractGui):
             list_equipo.remove(child)
 
         self.load_list_equipo()
+
+    def load_list_personajes(self):
+        list_personaje = self.get_object("list-personajes")
+        personajes = self.con.get_personajes(self.partida.id)
+
+        for personaje in personajes:
+            row = Gtk.ListBoxRow()
+            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+            row.add(hbox)
+
+            txt_nombre = '{} lu {} : {} : ({})'.format(
+                personaje.nombre,
+                personaje.profesion,
+                personaje.raza.nombre,
+                personaje.pueblo,
+            )
+            label_nombre = Gtk.Label(txt_nombre, xalign=0)
+            hbox.pack_start(label_nombre, True, True, 0)
+
+            txt_stats = 'HP{} FU{} AG{} IN{} CA{} CO{} CN{} LA{} MA{} SO{}'.format(
+                personaje.hp,
+                personaje.fuerza,
+                personaje.agilidad,
+                personaje.inteligencia,
+                personaje.carisma,
+                personaje.combate,
+                personaje.conocimientos,
+                personaje.latrocinio,
+                personaje.magia,
+                personaje.sociales,
+            )
+            label_stats = Gtk.Label(txt_stats, xalign=0)
+            hbox.pack_start(label_stats, True, True, 0)
+
+            button_editar = Gtk.Button.new_with_label("Editar")
+            button_editar.connect('clicked', Handler.onEditarPersonajeButton, {'id_personaje': personaje.id})
+            hbox.pack_start(button_editar, True, True, 0)
+
+            button_borrar = Gtk.Button.new_with_label("Borrar")
+            button_borrar.connect('clicked', Handler.onBorrarPersonajeButton, {'id_personaje': personaje.id})
+            hbox.pack_start(button_borrar, True, True, 0)
+
+            list_personaje.add(row)
+
+        list_personaje.show_all()
+
+    def refrescar_lista_personajes(self):
+        logger.debug('Refrescando lista personajes')
+        list_personajes = self.get_object("list-personajes")
+        children = list_personajes.get_children()
+        for child in children:
+            list_personajes.remove(child)
+
+        self.load_list_personajes()
+
+    def limpiar_form_personaje(self):
+        entry_nombre = self.get_object("entry-personaje-nombre")
+        entry_profesion = self.get_object("entry-personaje-profesion")
+        combo_raza = self.get_object("combo-personaje-raza")
+        entry_pueblo = self.get_object("entry-personaje-pueblo")
+        spinner_hp = self.get_object("spinner-personaje-hp")
+        spinner_fuerza = self.get_object("spinner-personaje-fuerza")
+        spinner_agilidad = self.get_object("spinner-personaje-agilidad")
+        spinner_inteligencia = self.get_object("spinner-personaje-inteligencia")
+        spinner_carisma = self.get_object("spinner-personaje-carisma")
+        spinner_combate = self.get_object("spinner-personaje-combate")
+        spinner_conocimientos = self.get_object("spinner-personaje-conocimientos")
+        spinner_latrocinio = self.get_object("spinner-personaje-latrocinio")
+        spinner_magia = self.get_object("spinner-personaje-magia")
+        spinner_sociales = self.get_object("spinner-personaje-sociales")
+        text_notas = self.get_object("text-personaje-notas")
+
+        entry_nombre.set_text('')
+        entry_profesion.set_text('')
+        entry_pueblo.set_text('')
+        text_notas.set_buffer(Gtk.TextBuffer())
+        spinner_hp.set_value(1)
+        spinner_fuerza.set_value(1)
+        spinner_agilidad.set_value(1)
+        spinner_inteligencia.set_value(1)
+        spinner_carisma.set_value(1)
+        spinner_combate.set_value(1)
+        spinner_conocimientos.set_value(1)
+        spinner_latrocinio.set_value(1)
+        spinner_magia.set_value(1)
+        spinner_sociales.set_value(1)
+        combo_raza.set_active_iter(None)
 
     def tabs_start(self, sensitive):
         tab1 = self.builder.get_object("tab-partida")
@@ -340,6 +428,7 @@ class Handler:
 
             # cargar widgets pestaña partida
             gui.load_partida_info()
+            gui.load_list_personajes()
 
     def onBorrarPartida(self, *args):
         gui, con = get_utils()
@@ -447,7 +536,7 @@ class Handler:
     def onBorrarEquipoButton(self, *args):
         gui, con = get_utils()
         id_equipo = args[0]['id_equipo']
-        logger.warn('Borrando equipo con id {}'.format(id_equipo))
+        logger.debug('Borrando equipo con id {}'.format(id_equipo))
         con.borrar_equipo(id_equipo)
         gui.refrescar_lista_equipo()
 
@@ -477,11 +566,10 @@ class Handler:
         data['pueblo'] = entry_pueblo.get_text()
         # combo
         data['raza'] = 0
-        valor = spin_valor.get_value_as_int()
 
-        mod_active_iter = combo_mod.get_active_iter()
-        if mod_active_iter:
-            data['raza'] = combo_mod.get_model()[mod_active_iter][-2]
+        raza_active_iter = combo_raza.get_active_iter()
+        if raza_active_iter:
+            data['raza'] = combo_raza.get_model()[raza_active_iter][-2]
         # spinners
         data['hp'] = spinner_hp.get_value_as_int()
         data['fuerza'] = spinner_fuerza.get_value_as_int()
@@ -493,6 +581,7 @@ class Handler:
         data['latrocinio'] = spinner_latrocinio.get_value_as_int()
         data['magia'] = spinner_magia.get_value_as_int()
         data['sociales'] = spinner_sociales.get_value_as_int()
+        data['partida'] = gui.partida.id
 
         # notas
         data['notas'] = text_notas.get_buffer().get_text(
@@ -509,12 +598,69 @@ class Handler:
             is_create = True
 
         if is_create:
-            logger.warn('Crear personaje')
+            logger.debug('Crear personaje:')
+            logger.debug(pprint(data))
+            con.crear_personaje(data)
         else:
-            logger.warn('Editar personaje')
+            logger.debug('Editar personaje')
+            logger.debug(pprint(data))
+            con.editar_personaje(gui.id_personaje_sel, data)
+            gui.id_personaje_sel = None
 
-        #gui.limpiar_form_personaje()
-        #gui.refrescar_lista_personajes()
+        gui.limpiar_form_personaje()
+        gui.refrescar_lista_personajes()
+
+    def onEditarPersonajeButton(self, *args):
+        gui, con = get_utils()
+
+        # cargar valores en formulario
+        entry_nombre = gui.get_object("entry-personaje-nombre")
+        entry_profesion = gui.get_object("entry-personaje-profesion")
+        combo_raza = gui.get_object("combo-personaje-raza")
+        entry_pueblo = gui.get_object("entry-personaje-pueblo")
+        spinner_hp = gui.get_object("spinner-personaje-hp")
+        spinner_fuerza = gui.get_object("spinner-personaje-fuerza")
+        spinner_agilidad = gui.get_object("spinner-personaje-agilidad")
+        spinner_inteligencia = gui.get_object("spinner-personaje-inteligencia")
+        spinner_carisma = gui.get_object("spinner-personaje-carisma")
+        spinner_combate = gui.get_object("spinner-personaje-combate")
+        spinner_conocimientos = gui.get_object("spinner-personaje-conocimientos")
+        spinner_latrocinio = gui.get_object("spinner-personaje-latrocinio")
+        spinner_magia = gui.get_object("spinner-personaje-magia")
+        spinner_sociales = gui.get_object("spinner-personaje-sociales")
+        text_notas = gui.get_object("text-personaje-notas")
+
+        personaje = con.get_personaje(args[0]['id_personaje'])
+
+        entry_nombre.set_text(personaje.nombre)
+        entry_profesion.set_text(personaje.profesion)
+        entry_pueblo.set_text(personaje.pueblo)
+        new_buffer = Gtk.TextBuffer()
+        new_buffer.set_text(personaje.notas)
+        text_notas.set_buffer(new_buffer)
+        spinner_hp.set_value(personaje.hp)
+        spinner_fuerza.set_value(personaje.fuerza)
+        spinner_agilidad.set_value(personaje.agilidad)
+        spinner_inteligencia.set_value(personaje.inteligencia)
+        spinner_carisma.set_value(personaje.carisma)
+        spinner_combate.set_value(personaje.combate)
+        spinner_conocimientos.set_value(personaje.conocimientos)
+        spinner_latrocinio.set_value(personaje.latrocinio)
+        spinner_magia.set_value(personaje.magia)
+        spinner_sociales.set_value(personaje.sociales)
+        # get active iter
+        active_iter = gui.pjraza_iters[personaje.raza.id]
+        combo_raza.set_active_iter(active_iter)
+
+        # setear id_personaje_sel
+        gui.id_personaje_sel = personaje.id
+
+    def onBorrarPersonajeButton(self, *args):
+        gui, con = get_utils()
+        id_personaje = args[0]['id_personaje']
+        logger.debug('Borrando personaje con id {}'.format(id_personaje))
+        con.borrar_personaje(id_personaje)
+        gui.refrescar_lista_personajes()
 
 def run_gui():
     gui = GnGGladeGui.get_instance()
