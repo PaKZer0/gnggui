@@ -191,6 +191,9 @@ class GnGGladeGui(AbstractGui):
         # cargar lista equipo
         self.load_list_equipo()
 
+        # set vars
+        self.id_personaje_sel = None
+
     def bind_signals(self):
         ## window ##
         window = self.builder.get_object("window1")
@@ -378,37 +381,39 @@ class GnGGladeGui(AbstractGui):
     def load_list_equipos_pj(self):
         self.refrescar_lista_equipos_pj(True)
         list_equipo = self.get_object("list-personaje-equipo")
-        equipos = self.con.get_equipos_personaje(self.id_personaje_sel)
 
-        for equipo in equipos:
-            row = Gtk.ListBoxRow()
-            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
-            row.add(hbox)
+        if self.id_personaje_sel:
+            equipos = self.con.get_equipos_personaje(self.id_personaje_sel)
 
-            texto_mod = ''
-            if equipo.mod:
-                if equipo.valor > 0:
-                    texto_mod = ' +{} en {}'.format(equipo.valor, equipo.mod.nombre)
-                elif equipo.valor < 0:
-                    texto_mod = ' {} en {}'.format(equipo.valor, equipo.mod.nombre)
+            for equipo in equipos:
+                row = Gtk.ListBoxRow()
+                hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+                row.add(hbox)
 
-            texto_nombre = '{}{}'.format(
-                equipo.nombre,
-                texto_mod,
-            )
-            label_datos = Gtk.Label(texto_nombre, xalign=0)
-            hbox.pack_start(label_datos, True, True, 0)
+                texto_mod = ''
+                if equipo.mod:
+                    if equipo.valor > 0:
+                        texto_mod = ' +{} en {}'.format(equipo.valor, equipo.mod.nombre)
+                    elif equipo.valor < 0:
+                        texto_mod = ' {} en {}'.format(equipo.valor, equipo.mod.nombre)
 
-            label_descrip = Gtk.Label(equipo.descripcion, xalign=0)
-            hbox.pack_start(label_descrip, True, True, 0)
+                texto_nombre = '{}{}'.format(
+                    equipo.nombre,
+                    texto_mod,
+                )
+                label_datos = Gtk.Label(texto_nombre, xalign=0)
+                hbox.pack_start(label_datos, True, True, 0)
 
-            button_borrar = Gtk.Button.new_with_label("Borrar")
-            button_borrar.connect('clicked', Handler.onBorrarEquipoPjButton, {'id_pj_equipo': equipo.id_pj_equipo})
-            hbox.pack_start(button_borrar, True, True, 0)
+                label_descrip = Gtk.Label(equipo.descripcion, xalign=0)
+                hbox.pack_start(label_descrip, True, True, 0)
 
-            list_equipo.add(row)
+                button_borrar = Gtk.Button.new_with_label("Borrar")
+                button_borrar.connect('clicked', Handler.onBorrarEquipoPjButton, {'id_pj_equipo': equipo.id_pj_equipo})
+                hbox.pack_start(button_borrar, True, True, 0)
 
-        list_equipo.show_all()
+                list_equipo.add(row)
+
+            list_equipo.show_all()
 
     def refrescar_lista_equipos_pj(self, delete=False):
         logger.debug('Refrescando lista equipos asignados')
@@ -524,6 +529,7 @@ class Handler:
             gui.load_partida_info()
             gui.load_list_personajes()
             gui.limpiar_form_personaje()
+            gui.load_personajes_combos()
 
     def onBorrarPartida(self, *args):
         gui, con = get_utils()
@@ -604,6 +610,8 @@ class Handler:
 
         gui.limpiar_form_equipo()
         gui.refrescar_lista_equipo()
+        gui.load_equipos_combo()
+        gui.refrescar_lista_equipos_pj()
 
     def onEditarEquipoButton(self, *args):
         gui, con = get_utils()
@@ -634,6 +642,8 @@ class Handler:
         logger.debug('Borrando equipo con id {}'.format(id_equipo))
         con.borrar_equipo(id_equipo)
         gui.refrescar_lista_equipo()
+        gui.load_equipos_combo()
+        gui.refrescar_lista_equipos_pj()
 
     def onGuardarPersonajeButton(self, *args):
         gui, con = get_utils()

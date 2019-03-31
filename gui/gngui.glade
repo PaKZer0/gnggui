@@ -1113,7 +1113,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox">
+                  <object class="GtkComboBox" id="combo-skill-tirada">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>
@@ -1123,7 +1123,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton">
+                  <object class="GtkSpinButton" id="spinner-bonuspj-tirada">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                   </object>
@@ -1173,9 +1173,9 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton">
+                              <object class="GtkComboBox" id="combo-dificultad-tirada">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -1215,7 +1215,7 @@
                                           <object class="GtkLabel">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="label" translatable="yes">3+4+0 = 7 &gt; 6</property>
+                                            <property name="label" translatable="yes">S3+[4]+{0} = 7 &gt; D6</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">0</property>
@@ -1395,7 +1395,7 @@
                                           <object class="GtkLabel">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="label" translatable="yes">3+4+0 = 7 &gt; 6 = 3+3+0</property>
+                                            <property name="label" translatable="yes">S3+[4]+{0} = 7 &gt; 6 = S3+[3]+{0}</property>
                                           </object>
                                           <packing>
                                             <property name="left_attach">0</property>
@@ -1750,7 +1750,7 @@
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">(3+2+0)-(2+1+0) = 2</property>
+                                    <property name="label" translatable="yes">(A3+[2]+{0})-(A2+[1]+{0}) = 2</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">0</property>
@@ -1931,7 +1931,7 @@
                                   <object class="GtkLabel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">(3+2+0)-(2+1+0) = 2</property>
+                                    <property name="label" translatable="yes">(A3+[2]+{0})-(D2+[1]+{0}) = 2</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">0</property>
