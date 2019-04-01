@@ -456,6 +456,14 @@ class Controller():
             'resultado': ret_tirada,
             'dado1': self.core.dado1,
             'dado2': self.core.dado2,
+            'pjagil': pjvalue,
+            'pnjagil': pnjvalue,
+            'equipo_bonus_pj1': equipo_bonus_pj1,
+            'equipo_bonus_pnj': equipo_bonus_pnj,
+            'magia_pjvalue': magia_pjvalue,
+            'magia_pnjvalue': magia_pnjvalue,
+            'equipom_bonus_pj1': equipom_bonus_pj1,
+            'equipom_bonus_pnj': equipom_bonus_pnj,
         }
 
         return ret

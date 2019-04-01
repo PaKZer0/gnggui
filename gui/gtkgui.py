@@ -184,14 +184,24 @@ class GnGGladeGui(AbstractGui):
         pj_sociales = self.get_object("spinner-personaje-sociales")
         bonuspj_tirada = self.get_object("spinner-bonuspj-tirada")
         bonuspnj_tirada = self.get_object("spinner-bonuspnj-tirada")
+        hppj_combate = self.get_object("spin-hppj-combate")
+        hppnj_combate = self.get_object("spin-hppnj-combate")
+        bonusinipj_combate = self.get_object("spin-bonusinipj-combate")
+        bonusinipnj_combate = self.get_object("spin-bonusinipnj-combate")
+        bonuscombpj_combate = self.get_object("spin-bonuscombpj-combate")
+        bonuscombpnj_combate = self.get_object("spin-bonuscombpnj-combate")
 
         skill_spiners = [pj_fuerza, pj_agilidad, pj_inteligencia,
                             pj_inteligencia, pj_carisma, pj_combate,
                             pj_conocimientos, pj_latrocinio, pj_magia,
                             pj_sociales]
-        all_spiners = [pj_hp, equipo_valor, bonuspj_tirada, bonuspnj_tirada
-                        ]\
-                        + skill_spiners
+
+        hp_spinners = [pj_hp, hppj_combate, hppnj_combate]
+
+        all_spiners = [ equipo_valor, bonuspj_tirada, bonuspnj_tirada,
+                            bonusinipj_combate, bonusinipnj_combate,
+                            bonuscombpj_combate, bonuscombpnj_combate
+                        ] + skill_spiners + hp_spinners
 
         # set all to integer spinners
         for spiner in all_spiners:
@@ -205,7 +215,8 @@ class GnGGladeGui(AbstractGui):
         for spiner in skill_spiners:
             spiner.set_adjustment(Gtk.Adjustment(0, 1, 8, 1, 0, 0))
 
-        pj_hp.set_adjustment(Gtk.Adjustment(0, 0, 1000, 1, 0, 0))
+        for spiner in hp_spinners:
+            spiner.set_adjustment(Gtk.Adjustment(0, 0, 1000, 1, 0, 0))
 
     def build(self):
         # build glade
@@ -224,7 +235,12 @@ class GnGGladeGui(AbstractGui):
         self.load_list_equipo()
 
         # set vars
-        self.id_personaje_sel = None
+        self.id_personaje_sel    = None
+        self.id_pj_ataca         = None
+        self.id_pj_defiende      = None
+        self.bt_asignar_activado = False
+        self.check_magia_ini     = False
+        self.check_magia_com     = False
 
     def bind_signals(self):
         ## window ##
@@ -255,6 +271,9 @@ class GnGGladeGui(AbstractGui):
         bguardarpj = self.builder.get_object("button-personaje-guardar")
         bguardarpj.connect("clicked", Handler.onGuardarPersonajeButton)
 
+        bresethp = self.builder.get_object("button-personaje-resethp")
+        bresethp.connect("clicked", Handler.onResetearHPPersonajeButton)
+
         ## tab tiradas ##
         btirarso = self.builder.get_object("button-tirarso-tiradas")
         btirarso.connect("clicked", Handler.onTirarSinOposicion)
@@ -268,7 +287,18 @@ class GnGGladeGui(AbstractGui):
         bborrarco = self.builder.get_object("button-borrarco-tiradas")
         bborrarco.connect("clicked", Handler.onBorrarConOposicion)
 
-        self.bt_asignar_activado = False
+        ## tab combate ##
+        btirarco = self.builder.get_object("button-tirarini-combate")
+        btirarco.connect("clicked", Handler.onTirarIniciativa)
+
+        bborrarco = self.builder.get_object("button-borrarini-combate")
+        bborrarco.connect("clicked", Handler.onBorrarIniciativa)
+
+        cpjcombate = self.builder.get_object("combo-pj-combate")
+        cpjcombate.connect("changed", Handler.onSeleccionarPj)
+
+        cpnjcombate = self.builder.get_object("combo-pnj-combate")
+        cpnjcombate.connect("changed", Handler.onSeleccionarPnj)
 
     def get_object(self, object_id):
         return self.builder.get_object(object_id)
@@ -761,6 +791,16 @@ class Handler:
         gui.refrescar_lista_personajes()
         gui.load_personajes_combos()
 
+    def onResetearHPPersonajeButton(self, *args):
+        gui, con = get_utils()
+
+        spinner_hp = gui.get_object("spinner-personaje-hp")
+        spinner_fuerza = gui.get_object("spinner-personaje-fuerza")
+
+        fuerza = spinner_fuerza.get_value_as_int()
+        if fuerza >= 1 and fuerza <= 8:
+            spinner_hp.set_value( fuerza * 5 )
+
     @classmethod
     def cargarLabelsAtaqueDefensa(cls):
         gui, con = get_utils()
@@ -924,10 +964,16 @@ class Handler:
     def onBorrarSinOposicion(self, *args):
         gui, con = get_utils()
 
+        # borrar labels
         label_tirada = gui.get_object("label-tirso-tirada")
         label_resultado = gui.get_object("label-resso-tirada")
         label_tirada.set_text('')
         label_resultado.set_text('')
+        # resetear spinners
+        spin_bonuspj = gui.get_object("spinner-bonuspj-tirada")
+        spin_bonuspnj = gui.get_object("spinner-bonuspnj-tirada")
+        spin_bonuspj.set_value(0)
+        spin_bonuspnj.set_value(0)
 
     def onTirarConOposicion(self, *args):
         gui, con = get_utils()
@@ -996,10 +1042,149 @@ class Handler:
 
     def onBorrarConOposicion(self, *args):
         gui, con = get_utils()
+        # borrar texto en los labels
         label_tirada = gui.get_object("label-tirco-tirada")
         label_resultado = gui.get_object("label-resco-tirada")
         label_tirada.set_text('')
         label_resultado.set_text('')
+        # resetear spinners
+        spin_bonuspj = gui.get_object("spinner-bonuspj-tirada")
+        spin_bonuspnj = gui.get_object("spinner-bonuspnj-tirada")
+        spin_bonuspj.set_value(0)
+        spin_bonuspnj.set_value(0)
+
+    def onSeleccionarPj(self, *args):
+        gui, con = get_utils()
+
+        # obtener personaje
+        cpjini = gui.get_object("combo-pj-combate")
+        cpjini_ai = cpjini.get_active_iter()
+
+        if cpjini_ai:
+            id_pj = cpjini.get_model()[cpjini_ai][-2]
+            personaje = con.get_personaje(id_pj)
+            spin_hp_pj = gui.get_object("spin-hppj-combate")
+            spin_hp_pj.set_value(personaje.hp)
+
+    def onSeleccionarPnj(self, *args):
+        gui, con = get_utils()
+
+        # obtener personaje
+        cpnjini = gui.get_object("combo-pnj-combate")
+        cpnjini_ai = cpnjini.get_active_iter()
+
+        if cpnjini_ai:
+            id_pnj = cpnjini.get_model()[cpnjini_ai][-2]
+            personaje = con.get_personaje(id_pnj)
+            spin_hp_pnj = gui.get_object("spin-hppnj-combate")
+            spin_hp_pnj.set_value(personaje.hp)
+
+    def onTirarIniciativa(self, *args):
+        gui, con = get_utils()
+
+        # obtener personaje
+        cpjini = gui.get_object("combo-pj-combate")
+        cpjini_ai = cpjini.get_active_iter()
+
+        # obtener pnj
+        cpnjini = gui.get_object("combo-pnj-combate")
+        cpnjnini_ai = cpnjini.get_active_iter()
+
+        # obtener valor bonus pj
+        spbonuspj = gui.get_object("spin-bonusinipj-combate")
+        bonus_pj = spbonuspj.get_value_as_int()
+
+        # obtener valor bonus pnj
+        spbonuspnj = gui.get_object("spin-bonusinipnj-combate")
+        bonus_pnj = spbonuspnj.get_value_as_int()
+
+        # obtener check magia
+        ckmagia = gui.get_object("check-magia-partida")
+        magia = ckmagia.get_active()
+
+        # tirar
+        if cpjini_ai and cpnjnini_ai:
+            id_pj = cpjini.get_model()[cpjini_ai][-2]
+            id_pnj = cpnjini.get_model()[cpnjnini_ai][-2]
+            res = con.iniciativa(id_pj, id_pnj, magia, bonus_pj, bonus_pnj)
+
+            cuenta_pj = res['pjagil'] + res['dado1'] + res['equipo_bonus_pj1'] + bonus_pj
+            cuenta_pnj = res['pnjagil'] + res['dado2'] + res['equipo_bonus_pnj'] + bonus_pj
+            symbol = '>' if res['resultado'] else '<'
+            magia_pjtx  = ''
+            magia_pnjtx = ''
+
+            if magia:
+                magia_pjtx = '+M{}+m{}'.format(
+                    res['magia_pjvalue'],
+                    res['equipom_bonus_pj1']
+                )
+
+                magia_pnjtx = '+M{}+m{}'.format(
+                    res['magia_pnjvalue'],
+                    res['equipom_bonus_pnj']
+                )
+
+            # formatear texto tirada
+            txt_tirada = 'A{}+[{}]+E{}+B{}{} = {} {} {} = A{}+[{}]+E{}+B{}{}'.format(
+                res['pjagil'],
+                res['dado1'],
+                res['equipo_bonus_pj1'],
+                bonus_pj,
+                magia_pjtx,
+                cuenta_pj,
+                symbol,
+                cuenta_pnj,
+                res['pnjagil'],
+                res['dado2'],
+                res['equipo_bonus_pnj'],
+                bonus_pnj,
+                magia_pnjtx,
+            )
+
+            # formatear texto resultado
+            txt_resultado = 'PJ ATACA | PNJ DEFIENDE' if res['resultado'] else 'PNJ ATACA | PJ DEFIENDE'
+            # mostrar texto
+            label_tirada = gui.get_object("label-tirarini-combate")
+            label_resultado = gui.get_object("label-resultini-combate")
+            label_tirada.set_text(txt_tirada)
+            label_resultado.set_text(txt_resultado)
+
+            # setear variable
+            gui.id_pj_ataca    = id_pj  if res['resultado'] else id_pnj
+            gui.id_pj_defiende = id_pnj if res['resultado'] else id_pj
+
+    def onBorrarIniciativa(self, *args):
+        gui, con = get_utils()
+        # borrar texto en los labels
+        label_tirada = gui.get_object("label-tirarini-combate")
+        label_resultado = gui.get_object("label-resultini-combate")
+        label_tirada.set_text('')
+        label_resultado.set_text('')
+        # resetear spinners
+        spin_bonuspj = gui.get_object("spin-bonusinipj-combate")
+        spin_bonuspnj = gui.get_object("spin-bonusinipnj-combate")
+        spin_bonuspj.set_value(0)
+        spin_bonuspnj.set_value(0)
+        # resetear pj con iniciativa
+        gui.id_pj_ataca    = None
+        gui.id_pj_defiende = None
+
+    def onTirarCombate(self, *args):
+        gui, con = get_utils()
+
+    def onBorrarCombate(self, *args):
+        gui, con = get_utils()
+        # borrar texto en los labels
+        label_tirada = gui.get_object("label-tirarcom-combate")
+        label_resultado = gui.get_object("label-resultini-combate")
+        label_tirada.set_text('')
+        label_resultado.set_text('')
+        # resetear spinners
+        spin_bonuspj = gui.get_object("spin-bonusinipj-combate")
+        spin_bonuspnj = gui.get_object("spin-bonusinipnj-combate")
+        spin_bonuspj.set_value(0)
+        spin_bonuspnj.set_value(0)
 
     def voidCallback(self, *args):
         pass
