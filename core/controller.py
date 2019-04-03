@@ -44,6 +44,10 @@ class Controller():
         return partida
 
     def borrar_partida(self, id_partida):
+        personajes = self.get_personajes(id_partida)
+        for personaje in personajes:
+            self.borrar_personaje(personaje.id)
+
         self.get_partida(id_partida).delete_instance()
 
     ### EQUIPOS ###
@@ -474,7 +478,7 @@ class Controller():
         pdefiende   = self.get_personaje(id_pdefiende)
         mod_ataque  = Mod.get(Mod.nombre == MOD_TYPE[1][1])
         mod_defensa = Mod.get(Mod.nombre == MOD_TYPE[2][1])
-        mod_magia   = Mod.get(Mod.nombre == MOD_TYPE[9][1])
+        mod_magia   = Mod.get(Mod.nombre == MOD_TYPE[8][1])
 
         # obtener valores
         pataca_val    = self.bonus_mod_personaje(mod_ataque, pataca)
@@ -529,6 +533,9 @@ class Controller():
             elif ret_tirada[0] < 0: # ataque patético
                 herido = pataca
                 datos['hp'] = herido.hp + ret_tirada[0]
+
+            if datos['hp'] < 0:
+                datos['hp'] = 0
 
             self.editar_personaje(herido.id, datos)
 

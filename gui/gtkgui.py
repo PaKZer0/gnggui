@@ -235,6 +235,7 @@ class GnGGladeGui(AbstractGui):
         self.load_list_equipo()
 
         # set vars
+        self.partida             = None
         self.id_personaje_sel    = None
         self.id_pj_ini           = None
         self.id_pnj_ini          = None
@@ -477,8 +478,8 @@ class GnGGladeGui(AbstractGui):
         for child in children:
             list_personajes.remove(child)
 
-        gui.id_pj_ini = None
-        gui.id_pnj_ini = None
+        self.id_pj_ini = None
+        self.id_pnj_ini = None
 
         self.load_list_personajes()
 
@@ -656,6 +657,7 @@ class Handler:
                 gui.tabs_start(False)
 
             gui.load_partidas_combo()
+            gui.refrescar_lista_personajes()
 
     def onEditPartida(self, *args):
         gui, con = get_utils()
@@ -970,14 +972,16 @@ class Handler:
             )
 
             cuenta = res['pjvalue'] + res['dado'] + res['equipo_bonus'] + bonus
+            symbol = '>' if res['resultado'] else '<'
 
             # formatear texto tirada
-            txt_tirada = 'S{}+[{}]+E{}+B{} = {} > D{}'.format(
+            txt_tirada = 'S{}+[{}]+E{}+B{} = {} {} D{}'.format(
                 res['pjvalue'],
                 res['dado'],
                 res['equipo_bonus'],
                 bonus,
                 cuenta,
+                symbol,
                 res['dif'],
             )
 
@@ -1232,36 +1236,28 @@ class Handler:
             res = con.combate(gui.id_pj_ataca, gui.id_pj_defiende, magia,
                                 bonus_pataca, bonus_pdefiende)
 
-            cuenta_pataca = res['pataca_val'] + res['dado1'] + res['equipo_bonus_pata'] + bonus_pj
-            cuenta_pdefie = res['pdefiende_val'] + res['dado2'] + res['equipo_bonus_pdef'] + bonus_pj
+            cuenta_pataca = res['pataca_val'] + res['dado1'] + res['equipo_bonus_pata'] + bonus_pataca
+            cuenta_pdefie = res['pdefiende_val'] + res['dado2'] + res['equipo_bonus_pdef'] + bonus_pdefiende
+
+            if magia:
+                cuenta_pataca = res['pataca_magia'] + res['dado1'] + res['equipom_bonus_pata'] + bonus_pataca
+                cuenta_pdefie = res['pdefiende_magia'] + res['dado2'] + res['equipom_bonus_pdef'] + bonus_pdefiende
 
             symbol = '='
             if res['resultado'] > 0:
                 symbol = '>'
-            elif res['resultado'] > 0:
+            elif res['resultado'] < 0:
                 symbol = '<'
 
             magia_patacatx  = ''
             magia_pdefietx = ''
 
-            if magia:
-                magia_patacatx = '+M{}+m{}'.format(
-                    res['pataca_magia'],
-                    res['equipom_bonus_pata']
-                )
-
-                magia_pdefietx = '+M{}+m{}'.format(
-                    res['pdefiende_magia'],
-                    res['equipom_bonus_pdef']
-                )
-
             # formatear texto tirada
-            txt_tirada = 'A{}+[{}]+E{}+B{}{} = {} {} {} = D{}+[{}]+E{}+B{}{}'.format(
+            txt_tirada = 'A{}+[{}]+E{}+B{} = {} {} {} = D{}+[{}]+E{}+B{}'.format(
                 res['pataca_val'],
                 res['dado1'],
                 res['equipo_bonus_pata'],
                 bonus_pataca,
-                magia_patacatx,
                 cuenta_pataca,
                 symbol,
                 cuenta_pdefie,
@@ -1269,8 +1265,22 @@ class Handler:
                 res['dado2'],
                 res['equipo_bonus_pdef'],
                 bonus_pdefiende,
-                magia_pdefietx,
             )
+
+            if magia:
+                txt_tirada = 'AM{}+[{}]+E{}+B{} = {} {} {} = DM{}+[{}]+E{}+B{}'.format(
+                    res['pataca_magia'],
+                    res['dado1'],
+                    res['equipom_bonus_pata'],
+                    bonus_pataca,
+                    cuenta_pataca,
+                    symbol,
+                    cuenta_pdefie,
+                    res['pdefiende_magia'],
+                    res['dado2'],
+                    res['equipom_bonus_pdef'],
+                    bonus_pdefiende,
+                )
 
             # formatear texto resultado
             txt_resultado = ''
