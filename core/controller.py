@@ -535,6 +535,18 @@ class Controller():
         ret = {
             'resultado': ret_tirada[0],
             'overkill' : ret_tirada[1],
+            'dado1': self.core.dado1,
+            'dado2': self.core.dado2,
+            'pataca': pataca,
+            'pdefiende': pdefiende,
+            'pataca_val': pataca_val,
+            'pdefiende_val': pdefiende_val,
+            'equipo_bonus_pata': equipo_bonus_pata,
+            'equipo_bonus_pdef': equipo_bonus_pdef,
+            'pataca_magia': pataca_magia,
+            'pdefiende_magia': pdefiende_magia,
+            'equipom_bonus_pata': equipom_bonus_pata,
+            'equipom_bonus_pdef': equipom_bonus_pdef,
         }
 
         return ret

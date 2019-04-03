@@ -1738,16 +1738,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="button-borrarini-combate">
-                                    <property name="label" translatable="yes">Borrar</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="top_attach">0</property>
-                                  </packing>
+                                  <placeholder/>
                                 </child>
                               </object>
                               <packing>
@@ -1765,7 +1756,6 @@
                                   <object class="GtkLabel" id="label-tirarini-combate">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">(A3+[2]+{0})-(A2+[1]+{0}) = 2</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">0</property>
@@ -1776,7 +1766,6 @@
                                   <object class="GtkLabel" id="label-resultini-combate">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">PJ1 ATACA</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">0</property>
@@ -1946,7 +1935,6 @@
                                   <object class="GtkLabel" id="label-tirarcom-combate">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">(A3+[2]+{0})-(D2+[1]+{0}) = 2</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">0</property>
@@ -1957,7 +1945,6 @@
                                   <object class="GtkLabel" id="label-resultcom-combate">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">PNJ PIERDE 2 HP</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">0</property>
