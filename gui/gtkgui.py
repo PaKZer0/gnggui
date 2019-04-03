@@ -467,6 +467,10 @@ class GnGGladeGui(AbstractGui):
             button_borrar.connect('clicked', Handler.onBorrarPersonajeButton, {'id_personaje': personaje.id})
             hbox.pack_start(button_borrar, True, True, 0)
 
+            button_borrar = Gtk.Button.new_with_label("Clonar")
+            button_borrar.connect('clicked', Handler.onClonarPersonaje, {'id_personaje': personaje.id})
+            hbox.pack_start(button_borrar, True, True, 0)
+
             list_personaje.add(row)
 
         list_personaje.show_all()
@@ -917,6 +921,14 @@ class Handler:
         id_personaje = args[0]['id_personaje']
         logger.debug('Borrando personaje con id {}'.format(id_personaje))
         con.borrar_personaje(id_personaje)
+        gui.refrescar_lista_personajes()
+        gui.load_personajes_combos()
+
+    def onClonarPersonaje(self, *args):
+        gui, con = get_utils()
+        id_personaje = args[0]['id_personaje']
+        logger.debug('Clonando personaje con id {}'.format(id_personaje))
+        con.clonar_personaje(id_personaje)
         gui.refrescar_lista_personajes()
         gui.load_personajes_combos()
 

@@ -238,6 +238,30 @@ class Controller():
         PlayerEquipo.delete().where(PlayerEquipo.player == player).execute()
         self.get_personaje(id_personaje).delete_instance()
 
+    def clonar_personaje(self, id_personaje):
+        personaje = self.get_personaje(id_personaje)
+        clon = Player(
+            nombre = personaje.nombre,
+            profesion = personaje.profesion,
+            raza = personaje.raza,
+            pueblo = personaje.pueblo,
+            hp = personaje.hp,
+            fuerza = personaje.fuerza,
+            agilidad = personaje.agilidad,
+            inteligencia = personaje.inteligencia,
+            carisma = personaje.carisma,
+            combate = personaje.combate,
+            conocimientos = personaje.conocimientos,
+            latrocinio = personaje.latrocinio,
+            magia = personaje.magia,
+            sociales = personaje.sociales,
+            notas = personaje.notas,
+            partida = personaje.partida
+        )
+        clon.save()
+
+        return clon
+
     def get_equipos_personaje(self, id_personaje):
         equipospj = PlayerEquipo.select().join(Player)\
                     .where(Player.id == id_personaje).execute()
