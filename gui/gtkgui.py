@@ -112,7 +112,7 @@ class GnGGladeGui(AbstractGui):
         combo_mods.add_attribute(renderer_text, "text", 1)
 
     def get_personajes_options(self):
-        personajes = self.con.get_personajes()
+        personajes = self.con.get_personajes(self.partida.id)
         ret = Gtk.ListStore(int, str)
 
         # iniciar iter list equipo pj
@@ -428,6 +428,11 @@ class GnGGladeGui(AbstractGui):
 
     def load_list_personajes(self):
         list_personaje = self.get_object("list-personajes")
+        # limpiar
+        children = list_personaje.get_children()
+        for child in children:
+            list_personaje.remove(child)
+
         personajes = self.con.get_personajes(self.partida.id)
 
         for personaje in personajes:
@@ -478,9 +483,6 @@ class GnGGladeGui(AbstractGui):
     def refrescar_lista_personajes(self):
         logger.debug('Refrescando lista personajes')
         list_personajes = self.get_object("list-personajes")
-        children = list_personajes.get_children()
-        for child in children:
-            list_personajes.remove(child)
 
         self.id_pj_ini = None
         self.id_pnj_ini = None
