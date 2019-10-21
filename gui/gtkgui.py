@@ -932,6 +932,12 @@ class Handler:
         button_asignar = gui.get_object("button-personaje-equipo")
         button_asignar.set_sensitive(True)
         if not gui.bt_asignar_activado:
+            # disconnect previous binds
+            try:
+                button_asignar.disconnect_by_func(Handler.onAsignarEquipo)
+            except:
+                pass
+
             gui.bt_asignar_activado = True
             button_asignar.connect("clicked", Handler.onAsignarEquipo)
 
@@ -939,6 +945,12 @@ class Handler:
         button_resetear = gui.get_object("button-personaje-resetform")
         button_resetear.set_sensitive(True)
         if not gui.bt_reset_activado:
+            # disconnect previous binds
+            try:
+                button_resetear.disconnect_by_func(Handler.onResetForm)
+            except:
+                pass
+
             gui.bt_reset_activado = True
             button_resetear.connect("clicked", Handler.onResetForm)
 
