@@ -9,7 +9,7 @@ from gui.abstractgui import AbstractGui
 
 logger = logging.getLogger(__name__)
 
-logging.basicConfig(filename='output.log',level=logging.DEBUG)
+#logging.basicConfig(filename='output.log',level=logging.DEBUG)
 
 def get_utils():
     gui = GnGGladeGui.get_instance()

@@ -1,5 +1,11 @@
+import logging
+
+from pprint import pformat
+
 from .core import Core
 from .models import *
+
+logger = logging.getLogger(__name__)
 
 class Controller():
     def __init__(self, test=False):
@@ -439,7 +445,7 @@ class Controller():
         personaje    = self.get_personaje(id_pj)
         adversario   = self.get_personaje(id_pnj)
         mod_agilidad = Mod.get(Mod.nombre == MOD_TYPE[3][1])
-        mod_magia    = Mod.get(Mod.nombre == MOD_TYPE[9][1])
+        mod_magia    = Mod.get(Mod.nombre == MOD_TYPE[8][1])
 
         # obtener valor personaje
         pjvalue  = self.bonus_mod_personaje(mod_agilidad, personaje)
@@ -499,14 +505,16 @@ class Controller():
             'equipom_bonus_pnj': equipom_bonus_pnj,
         }
 
+        logger.debug(pformat(ret, indent=1))
+
         return ret
 
     def combate(self, id_pataca, id_pdefiende, magia=False,
                 bonus_ata=0, bonus_def=0):
         pataca      = self.get_personaje(id_pataca)
         pdefiende   = self.get_personaje(id_pdefiende)
-        mod_ataque  = Mod.get(Mod.nombre == MOD_TYPE[1][1])
-        mod_defensa = Mod.get(Mod.nombre == MOD_TYPE[2][1])
+        mod_ataque  = Mod.get(Mod.nombre == MOD_TYPE[0][1])
+        mod_defensa = Mod.get(Mod.nombre == MOD_TYPE[1][1])
         mod_magia   = Mod.get(Mod.nombre == MOD_TYPE[8][1])
 
         # obtener valores

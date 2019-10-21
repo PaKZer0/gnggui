@@ -43,7 +43,7 @@ class ControllerTestCase(unittest.TestCase):
         return self.con.crear_equipo(
             'Cardo borriquero',
             'Dicen que da suerte',
-            0,
+            1,
             mod_magia.id,
         )
 
@@ -176,7 +176,7 @@ class ControllerTestCase(unittest.TestCase):
         rel = self.con.asignar_equipo(personaje.id, equipo.id)
         equipos = self.con.get_equipos_personaje(personaje.id)
         self.assertEqual(len(equipos), 1)
-        
+
         self.con.desasignar_equipo(rel.id)
         equipos = self.con.get_equipos_personaje(personaje.id)
         self.assertEqual(len(equipos), 0)
@@ -332,6 +332,30 @@ class ControllerTestCase(unittest.TestCase):
 
         # debería de golpear el pj
         self.assertTrue( ret_tirada['resultado'] > 0 )
+
+
+    def test_equipo_m(self):
+        self.crear_partida()
+        personaje = self.crear_personaje()
+        adversario = self.crear_adversario()
+
+        equipo1 = self.crear_equipo()
+        equipo2 = self.crear_equipo2()
+        equipom1 = self.crear_equipom1()
+        equipom2 = self.crear_equipom2()
+
+        self.con.asignar_equipo(personaje.id, equipo1.id)
+        self.con.asignar_equipo(personaje.id, equipom1.id)
+        self.con.asignar_equipo(adversario.id, equipo2.id)
+        self.con.asignar_equipo(adversario.id, equipom2.id)
+
+        mod_magia = self.con.get_mod(9)
+
+        magia_pjvalue  = self.con.bonus_mod_personaje(mod_magia, personaje)
+        magia_pnjvalue = self.con.bonus_mod_personaje(mod_magia, adversario)
+
+        self.assertEqual(magia_pjvalue, 4)
+        self.assertEqual(magia_pnjvalue, 1)
 
 
 if __name__ == '__main__':
