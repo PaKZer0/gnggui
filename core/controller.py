@@ -260,6 +260,11 @@ class Controller():
         )
         clon.save()
 
+        # clonar equipo
+        equipos = self.get_equipos_personaje(id_personaje)
+        for equipo in equipos:
+            self.asignar_equipo(clon.id, equipo.id)
+
         return clon
 
     def get_equipos_personaje(self, id_personaje):
