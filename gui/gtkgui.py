@@ -710,6 +710,10 @@ class Handler:
         if mod_active_iter:
             id_mod = combo_mod.get_model()[mod_active_iter][-2]
 
+        # fix when value comes negative
+        if id_mod == -1:
+            id_mod = 0
+
         is_create = False
 
         if not hasattr(gui, 'id_equipo_sel'):
@@ -751,8 +755,9 @@ class Handler:
         equipo_descripcion.set_buffer(new_buffer)
         spin_valor.set_value(equipo.valor)
         # get active iter
-        active_iter = gui.eqmod_iters[equipo.mod.id]
-        combo_mod.set_active_iter(active_iter)
+        if equipo.mod:
+            active_iter = gui.eqmod_iters[equipo.mod.id]
+            combo_mod.set_active_iter(active_iter)
 
         # setear id_equipo_sel
         gui.id_equipo_sel = equipo.id
