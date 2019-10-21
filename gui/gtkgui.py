@@ -9,6 +9,8 @@ from gui.abstractgui import AbstractGui
 
 logger = logging.getLogger(__name__)
 
+logging.basicConfig(filename='output.log',level=logging.DEBUG)
+
 def get_utils():
     gui = GnGGladeGui.get_instance()
     con = gui.get_controller()
@@ -112,6 +114,7 @@ class GnGGladeGui(AbstractGui):
         combo_mods.add_attribute(renderer_text, "text", 1)
 
     def get_personajes_options(self):
+        logger.debug('Cargando personajes de partida {}'.format(self.partida.id))
         personajes = self.con.get_personajes(self.partida.id)
         ret = Gtk.ListStore(int, str)
 
@@ -140,9 +143,9 @@ class GnGGladeGui(AbstractGui):
         combos_pj.append(self.builder.get_object("combo-pnj-tirada"))
         combos_pj.append(self.builder.get_object("combo-pj-combate"))
         combos_pj.append(self.builder.get_object("combo-pnj-combate"))
+        pjs_store = self.get_personajes_options()
 
         for combo in combos_pj:
-            pjs_store = self.get_personajes_options()
             combo.clear()
             combo.set_model(pjs_store)
             combo.pack_start(renderer_text, True)
@@ -243,6 +246,7 @@ class GnGGladeGui(AbstractGui):
         self.id_pj_defiende      = None
         self.ataca_pj            = None
         self.bt_asignar_activado = False
+        self.bt_reset_activado   = False
         self.check_magia_ini     = False
         self.check_magia_com     = False
 
@@ -527,7 +531,7 @@ class GnGGladeGui(AbstractGui):
             list_equipo.show_all()
 
     def refrescar_lista_equipos_pj(self, delete=False):
-        logger.debug('Refrescando lista equipos asignados')
+        logger.debug('Refrescando lista equipos asignados. delete: {}'.format(delete))
         list_equipo = self.get_object("list-personaje-equipo")
         children = list_equipo.get_children()
         for child in children:
@@ -553,6 +557,7 @@ class GnGGladeGui(AbstractGui):
         spinner_sociales = self.get_object("spinner-personaje-sociales")
         text_notas = self.get_object("text-personaje-notas")
         button_asignar = self.get_object("button-personaje-equipo")
+        button_resetear = self.get_object("button-personaje-resetform")
         label_ataque = self.get_object("label-personaje-ataque")
         label_defensa = self.get_object("label-personaje-defensa")
 
@@ -576,7 +581,11 @@ class GnGGladeGui(AbstractGui):
 
         button_asignar.set_sensitive(False)
         button_asignar.connect("clicked", Handler.voidCallback)
+        button_resetear.set_sensitive(False)
+        button_resetear.connect("clicked", Handler.voidCallback)
+
         self.bt_asignar_activado = False
+        self.bt_reset_activado = False
         self.refrescar_lista_equipos_pj(True)
 
     def tabs_start(self, sensitive):
@@ -807,26 +816,39 @@ class Handler:
             False
         )
 
-        is_create = False
+        # validación
+        valid = True
 
-        if not hasattr(gui, 'id_personaje_sel'):
-            is_create = True
-        elif not gui.id_personaje_sel:
-            is_create = True
+        # nombre lleno
+        if not data['nombre'] or data['nombre'] == "":
+            valid = False
 
-        if is_create:
-            logger.debug('Crear personaje:')
-            logger.debug(data)
-            con.crear_personaje(data)
+        if not isinstance(data['raza'], int):
+            valid = False
+
+        if valid:
+            is_create = False
+
+            if not hasattr(gui, 'id_personaje_sel'):
+                is_create = True
+            elif not gui.id_personaje_sel:
+                is_create = True
+
+            if is_create:
+                logger.debug('Crear personaje:')
+                logger.debug(data)
+                con.crear_personaje(data)
+            else:
+                logger.debug('Editar personaje')
+                logger.debug(data)
+                con.editar_personaje(gui.id_personaje_sel, data)
+                gui.id_personaje_sel = None
+
+            gui.limpiar_form_personaje()
+            gui.refrescar_lista_personajes()
+            gui.load_personajes_combos()
         else:
-            logger.debug('Editar personaje')
-            logger.debug(data)
-            con.editar_personaje(gui.id_personaje_sel, data)
-            gui.id_personaje_sel = None
-
-        gui.limpiar_form_personaje()
-        gui.refrescar_lista_personajes()
-        gui.load_personajes_combos()
+            logger.debug('Formulario no válido, ignorar')
 
     def onResetearHPPersonajeButton(self, *args):
         gui, con = get_utils()
@@ -836,7 +858,7 @@ class Handler:
 
         fuerza = spinner_fuerza.get_value_as_int()
         if fuerza >= 1 and fuerza <= 8:
-            spinner_hp.set_value( fuerza * 5 )
+            spinner_hp.set_value( fuerza * 3 )
 
     @classmethod
     def cargarLabelsAtaqueDefensa(cls):
@@ -913,6 +935,13 @@ class Handler:
             gui.bt_asignar_activado = True
             button_asignar.connect("clicked", Handler.onAsignarEquipo)
 
+        # activar botón resetear form
+        button_resetear = gui.get_object("button-personaje-resetform")
+        button_resetear.set_sensitive(True)
+        if not gui.bt_reset_activado:
+            gui.bt_reset_activado = True
+            button_resetear.connect("clicked", Handler.onResetForm)
+
         # setear id_personaje_sel
         gui.id_personaje_sel = personaje.id
         gui.load_list_equipos_pj()
@@ -947,6 +976,14 @@ class Handler:
             con.asignar_equipo(gui.id_personaje_sel, id_equipo)
             gui.refrescar_lista_equipos_pj()
             Handler.cargarLabelsAtaqueDefensa()
+
+    def onResetForm(self, *args):
+        gui, con = get_utils()
+
+        gui.limpiar_form_personaje()
+        gui.refrescar_lista_personajes()
+        gui.load_personajes_combos()
+        gui.id_personaje_sel = None
 
     def onBorrarEquipoPjButton(self, *args):
         gui, con = get_utils()
