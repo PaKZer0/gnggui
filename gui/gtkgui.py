@@ -1259,11 +1259,9 @@ class Handler:
             magia_pnjtxfmt = ''
 
             if magia:
-                cuenta_pj = res['pjagil'] + res['dado1'] +\
-                    res['equipo_bonus_pj1'] + bonus_pj + res['magia_pjvalue'] +\
+                cuenta_pj = cuenta_pj + res['magia_pjvalue'] +\
                     res['equipom_bonus_pj1']
-                cuenta_pnj = res['pnjagil'] + res['dado2'] +\
-                    res['equipo_bonus_pnj'] + bonus_pnj + res['magia_pnjvalue'] +\
+                cuenta_pnj = cuenta_pnj + res['magia_pnjvalue'] +\
                     res['equipom_bonus_pnj']
 
                 magia_pjtx = '+M{}+m{}'.format(
@@ -1397,6 +1395,11 @@ class Handler:
 
         # tirar
         if gui.ataca_pj != None and gui.id_pj_ataca and gui.id_pj_defiende:
+            id_pj = gui.id_pj_ataca if gui.ataca_pj else gui.id_pj_defiende
+            id_pnj = gui.id_pj_ataca if not gui.ataca_pj else gui.id_pj_defiende
+            nombre_pj = con.get_personaje(id_pj).nombre
+            nombre_pnj = con.get_personaje(id_pnj).nombre
+
             bonus_pataca = bonus_pj
             bonus_pdefiende = bonus_pnj
 
@@ -1438,6 +1441,102 @@ class Handler:
                 bonus_pdefiende,
             )
 
+            pj1_accion = ''
+            pj1_combate = ''
+            pj1_combate_m = ''
+            pj1_dado = ''
+            pj1_equipo = ''
+            pj1_equipo_m = ''
+            pj1_bonus = ''
+            pj1_cuenta = ''
+
+            pnj_accion = ''
+            pnj_combate = ''
+            pnj_combate_m = ''
+            pnj_dado = ''
+            pnj_equipo = ''
+            pnj_equipo_m = ''
+            pnj_bonus = ''
+            pnj_cuenta = ''
+
+
+            if gui.ataca_pj:
+                pj1_accion = 'Ataque\t'
+                pj1_combate = res['pataca_val']
+                pj1_dado = res['dado1']
+                pj1_equipo = res['equipo_bonus_pata']
+                pj1_bonus = bonus_pataca
+                pj1_cuenta = cuenta_pataca
+
+                pnj_accion = 'Defensa'
+                pnj_combate = res['pdefiende_val']
+                pnj_dado = res['dado2']
+                pnj_equipo = res['equipo_bonus_pdef']
+                pnj_bonus = bonus_pdefiende
+                pnj_cuenta = cuenta_pdefie
+
+                if magia:
+                    pj1_accion = 'Ataque mágico'
+                    pj1_combate_m = res['pataca_magia']
+                    pj1_equipo_m = res['equipom_bonus_pata']
+
+                    pnj_accion = 'Defensa mágica'
+                    pnj_combate_m = res['pdefiende_magia']
+                    pnj_equipo_m = res['equipom_bonus_pdef']
+            else:
+                pj1_accion = 'Defensa'
+                pj1_combate = res['pdefiende_val']
+                pj1_dado = res['dado2']
+                pj1_equipo = res['equipo_bonus_pdef']
+                pj1_bonus = bonus_pdefiende
+                pj1_cuenta = cuenta_pdefie
+
+                pnj_accion = 'Ataque\t'
+                pnj_combate = res['pataca_val']
+                pnj_dado = res['dado1']
+                pnj_equipo = res['equipo_bonus_pata']
+                pnj_bonus = bonus_pataca
+                pnj_cuenta = cuenta_pataca
+
+                if magia:
+                    pj1_accion = 'Defensa mágica'
+                    pj1_combate_m = res['pdefiende_magia']
+                    pj1_equipo_m = res['equipom_bonus_pdef']
+
+                    pnj_accion = 'Ataque mágico'
+                    pnj_combate_m = res['pataca_magia']
+                    pnj_equipo_m = res['equipom_bonus_pata']
+
+
+            txt_tirada_pj1 = \
+                "\t{}:\t {}\
+                \n\tDado:\t\t[{}]\
+                \n\tEquipo:\t\t {}\
+                \n\tBonus:\t\t {}\
+                \n\tTotal:\t\t {}".format(
+                pj1_accion,
+                pj1_combate,
+                pj1_dado,
+                pj1_equipo,
+                pj1_bonus,
+                pj1_cuenta,
+            )
+
+            txt_tirada_pnj = \
+                "\t{}:\t {}\
+                \n\tDado:\t\t[{}]\
+                \n\tEquipo:\t\t {}\
+                \n\tBonus:\t\t {}\
+                \n\tTotal:\t\t {}".format(
+                pnj_accion,
+                pnj_combate,
+                pnj_dado,
+                pnj_equipo,
+                pnj_bonus,
+                pnj_cuenta,
+            )
+
+
             if magia:
                 txt_tirada = 'AM{}+[{}]+E{}+B{} = {} {} {} = DM{}+[{}]+E{}+B{}'.format(
                     res['pataca_magia'],
@@ -1451,6 +1550,34 @@ class Handler:
                     res['dado2'],
                     res['equipom_bonus_pdef'],
                     bonus_pdefiende,
+                )
+
+                txt_tirada_pj1 = \
+                    "\t{}:\t {}\
+                    \n\tDado:\t\t[{}]\
+                    \n\tEquipo:\t\t {}\
+                    \n\tBonus:\t\t {}\
+                    \n\tTotal:\t\t {}".format(
+                    pj1_accion,
+                    pj1_combate_m,
+                    pj1_dado,
+                    pj1_equipo_m,
+                    pj1_bonus,
+                    pj1_cuenta,
+                )
+
+                txt_tirada_pnj = \
+                    "\t{}:\t {}\
+                    \n\tDado:\t\t[{}]\
+                    \n\tEquipo:\t\t {}\
+                    \n\tBonus:\t\t {}\
+                    \n\tTotal:\t\t {}".format(
+                    pnj_accion,
+                    pnj_combate_m,
+                    pnj_dado,
+                    pnj_equipo_m,
+                    pnj_bonus,
+                    pnj_cuenta,
                 )
 
             # formatear texto resultado
@@ -1470,9 +1597,28 @@ class Handler:
 
             # mostrar texto
             label_tirada = gui.get_object("label-tirarcom-combate")
+            label_tirada_pj1 = gui.get_object("label-tirarcom-combate-pj1")
+            label_tirada_pnj = gui.get_object("label-tirarcom-combate-pnj")
+            label_nombre_pj1 = gui.get_object("label-tirarcom-nombre-pj1")
+            label_nombre_pnj = gui.get_object("label-tirarcom-nombre-pnj")
+            label_dado_pj1 = gui.get_object("label-tirarcom-dado-pj1")
+            label_dado_pnj = gui.get_object("label-tirarcom-dado-pnj")
+
             label_resultado = gui.get_object("label-resultcom-combate")
+            label_resultado_pj1 = gui.get_object("label-resultcom-combate-pj1")
+            label_resultado_pnj = gui.get_object("label-resultcom-combate-pnj")
+
             label_tirada.set_text(txt_tirada)
+            label_tirada_pj1.set_text(txt_tirada_pj1)
+            label_tirada_pnj.set_text(txt_tirada_pnj)
+            label_nombre_pj1.set_text(nombre_pj)
+            label_nombre_pnj.set_text(nombre_pnj)
+            label_dado_pj1.set_text(str(pj1_dado))
+            label_dado_pnj.set_text(str(pnj_dado))
+
             label_resultado.set_text(txt_resultado)
+            label_resultado_pj1.set_text('')
+            label_resultado_pnj.set_text('')
 
             # recargar spinners con hp
             hppj_combate = gui.get_object("spin-hppj-combate")
@@ -1539,9 +1685,29 @@ class Handler:
         gui, con = get_utils()
         # borrar texto en los labels
         label_tirada = gui.get_object("label-tirarcom-combate")
+        label_tirada_pj1 = gui.get_object("label-tirarcom-combate-pj1")
+        label_tirada_pnj = gui.get_object("label-tirarcom-combate-pnj")
+        label_nombre_pj1 = gui.get_object("label-tirarcom-nombre-pj1")
+        label_nombre_pnj = gui.get_object("label-tirarcom-nombre-pnj")
+        label_dado_pj1 = gui.get_object("label-tirarcom-dado-pj1")
+        label_dado_pnj = gui.get_object("label-tirarcom-dado-pnj")
+
         label_resultado = gui.get_object("label-resultcom-combate")
+        label_resultado_pj1 = gui.get_object("label-resultcom-combate-pj1")
+        label_resultado_pnj = gui.get_object("label-resultcom-combate-pnj")
+
         label_tirada.set_text('')
+        label_tirada_pj1.set_text('')
+        label_tirada_pnj.set_text('')
+        label_nombre_pj1.set_text('')
+        label_nombre_pnj.set_text('')
+        label_dado_pj1.set_text('')
+        label_dado_pnj.set_text('')
+
         label_resultado.set_text('')
+        label_resultado_pj1.set_text('')
+        label_resultado_pnj.set_text('')
+
         # resetear spinners
         spin_bonuspj = gui.get_object("spin-bonuscombpj-combate")
         spin_bonuspnj = gui.get_object("spin-bonuscombpnj-combate")
