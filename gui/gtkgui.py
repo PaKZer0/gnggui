@@ -1582,18 +1582,29 @@ class Handler:
 
             # formatear texto resultado
             txt_resultado = ''
+            txt_resultado_pj1 = ''
+            txt_resultado_pnj = ''
+
             nombre_pataca = res['pataca'].nombre.upper()
             nombre_pdefie = res['pdefiende'].nombre.upper()
 
             if res['resultado'] != 0:
                 if res['overkill']:
                     txt_resultado = '{} ES TOTALMENTE ANIQUILADX!!'.format(nombre_pdefie)
+                    txt_resultado_pj1 = '' if gui.ataca_pj else txt_resultado
+                    txt_resultado_pnj = '' if not gui.ataca_pj else txt_resultado
                 elif res['resultado'] > 0:
                     txt_resultado = '{} RECIBE {} HERIDAS'.format(nombre_pdefie, res['resultado'])
+                    txt_resultado_pj1 = '' if gui.ataca_pj else txt_resultado
+                    txt_resultado_pnj = '' if not gui.ataca_pj else txt_resultado
                 elif res['resultado'] < 0:
                     txt_resultado = '{} FALLA Y SE HACE {} HERIDAS'.format(nombre_pataca, res['resultado'] * -1)
+                    txt_resultado_pj1 = '' if not gui.ataca_pj else txt_resultado
+                    txt_resultado_pnj = '' if gui.ataca_pj else txt_resultado
             else:
                 txt_resultado = 'EMPATE'
+                txt_resultado_pj1 = txt_resultado
+                txt_resultado_pnj = txt_resultado
 
             # mostrar texto
             label_tirada = gui.get_object("label-tirarcom-combate")
@@ -1617,8 +1628,8 @@ class Handler:
             label_dado_pnj.set_text(str(pnj_dado))
 
             label_resultado.set_text(txt_resultado)
-            label_resultado_pj1.set_text('')
-            label_resultado_pnj.set_text('')
+            label_resultado_pj1.set_text(txt_resultado_pj1)
+            label_resultado_pnj.set_text(txt_resultado_pnj)
 
             # recargar spinners con hp
             hppj_combate = gui.get_object("spin-hppj-combate")
