@@ -267,6 +267,12 @@ class GnGGladeGui(AbstractGui):
         brmpartida = self.builder.get_object("button-remove-partida")
         brmpartida.connect("clicked", Handler.onBorrarPartida)
 
+        bshowtiradas = self.builder.get_object("button-show-tiradas")
+        bshowtiradas.connect("clicked", Handler.onShowTiradas)
+
+        bshowcombates = self.builder.get_object("button-show-combates")
+        bshowcombates.connect("clicked", Handler.onShowCombates)
+
         ## tab partida ##
         beditpartida = self.builder.get_object("button-edit-partida")
         beditpartida.connect("clicked", Handler.onEditPartida)
@@ -673,6 +679,20 @@ class Handler:
 
             gui.load_partidas_combo()
             gui.refrescar_lista_personajes()
+
+    def onShowTiradas(self, *args):
+        gui, con = get_utils()
+
+        ## tiradas window ##
+        tiradas_window = gui.builder.get_object("combat_window")
+        tiradas_window.show_all()
+
+    def onShowCombates(self, *args):
+        gui, con = get_utils()
+
+        ## combat window ##
+        combat_window = gui.builder.get_object("combat_window")
+        combat_window.show_all()
 
     def onEditPartida(self, *args):
         gui, con = get_utils()
@@ -1227,6 +1247,9 @@ class Handler:
             id_pnj = cpnjini.get_model()[cpnjnini_ai][-2]
             res = con.iniciativa(id_pj, id_pnj, magia, bonus_pj, bonus_pnj)
 
+            nombre_pj = con.get_personaje(id_pj).nombre
+            nombre_pnj = con.get_personaje(id_pnj).nombre
+
             cuenta_pj = res['pjagil'] + res['dado1'] + res['equipo_bonus_pj1'] + bonus_pj
             cuenta_pnj = res['pnjagil'] + res['dado2'] + res['equipo_bonus_pnj'] + bonus_pj
             symbol = '>' if res['resultado'] else '<'
@@ -1261,13 +1284,70 @@ class Handler:
                 magia_pnjtx,
             )
 
+            txt_tirada_pj1 = \
+                "\tAgilidad:\t {}\
+                \n\tDado:\t\t[{}]\
+                \n\tEquipo:\t\t {}\
+                \n\tBonus:\t\t {}\
+                \n\t{}\
+                \n\tTotal:\t\t {}".format(
+                res['pjagil'],
+                res['dado1'],
+                res['equipo_bonus_pj1'],
+                bonus_pj,
+                magia_pjtx,
+                cuenta_pj
+            )
+
+            txt_tirada_pnj = \
+                "\tAgilidad:\t {}\
+                \n\tDado:\t\t[{}]\
+                \n\tEquipo:\t\t {}\
+                \n\tBonus:\t\t {}\
+                \n\t{}\
+                \n\tTotal:\t\t {}".format(
+                res['pnjagil'],
+                res['dado2'],
+                res['equipo_bonus_pnj'],
+                bonus_pnj,
+                magia_pnjtx,
+                cuenta_pnj
+            )
+
             # formatear texto resultado
             txt_resultado = 'PJ ATACA | PNJ DEFIENDE' if res['resultado'] else 'PNJ ATACA | PJ DEFIENDE'
+
+            if res['resultado']:
+                txt_resultado1 = '{} ATACA'.format(nombre_pj)
+                txt_resultado2 = '{} DEFIENDE'.format(nombre_pnj)
+            else:
+                txt_resultado1 = '{} DEFIENDE'.format(nombre_pj)
+                txt_resultado2 = '{} ATACA'.format(nombre_pnj)
+
             # mostrar texto
             label_tirada = gui.get_object("label-tirarini-combate")
+            label_tirada_pj1 = gui.get_object("label-tirarini-combate-pj1")
+            label_tirada_pnj = gui.get_object("label-tirarini-combate-pnj")
+            label_nombre_pj1 = gui.get_object("label-tirarini-nombre-pj1")
+            label_nombre_pnj = gui.get_object("label-tirarini-nombre-pnj")
+            label_dado_pj1 = gui.get_object("label-tirarini-dado-pj1")
+            label_dado_pnj = gui.get_object("label-tirarini-dado-pnj")
+
             label_resultado = gui.get_object("label-resultini-combate")
+            label_resultado_pj1 = gui.get_object("label-resultini-combate-pj1")
+            label_resultado_pnj = gui.get_object("label-resultini-combate-pnj")
+
             label_tirada.set_text(txt_tirada)
+            label_tirada_pj1.set_text(txt_tirada_pj1)
+            label_tirada_pnj.set_text(txt_tirada_pnj)
+            label_nombre_pj1.set_text(nombre_pj)
+            label_nombre_pnj.set_text(nombre_pnj)
+            label_dado_pj1.set_text(str(res['dado1']))
+            label_dado_pnj.set_text(str(res['dado2']))
+
             label_resultado.set_text(txt_resultado)
+            label_resultado_pj1.set_text(txt_resultado1)
+            label_resultado_pnj.set_text(txt_resultado2)
 
             # setear variables
             gui.ataca_pj       = True  if res['resultado'] else False
@@ -1403,9 +1483,29 @@ class Handler:
         gui, con = get_utils()
         # borrar texto en los labels
         label_tirada = gui.get_object("label-tirarini-combate")
+        label_tirada_pj1 = gui.get_object("label-tirarini-combate-pj1")
+        label_tirada_pnj = gui.get_object("label-tirarini-combate-pnj")
+        label_nombre_pj1 = gui.get_object("label-tirarini-nombre-pj1")
+        label_nombre_pnj = gui.get_object("label-tirarini-nombre-pnj")
+        label_dado_pj1 = gui.get_object("label-tirarini-dado-pj1")
+        label_dado_pnj = gui.get_object("label-tirarini-dado-pnj")
+
         label_resultado = gui.get_object("label-resultini-combate")
+        label_resultado_pj1 = gui.get_object("label-resultini-combate-pj1")
+        label_resultado_pnj = gui.get_object("label-resultini-combate-pnj")
+
         label_tirada.set_text('')
+        label_tirada_pj1.set_text('')
+        label_tirada_pnj.set_text('')
+        label_nombre_pj1.set_text('')
+        label_nombre_pnj.set_text('')
+        label_dado_pj1.set_text('')
+        label_dado_pnj.set_text('')
+
         label_resultado.set_text('')
+        label_resultado_pj1.set_text('')
+        label_resultado_pnj.set_text('')
+
         # resetear spinners
         spin_bonuspj = gui.get_object("spin-bonusinipj-combate")
         spin_bonuspnj = gui.get_object("spin-bonusinipnj-combate")
