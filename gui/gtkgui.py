@@ -1254,17 +1254,40 @@ class Handler:
             cuenta_pnj = res['pnjagil'] + res['dado2'] + res['equipo_bonus_pnj'] + bonus_pj
             symbol = '>' if res['resultado'] else '<'
             magia_pjtx  = ''
+            magia_pjtxfmt = ''
             magia_pnjtx = ''
+            magia_pnjtxfmt = ''
 
             if magia:
+                cuenta_pj = res['pjagil'] + res['dado1'] +\
+                    res['equipo_bonus_pj1'] + bonus_pj + res['magia_pjvalue'] +\
+                    res['equipom_bonus_pj1']
+                cuenta_pnj = res['pnjagil'] + res['dado2'] +\
+                    res['equipo_bonus_pnj'] + bonus_pnj + res['magia_pnjvalue'] +\
+                    res['equipom_bonus_pnj']
+
                 magia_pjtx = '+M{}+m{}'.format(
                     res['magia_pjvalue'],
                     res['equipom_bonus_pj1']
                 )
 
+                magia_pjtxfmt = \
+                    "Magia:\t\t {}\
+                    \n\tEquipo mágico:\t {}".format(
+                        res['magia_pjvalue'],
+                        res['equipom_bonus_pj1']
+                )
+
                 magia_pnjtx = '+M{}+m{}'.format(
                     res['magia_pnjvalue'],
                     res['equipom_bonus_pnj']
+                )
+
+                magia_pnjtxfmt = \
+                    "Magia:\t\t {}\
+                    \n\tEquipo mágico:\t {}".format(
+                        res['magia_pnjvalue'],
+                        res['equipom_bonus_pnj']
                 )
 
             # formatear texto tirada
@@ -1295,7 +1318,7 @@ class Handler:
                 res['dado1'],
                 res['equipo_bonus_pj1'],
                 bonus_pj,
-                magia_pjtx,
+                magia_pjtxfmt,
                 cuenta_pj
             )
 
@@ -1310,7 +1333,7 @@ class Handler:
                 res['dado2'],
                 res['equipo_bonus_pnj'],
                 bonus_pnj,
-                magia_pnjtx,
+                magia_pnjtxfmt,
                 cuenta_pnj
             )
 
