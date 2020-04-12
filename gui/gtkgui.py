@@ -185,6 +185,7 @@ class GnGGladeGui(AbstractGui):
         pj_latrocinio = self.get_object("spinner-personaje-latrocinio")
         pj_magia = self.get_object("spinner-personaje-magia")
         pj_sociales = self.get_object("spinner-personaje-sociales")
+        pj_multiplicar = self.get_object("spin-bonuscombpnj-combate")
         bonuspj_tirada = self.get_object("spinner-bonuspj-tirada")
         bonuspnj_tirada = self.get_object("spinner-bonuspnj-tirada")
         hppj_combate = self.get_object("spin-hppj-combate")
@@ -192,12 +193,12 @@ class GnGGladeGui(AbstractGui):
         bonusinipj_combate = self.get_object("spin-bonusinipj-combate")
         bonusinipnj_combate = self.get_object("spin-bonusinipnj-combate")
         bonuscombpj_combate = self.get_object("spin-bonuscombpj-combate")
-        bonuscombpnj_combate = self.get_object("spin-bonuscombpnj-combate")
+        bonuscombpnj_combate = self.get_object("spinner-personaje-multiplicar")
 
         skill_spiners = [pj_fuerza, pj_agilidad, pj_inteligencia,
                             pj_inteligencia, pj_carisma, pj_combate,
                             pj_conocimientos, pj_latrocinio, pj_magia,
-                            pj_sociales]
+                            pj_sociales, pj_multiplicar]
 
         hp_spinners = [pj_hp, hppj_combate, hppnj_combate]
 
@@ -287,6 +288,9 @@ class GnGGladeGui(AbstractGui):
 
         bresethp = self.builder.get_object("button-personaje-resethp")
         bresethp.connect("clicked", Handler.onResetearHPPersonajeButton)
+
+        bmultiplicarpj = self.builder.get_object("button-personaje-multiplicar")
+        bmultiplicarpj.connect("clicked", Handler.onMultiplicarPersonaje)
 
         ## tab tiradas ##
         btirarso = self.builder.get_object("button-tirarso-tiradas")
@@ -485,6 +489,10 @@ class GnGGladeGui(AbstractGui):
             button_borrar = Gtk.Button.new_with_label("Clonar")
             button_borrar.connect('clicked', Handler.onClonarPersonaje, {'id_personaje': personaje.id})
             hbox.pack_start(button_borrar, True, True, 0)
+
+            button_multiplicar = Gtk.Button.new_with_label("Multiplicar")
+            button_multiplicar.connect('clicked', Handler.onMultiplicarPersonaje, {'id_personaje': personaje.id})
+            hbox.pack_start(button_multiplicar, True, True, 0)
 
             list_personaje.add(row)
 
@@ -999,6 +1007,39 @@ class Handler:
         con.clonar_personaje(id_personaje)
         gui.refrescar_lista_personajes()
         gui.load_personajes_combos()
+
+    def onMultiplicarPersonaje(self, *args):
+        gui, con = get_utils()
+
+        # obtener el id del personaje
+        # o del seleccionado actualmente
+        # o del que entra por parámetros
+        id_personaje = None
+
+        if not hasattr(gui, 'id_personaje_sel') or not gui.id_personaje_sel and args:
+            id_personaje = args[0].get('id_personaje', None)
+        else:
+            id_personaje = gui.id_personaje_sel
+
+        # si no hay id no hacer nada
+        if not id_personaje:
+            return
+
+        # obtener multiplo del spinner
+        spinner_mult = gui.get_object("spinner-personaje-multiplicar")
+        multiplo = spinner_mult.get_value_as_int()
+
+        if multiplo == 0:
+            return
+
+        logger.debug('Multiplicando personaje con id {} por {}'.format(
+            id_personaje, multiplo))
+        con.multiplicar_personaje(id_personaje, multiplo)
+        gui.refrescar_lista_personajes()
+        gui.load_personajes_combos()
+
+        # resetear spinner
+        spinner_mult.set_value(0)
 
     def onAsignarEquipo(self, *args):
         gui, con = get_utils()

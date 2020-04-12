@@ -907,6 +907,28 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkSpinButton" id="spinner-personaje-multiplicar">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">5</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button-personaje-multiplicar">
+                        <property name="label" translatable="yes">Multiplicar</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">6</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkButton" id="button-personaje-resetform">
                         <property name="label" translatable="yes">Vaciar</property>
                         <property name="visible">True</property>
@@ -915,14 +937,8 @@
                       </object>
                       <packing>
                         <property name="left_attach">5</property>
-                        <property name="top_attach">0</property>
+                        <property name="top_attach">1</property>
                       </packing>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
                     </child>
                     <child>
                       <placeholder/>

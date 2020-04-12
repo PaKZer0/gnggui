@@ -244,10 +244,14 @@ class Controller():
         PlayerEquipo.delete().where(PlayerEquipo.player == player).execute()
         self.get_personaje(id_personaje).delete_instance()
 
-    def clonar_personaje(self, id_personaje):
+    def clonar_personaje(self, id_personaje, nombre=None):
         personaje = self.get_personaje(id_personaje)
+
+        if not nombre:
+            nombre = personaje.nombre
+
         clon = Player(
-            nombre = personaje.nombre,
+            nombre = nombre,
             profesion = personaje.profesion,
             raza = personaje.raza,
             pueblo = personaje.pueblo,
@@ -272,6 +276,12 @@ class Controller():
             self.asignar_equipo(clon.id, equipo.id)
 
         return clon
+
+    def multiplicar_personaje(self, id_personaje, multiplo):
+        for i in range(multiplo):
+            nombre = self.get_personaje(id_personaje).nombre
+            nombre = '{} {}'.format(nombre, i+1)
+            self.clonar_personaje(id_personaje, nombre)
 
     def get_equipos_personaje(self, id_personaje):
         equipospj = PlayerEquipo.select().join(Player)\
