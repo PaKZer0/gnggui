@@ -306,6 +306,12 @@ class GnGGladeGui(AbstractGui):
         bborrarco.connect("clicked", Handler.onBorrarConOposicion)
 
         ## tab combate ##
+        bresethppj1 = self.builder.get_object("button-restaurapj1-combate")
+        bresethppj1.connect("clicked", Handler.onResetearPj, {'is_pj': True})
+
+        bresethppnj = self.builder.get_object("button-restaurapnj-combate")
+        bresethppnj.connect("clicked", Handler.onResetearPj, {'is_pj': False})
+
         btirarini = self.builder.get_object("button-tirarini-combate")
         btirarini.connect("clicked", Handler.onTirarIniciativa)
 
@@ -1257,6 +1263,32 @@ class Handler:
         if gui.id_pnj_ini:
             new_hp = self.get_value_as_int()
             personaje = con.editar_personaje(gui.id_pnj_ini, { 'hp': new_hp })
+            gui.refrescar_lista_personajes()
+
+    def onResetearPj(self, *args):
+        gui, con = get_utils()
+
+        is_pj = args[0]['is_pj']
+        combo_pj = None
+        combo_pj_ai = None
+        hp_spinner = None
+
+        if is_pj:
+            # obtener personaje
+            combo_pj = gui.get_object("combo-pj-combate")
+            combo_pj_ai = combo_pj.get_active_iter()
+            hp_spinner = gui.get_object("spin-hppj-combate")
+        else:
+            # obtener pnj
+            combo_pj = gui.get_object("combo-pnj-combate")
+            combo_pj_ai = combo_pj.get_active_iter()
+            hp_spinner = gui.get_object("spin-hppnj-combate")
+
+        # resetear el personaje adecuado y refrescar spinner
+        if combo_pj and combo_pj_ai:
+            id_pj = combo_pj.get_model()[combo_pj_ai][-2]
+            new_hp = con.restaurar_personaje(id_pj)
+            hp_spinner.set_value(new_hp)
             gui.refrescar_lista_personajes()
 
     def onTirarIniciativa(self, *args):

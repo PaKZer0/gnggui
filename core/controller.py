@@ -244,6 +244,14 @@ class Controller():
         PlayerEquipo.delete().where(PlayerEquipo.player == player).execute()
         self.get_personaje(id_personaje).delete_instance()
 
+    def restaurar_personaje(self, id_personaje):
+        personaje = self.get_personaje(id_personaje)
+        new_hp = personaje.fuerza * 3
+        personaje.hp = new_hp
+        personaje.save()
+
+        return new_hp
+
     def clonar_personaje(self, id_personaje, nombre=None):
         personaje = self.get_personaje(id_personaje)
 

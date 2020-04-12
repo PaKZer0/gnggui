@@ -1930,7 +1930,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="row_homogeneous">True</property>
-                <property name="column_homogeneous">True</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
@@ -2027,6 +2026,33 @@
                     <property name="left_attach">3</property>
                     <property name="top_attach">2</property>
                   </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="button-restaurapj1-combate">
+                    <property name="label" translatable="yes">Restaurar</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="button-restaurapnj-combate">
+                    <property name="label" translatable="yes">Restaurar</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
                 <child>
                   <placeholder/>
