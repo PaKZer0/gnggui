@@ -151,6 +151,9 @@ class GnGGladeGui(AbstractGui):
             combo.pack_start(renderer_text, True)
             combo.add_attribute(renderer_text, "text", 1)
 
+        self.id_pj_ini = None
+        self.id_pnj_ini = None
+
     def get_dificultades_options(self):
         dificultades = self.con.get_dificultades()
         ret = Gtk.ListStore(int, str)
@@ -522,9 +525,6 @@ class GnGGladeGui(AbstractGui):
         logger.debug('Refrescando lista personajes')
         list_personajes = self.get_object("list-personajes")
 
-        self.id_pj_ini = None
-        self.id_pnj_ini = None
-
         self.load_list_personajes()
 
     def load_list_equipos_pj(self):
@@ -788,7 +788,7 @@ class Handler:
 
     def onNuevoEquipo(self, *args):
         gui, con = get_utils()
-        
+
         gui.limpiar_form_equipo()
         gui.refrescar_lista_equipo()
         gui.load_equipos_combo()
