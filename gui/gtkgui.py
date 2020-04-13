@@ -406,6 +406,7 @@ class GnGGladeGui(AbstractGui):
         for equipo in equipos:
             row = Gtk.ListBoxRow()
             hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+            hbox.set_homogeneous(True)
             row.add(hbox)
 
             texto_mod = ''
@@ -423,15 +424,20 @@ class GnGGladeGui(AbstractGui):
             hbox.pack_start(label_datos, True, True, 0)
 
             label_descrip = Gtk.Label(equipo.descripcion, xalign=0)
+            label_descrip.set_line_wrap(True)
             hbox.pack_start(label_descrip, True, True, 0)
+
+            buttongrid = Gtk.Grid()
 
             button_editar = Gtk.Button.new_with_label("Editar")
             button_editar.connect('clicked', Handler.onEditarEquipoButton, {'id_equipo': equipo.id})
-            hbox.pack_start(button_editar, True, True, 0)
+            buttongrid.add(button_editar)
 
             button_borrar = Gtk.Button.new_with_label("Borrar")
             button_borrar.connect('clicked', Handler.onBorrarEquipoButton, {'id_equipo': equipo.id})
-            hbox.pack_start(button_borrar, True, True, 0)
+            buttongrid.add(button_borrar)
+
+            hbox.pack_start(buttongrid, True, True, 0)
 
             list_equipo.add(row)
 
@@ -457,7 +463,8 @@ class GnGGladeGui(AbstractGui):
 
         for personaje in personajes:
             row = Gtk.ListBoxRow()
-            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
+            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+            hbox.set_homogeneous(True)
             row.add(hbox)
 
             txt_nombre = '{} lu {} : {} : ({})'.format(
@@ -484,21 +491,25 @@ class GnGGladeGui(AbstractGui):
             label_stats = Gtk.Label(txt_stats, xalign=0)
             hbox.pack_start(label_stats, True, True, 0)
 
+            buttongrid = Gtk.Grid()
+
             button_editar = Gtk.Button.new_with_label("Editar")
             button_editar.connect('clicked', Handler.onEditarPersonajeButton, {'id_personaje': personaje.id})
-            hbox.pack_start(button_editar, True, True, 0)
+            buttongrid.add(button_editar)
 
             button_borrar = Gtk.Button.new_with_label("Borrar")
             button_borrar.connect('clicked', Handler.onBorrarPersonajeButton, {'id_personaje': personaje.id})
-            hbox.pack_start(button_borrar, True, True, 0)
-
-            button_borrar = Gtk.Button.new_with_label("Clonar")
-            button_borrar.connect('clicked', Handler.onClonarPersonaje, {'id_personaje': personaje.id})
-            hbox.pack_start(button_borrar, True, True, 0)
+            buttongrid.add(button_borrar)
 
             button_multiplicar = Gtk.Button.new_with_label("Multiplicar")
             button_multiplicar.connect('clicked', Handler.onMultiplicarPersonaje, {'id_personaje': personaje.id})
-            hbox.pack_start(button_multiplicar, True, True, 0)
+            buttongrid.add(button_multiplicar)
+
+            button_borrar = Gtk.Button.new_with_label("Clonar")
+            button_borrar.connect('clicked', Handler.onClonarPersonaje, {'id_personaje': personaje.id})
+            buttongrid.add(button_borrar)
+
+            hbox.pack_start(buttongrid, True, True, 0)
 
             list_personaje.add(row)
 
