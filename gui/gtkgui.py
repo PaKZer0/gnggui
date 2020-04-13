@@ -282,6 +282,9 @@ class GnGGladeGui(AbstractGui):
         bguardarequ = self.builder.get_object("button-equipo-guardar")
         bguardarequ.connect("clicked", Handler.onGuardarEquipo)
 
+        bnuevoequ = self.builder.get_object("button-equipo-nuevo")
+        bnuevoequ.connect("clicked", Handler.onNuevoEquipo)
+
         ## tab personajes ##
         bguardarpj = self.builder.get_object("button-personaje-guardar")
         bguardarpj.connect("clicked", Handler.onGuardarPersonajeButton)
@@ -782,6 +785,17 @@ class Handler:
         gui.refrescar_lista_equipo()
         gui.load_equipos_combo()
         gui.refrescar_lista_equipos_pj()
+
+    def onNuevoEquipo(self, *args):
+        gui, con = get_utils()
+        
+        gui.limpiar_form_equipo()
+        gui.refrescar_lista_equipo()
+        gui.load_equipos_combo()
+        gui.refrescar_lista_equipos_pj()
+
+        if hasattr(gui, 'id_equipo_sel'):
+            gui.id_equipo_sel = None
 
     def onEditarEquipoButton(self, *args):
         gui, con = get_utils()
