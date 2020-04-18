@@ -1358,8 +1358,8 @@ class Handler:
                 symbol,
                 res['dif']
             )
-            dado_tirada_pj1 = gui.get_object("label-tirada-tirada-pj1")
-            dado_tirada_pj1.set_text(txt_tirada_pj1)
+            label_tirada_pj1 = gui.get_object("label-tirada-tirada-pj1")
+            label_tirada_pj1.set_text(txt_tirada_pj1)
 
             # mostramos el resultado final
             texto_final_ok = '{} lo ha logrado'
@@ -1416,6 +1416,10 @@ class Handler:
             id_pnj = cpnjtirada.get_model()[cpnjtirada_ai][-2]
             id_mod = cmodtirada.get_model()[cmodtirada_ai][-2]
 
+            pjmodel = con.get_personaje(id_personaje)
+            pnjmodel = con.get_personaje(id_pnj)
+            modmodel = con.get_mod(id_mod)
+
             res = con.tirada_con_oposicion(
                 id_personaje,
                 id_pnj,
@@ -1428,18 +1432,26 @@ class Handler:
             cuenta_pnj = res['pnjvalue'] + res['dado2'] + res['equipo_bonus_pnj'] + bonus_pj
             symbol = '>' if res['resultado'] else '<'
 
+            pj1_mod_value = res['pjvalue']
+            dado_pj1 = res['dado1']
+            pj1_equipo_bonus = res['equipo_bonus_pj1']
+
+            pnj_mod_value = res['pnjvalue']
+            dado_pnj = res['dado2']
+            pnj_equipo_bonus = res['equipo_bonus_pnj']
+
             # formatear texto tirada
             txt_tirada = 'S{}+[{}]+E{}+B{} = {} {} {} = S{}+[{}]+E{}+B{}'.format(
-                res['pjvalue'],
-                res['dado1'],
-                res['equipo_bonus_pj1'],
+                pj1_mod_value,
+                dado_pj1,
+                pj1_equipo_bonus,
                 bonus_pj,
                 cuenta_pj,
                 symbol,
                 cuenta_pnj,
-                res['pnjvalue'],
-                res['dado2'],
-                res['equipo_bonus_pnj'],
+                pnj_mod_value,
+                dado_pnj,
+                pnj_equipo_bonus,
                 bonus_pnj,
             )
 
@@ -1451,6 +1463,76 @@ class Handler:
             label_resultado = gui.get_object("label-resco-tirada")
             label_tirada.set_text(txt_tirada)
             label_resultado.set_text(txt_resultado)
+
+            ## mostrar pantalla personajes
+            # mostrar tipo tirada completo
+            type_text = '{} ({})'.format(
+                gui.text_tirada_conopo,
+                modmodel.nombre
+            )
+            label_type = gui.get_object("label-tirada-tipo")
+            label_type.set_text(type_text)
+
+            # mostramos etiqueta pj1 y pnj con valor mod
+            valor_mod_pj = con.bonus_mod_personaje(modmodel, pjmodel)
+            txt_nombre_pj1 = '{} ({})'.format(pjmodel.nombre, valor_mod_pj)
+            pj_label = gui.get_object("label-tirada-nombre-pj1")
+            pj_label.set_text(txt_nombre_pj1)
+
+            valor_mod_pnj = con.bonus_mod_personaje(modmodel, pnjmodel)
+            txt_nombre_pnj = '{} ({})'.format(pnjmodel.nombre, valor_mod_pnj)
+            pnj_label = gui.get_object("label-tirada-nombre-pnj")
+            pnj_label.set_text(txt_nombre_pnj)
+
+            # mostramos dados
+            dado_label_pj1 = gui.get_object("label-tirada-dado-pj1")
+            dado_label_pj1.set_text(str(dado_pj1))
+
+            dado_label_pnj = gui.get_object("label-tirada-dado-pnj")
+            dado_label_pnj.set_text(str(dado_pnj))
+
+            # formateamos y mostramos cuenta
+            txt_tmpl = "\t{}:\t {}\
+            \n\tDado:\t\t[{}]\
+            \n\tEquipo:\t\t {}\
+            \n\tBonus:\t\t {}\
+            \n\tTotal:\t\t {}"
+
+            txt_tirada_pj1 = txt_tmpl.format(
+                modmodel.nombre,
+                pj1_mod_value,
+                dado_pj1,
+                pj1_equipo_bonus,
+                bonus_pj,
+                cuenta_pj,
+            )
+            label_tirada_pj1 = gui.get_object("label-tirada-tirada-pj1")
+            label_tirada_pj1.set_text(txt_tirada_pj1)
+
+            txt_tirada_pnj = txt_tmpl.format(
+                modmodel.nombre,
+                pnj_mod_value,
+                dado_pnj,
+                pnj_equipo_bonus,
+                bonus_pnj,
+                cuenta_pnj,
+            )
+            label_tirada_pnj = gui.get_object("label-tirada-tirada-pnj")
+            label_tirada_pnj.set_text(txt_tirada_pnj)
+
+            # mostramos el resultado final
+            texto_final_ok = '{} lo ha logrado'
+            texto_final_ko = '{} ha fracasado'
+
+            texto_final_pj1 = texto_final_ok if res['resultado'] else texto_final_ko
+            texto_final_pj1 = texto_final_pj1.format(pjmodel.nombre)
+            label_fin_pj1 = gui.get_object("label-tirada-resultado-pj1")
+            label_fin_pj1.set_text(texto_final_pj1)
+
+            texto_final_pnj = texto_final_ok if not res['resultado'] else texto_final_ko
+            texto_final_pnj = texto_final_pnj.format(pnjmodel.nombre)
+            label_fin_pnj = gui.get_object("label-tirada-resultado-pnj")
+            label_fin_pnj.set_text(texto_final_pnj)
 
     def onBorrarConOposicion(self, *args):
         gui, con = get_utils()
