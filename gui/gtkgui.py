@@ -712,7 +712,7 @@ class Handler:
         gui, con = get_utils()
 
         ## tiradas window ##
-        tiradas_window = gui.builder.get_object("combat_window")
+        tiradas_window = gui.builder.get_object("tiradas_window")
         tiradas_window.show_all()
 
     def onShowCombates(self, *args):
