@@ -271,9 +271,6 @@ class GnGGladeGui(AbstractGui):
         brmpartida = self.builder.get_object("button-remove-partida")
         brmpartida.connect("clicked", Handler.onBorrarPartida)
 
-        bshowtiradas = self.builder.get_object("button-show-tiradas")
-        bshowtiradas.connect("clicked", Handler.onShowTiradas)
-
         bshowcombates = self.builder.get_object("button-show-combates")
         bshowcombates.connect("clicked", Handler.onShowCombates)
 
@@ -707,13 +704,6 @@ class Handler:
 
             gui.load_partidas_combo()
             gui.refrescar_lista_personajes()
-
-    def onShowTiradas(self, *args):
-        gui, con = get_utils()
-
-        ## tiradas window ##
-        tiradas_window = gui.builder.get_object("tiradas_window")
-        tiradas_window.show_all()
 
     def onShowCombates(self, *args):
         gui, con = get_utils()
