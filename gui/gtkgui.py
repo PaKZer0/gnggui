@@ -1480,11 +1480,11 @@ class Handler:
         gui, con = get_utils()
 
         # obtener valor bonus pj
-        spbonuspj = gui.get_object("spin-bonusinipj-combate")
+        spbonuspj = gui.get_object("spin-bonuscombpj-combate")
         bonus_pj = spbonuspj.get_value_as_int()
 
         # obtener valor bonus pnj
-        spbonuspnj = gui.get_object("spin-bonusinipnj-combate")
+        spbonuspnj = gui.get_object("spin-bonuscombpnj-combate")
         bonus_pnj = spbonuspnj.get_value_as_int()
 
         # obtener check magia
