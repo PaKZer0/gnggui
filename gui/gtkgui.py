@@ -1,3 +1,4 @@
+import os
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -231,7 +232,8 @@ class GnGGladeGui(AbstractGui):
     def build(self):
         # build glade
         self.builder = Gtk.Builder()
-        self.builder.add_from_file("gui/gngui.glade")
+        current_path = os.path.dirname(__file__)
+        self.builder.add_from_file("{}/gngui.glade".format(current_path))
 
         # cargar combos
         self.load_partidas_combo()
