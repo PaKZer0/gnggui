@@ -1138,7 +1138,15 @@ class Handler:
         nombrepnj_label.set_text('')
 
         # llamamos a sel mod
+        args = (pj, nombrepj_label, None, None)
         Handler.onChangeSelModTirada(self, *args)
+
+    def recortarCadena(self, cadena):
+        if '(' in cadena:
+            i = cadena.index('(') - 1
+            cadena = cadena[:i]
+
+        return cadena
 
     def onChangeSelModTirada(self, *args):
         gui, con = get_utils()
@@ -1154,17 +1162,49 @@ class Handler:
 
         # obtener texto mod
         id_mod = cmodtirada.get_model()[cmodtirada_ai][-2]
-        txt_mod = con.get_mod(id_mod).nombre
+        modmodel = con.get_mod(id_mod)
+        txt_mod = modmodel.nombre
 
         text_type = typelabel.get_text()
 
         # recortar cadena
-        if '(' in text_type:
-            i = text_type.index('(') - 1
-            text_type = text_type[:i]
+        text_type = Handler.recortarCadena(self, text_type)
 
         new_type = '{} ({})'.format(text_type, txt_mod)
         typelabel.set_text(new_type)
+
+        # actualizar valores de personaje
+        pj = None
+        pnj = None
+        label_pj = gui.get_object("label-tirada-nombre-pj1")
+        label_pnj = gui.get_object("label-tirada-nombre-pnj")
+
+        cpjtirada = gui.get_object("combo-pj-tirada")
+        cpjtirada_ai = cpjtirada.get_active_iter()
+        cpnjtirada = gui.get_object("combo-pnj-tirada")
+        cpnjtirada_ai = cpnjtirada.get_active_iter()
+
+        if cpjtirada_ai:
+            id_personaje = cpjtirada.get_model()[cpjtirada_ai][-2]
+            pj = con.get_personaje(id_personaje)
+
+        if cpnjtirada_ai:
+            id_personaje = cpjtirada.get_model()[cpnjtirada_ai][-2]
+            pnj = con.get_personaje(id_personaje)
+
+        if pj:
+            valor_mod_pj = con.bonus_mod_personaje(modmodel, pj)
+            old_text = label_pj.get_text()
+            old_text = Handler.recortarCadena(self, old_text)
+            new_txt = '{} ({})'.format(old_text, valor_mod_pj)
+            label_pj.set_text(new_txt)
+
+        if pnj:
+            valor_mod_pnj = con.bonus_mod_personaje(modmodel, pnj)
+            old_text = label_pnj.get_text()
+            old_text = Handler.recortarCadena(self, old_text)
+            new_txt = '{} ({})'.format(old_text, valor_mod_pnj)
+            label_pnj.set_text(new_txt)
 
     def onChangeSelPnjTirada(self, *args):
         gui, con = get_utils()
@@ -1189,6 +1229,10 @@ class Handler:
         id_pnj = cpnjtirada.get_model()[cpnjtirada_ai][-2]
         pnj = con.get_personaje(id_pnj)
         nombrepnj_label.set_text(pnj.nombre)
+
+        # llamamos a sel mod
+        args = (None, None, pnj, nombrepnj_label)
+        Handler.onChangeSelModTirada(self, *args)
 
     def borrarTiradaWindow(self, *args):
         gui, con = get_utils()
@@ -1226,6 +1270,10 @@ class Handler:
             id_mod = cmodtirada.get_model()[cmodtirada_ai][-2]
             id_dificultad = cdiftirada.get_model()[cdiftirada_ai][-2]
 
+            pjmodel = con.get_personaje(id_personaje)
+            modmodel = con.get_mod(id_mod)
+            difmodel = con.get_dificultad(id_dificultad)
+
             res = con.tirada_sin_oposicion(
                 id_personaje, id_dificultad, id_mod, bonus
             )
@@ -1233,11 +1281,15 @@ class Handler:
             cuenta = res['pjvalue'] + res['dado'] + res['equipo_bonus'] + bonus
             symbol = '>' if res['resultado'] else '<'
 
+            dado_pj1 = res['dado']
+            pj1_mod_value = res['pjvalue']
+            pj1_equipo_bonus = res['equipo_bonus']
+
             # formatear texto tirada
             txt_tirada = 'S{}+[{}]+E{}+B{} = {} {} D{}'.format(
-                res['pjvalue'],
-                res['dado'],
-                res['equipo_bonus'],
+                pj1_mod_value,
+                dado_pj1,
+                pj1_equipo_bonus,
                 bonus,
                 cuenta,
                 symbol,
