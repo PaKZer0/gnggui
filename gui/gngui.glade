@@ -1905,7 +1905,7 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="margin_right">60</property>
+                                <property name="margin_right">257</property>
                                 <property name="hexpand">False</property>
                                 <property name="label" translatable="yes">PNJ</property>
                               </object>
@@ -1918,7 +1918,8 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="margin_left">290</property>
+                                <property name="margin_left">100</property>
+                                <property name="margin_right">10</property>
                                 <property name="hexpand">False</property>
                                 <property name="label" translatable="yes">Bonus</property>
                               </object>
@@ -2091,6 +2092,8 @@
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">30</property>
+                    <property name="margin_right">30</property>
                     <property name="label" translatable="yes">PJ1</property>
                   </object>
                   <packing>
@@ -2102,6 +2105,8 @@
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">30</property>
+                    <property name="margin_right">30</property>
                     <property name="label" translatable="yes">PNJ</property>
                   </object>
                   <packing>
@@ -2135,6 +2140,8 @@
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">30</property>
+                    <property name="margin_right">30</property>
                     <property name="label" translatable="yes">HP PJ1</property>
                   </object>
                   <packing>
@@ -2146,6 +2153,8 @@
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_left">30</property>
+                    <property name="margin_right">30</property>
                     <property name="label" translatable="yes">HP PNJ</property>
                   </object>
                   <packing>

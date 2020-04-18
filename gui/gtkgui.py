@@ -1188,6 +1188,17 @@ class Handler:
         pnj = con.get_personaje(id_pnj)
         nombrepnj_label.set_text(pnj.nombre)
 
+    def borrarTiradaWindow(self, *args):
+        gui, con = get_utils()
+
+        typelabel = gui.get_object("label-tirada-tipo")
+        nombrepj_label = gui.get_object("label-tirada-nombre-pj1")
+        nombrepnj_label = gui.get_object("label-tirada-nombre-pnj")
+
+        typelabel.set_text('')
+        nombrepj_label.set_text('')
+        nombrepnj_label.set_text('')
+
     def onTirarSinOposicion(self, *args):
         gui, con = get_utils()
 
@@ -1248,11 +1259,14 @@ class Handler:
         label_resultado = gui.get_object("label-resso-tirada")
         label_tirada.set_text('')
         label_resultado.set_text('')
+
         # resetear spinners
         spin_bonuspj = gui.get_object("spinner-bonuspj-tirada")
         spin_bonuspnj = gui.get_object("spinner-bonuspnj-tirada")
         spin_bonuspj.set_value(0)
         spin_bonuspnj.set_value(0)
+
+        Handler.borrarTiradaWindow(self, *args)
 
     def onTirarConOposicion(self, *args):
         gui, con = get_utils()
@@ -1331,6 +1345,8 @@ class Handler:
         spin_bonuspnj = gui.get_object("spinner-bonuspnj-tirada")
         spin_bonuspj.set_value(0)
         spin_bonuspnj.set_value(0)
+
+        Handler.borrarTiradaWindow(self, *args)
 
     def onSeleccionarPj(self, *args):
         gui, con = get_utils()
