@@ -62,29 +62,29 @@
             <property name="can_focus">False</property>
             <property name="column_homogeneous">True</property>
             <child>
-              <object class="GtkLabel" id="label-tirada-dado-pj1">
+              <object class="GtkLabel" id="label-tirada-resultado-pj1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <attributes>
-                  <attribute name="font-desc" value="Monospace Bold 32"/>
+                  <attribute name="font-desc" value="Monospace Bold 14"/>
                 </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
+                <property name="top_attach">3</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label-tirada-dado-pnj">
+              <object class="GtkLabel" id="label-tirada-resultado-pnj">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <attributes>
-                  <attribute name="font-desc" value="Monospace Bold 32"/>
+                  <attribute name="font-desc" value="Monospace Bold 14"/>
                 </attributes>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
+                <property name="top_attach">3</property>
               </packing>
             </child>
             <child>
@@ -97,7 +97,7 @@
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
+                <property name="top_attach">2</property>
               </packing>
             </child>
             <child>
@@ -110,33 +110,59 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
+                <property name="top_attach">2</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label-tirada-resultado-pj1">
+              <object class="GtkLabel" id="label-tirada-dado-pj1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <attributes>
-                  <attribute name="font-desc" value="Monospace Bold 14"/>
+                  <attribute name="font-desc" value="Monospace Bold 32"/>
                 </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
+                <property name="top_attach">1</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="label-resultini-combate-pn">
+              <object class="GtkLabel" id="label-tirada-dado-pnj">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <attributes>
-                  <attribute name="font-desc" value="Monospace Bold 14"/>
+                  <attribute name="font-desc" value="Monospace Bold 32"/>
                 </attributes>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">2</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label-tirada-nombre-pj1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <attributes>
+                  <attribute name="font-desc" value="Sans 14"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label-tirada-nombre-pnj">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <attributes>
+                  <attribute name="font-desc" value="Sans 14"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
           </object>
@@ -1875,11 +1901,12 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="row_homogeneous">True</property>
-                            <property name="column_homogeneous">True</property>
                             <child>
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_right">60</property>
+                                <property name="hexpand">False</property>
                                 <property name="label" translatable="yes">PNJ</property>
                               </object>
                               <packing>
@@ -1891,6 +1918,8 @@
                               <object class="GtkLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_left">290</property>
+                                <property name="hexpand">False</property>
                                 <property name="label" translatable="yes">Bonus</property>
                               </object>
                               <packing>
@@ -1912,6 +1941,7 @@
                               <object class="GtkComboBox" id="combo-pnj-tirada">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="hexpand">True</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>

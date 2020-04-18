@@ -18,6 +18,9 @@ def get_utils():
     return gui, con
 
 class GnGGladeGui(AbstractGui):
+    text_tirada_sinopo = "Sin oposición"
+    text_tirada_conopo = "Con oposición"
+
     def get_mods_options(self, with_empty=True):
         mods = self.con.get_mods()
         ret = Gtk.ListStore(int, str)
@@ -296,6 +299,18 @@ class GnGGladeGui(AbstractGui):
         bmultiplicarpj.connect("clicked", Handler.onMultiplicarPersonaje)
 
         ## tab tiradas ##
+        seltiradapj = self.builder.get_object("combo-pj-tirada")
+        seltiradapj.connect("notify::popup-shown", Handler.onChangeSelPjTirada)
+        seltiradapj.connect("changed", Handler.onChangeSelPjTirada)
+
+        seltiradamod = self.builder.get_object("combo-mod-tirada")
+        seltiradamod.connect("notify::popup-shown", Handler.onChangeSelModTirada)
+        seltiradamod.connect("changed", Handler.onChangeSelModTirada)
+
+        seltiradapj = self.builder.get_object("combo-pnj-tirada")
+        seltiradapj.connect("notify::popup-shown", Handler.onChangeSelPnjTirada)
+        seltiradapj.connect("changed", Handler.onChangeSelPnjTirada)
+
         btirarso = self.builder.get_object("button-tirarso-tiradas")
         btirarso.connect("clicked", Handler.onTirarSinOposicion)
 
@@ -1091,6 +1106,85 @@ class Handler:
         con.desasignar_equipo(id_pj_equipo)
         gui.refrescar_lista_equipos_pj()
         Handler.cargarLabelsAtaqueDefensa()
+
+    def onChangeSelPjTirada(self, *args):
+        gui, con = get_utils()
+
+        typelabel = gui.get_object("label-tirada-tipo")
+        nombrepj_label = gui.get_object("label-tirada-nombre-pj1")
+        nombrepnj_label = gui.get_object("label-tirada-nombre-pnj")
+
+        # comprobar que el combo tiene un valor de personaje
+        cpjtirada = gui.get_object("combo-pj-tirada")
+        cpjtirada_ai = cpjtirada.get_active_iter()
+
+        # si no, borrar tipo de tirada y fuera
+        if not cpjtirada_ai:
+            typelabel.set_text('')
+            return
+
+        typelabel.set_text(gui.text_tirada_sinopo)
+
+        # pintamos el nombre del personaje
+        id_personaje = cpjtirada.get_model()[cpjtirada_ai][-2]
+        pj = con.get_personaje(id_personaje)
+        nombrepj_label.set_text(pj.nombre)
+
+        # borramos el del pnj para que se pinte al seleccionar este combo
+        nombrepnj_label.set_text('')
+
+        # llamamos a sel mod
+        Handler.onChangeSelModTirada(self, *args)
+
+    def onChangeSelModTirada(self, *args):
+        gui, con = get_utils()
+        typelabel = gui.get_object("label-tirada-tipo")
+
+        # comprobar valor válido en el combo, si no borrar
+        # añadimos al texto existente en tiradas el mod que se usa
+        cmodtirada = gui.get_object("combo-mod-tirada")
+        cmodtirada_ai = cmodtirada.get_active_iter()
+
+        if not cmodtirada_ai:
+            return
+
+        # obtener texto mod
+        id_mod = cmodtirada.get_model()[cmodtirada_ai][-2]
+        txt_mod = con.get_mod(id_mod).nombre
+
+        text_type = typelabel.get_text()
+
+        # recortar cadena
+        if '(' in text_type:
+            i = text_type.index('(') - 1
+            text_type = text_type[:i]
+
+        new_type = '{} ({})'.format(text_type, txt_mod)
+        typelabel.set_text(new_type)
+
+    def onChangeSelPnjTirada(self, *args):
+        gui, con = get_utils()
+
+        typelabel = gui.get_object("label-tirada-tipo")
+        nombrepnj_label = gui.get_object("label-tirada-nombre-pnj")
+
+        # comprobar que el combo tiene un valor de personaje
+        # si no, borrar tipo de tirada y fuera
+        # pintamos que es tirada con oposición
+        cpjtirada = gui.get_object("combo-pj-tirada")
+        cpjtirada_ai = cpjtirada.get_active_iter()
+        cpnjtirada = gui.get_object("combo-pnj-tirada")
+        cpnjtirada_ai = cpnjtirada.get_active_iter()
+
+        if not cpnjtirada_ai or not cpjtirada_ai:
+            return
+
+        typelabel.set_text(gui.text_tirada_conopo)
+
+        # pintamos el nombre del personaje
+        id_pnj = cpnjtirada.get_model()[cpnjtirada_ai][-2]
+        pnj = con.get_personaje(id_pnj)
+        nombrepnj_label.set_text(pnj.nombre)
 
     def onTirarSinOposicion(self, *args):
         gui, con = get_utils()
