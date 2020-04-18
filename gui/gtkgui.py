@@ -337,9 +337,11 @@ class GnGGladeGui(AbstractGui):
 
         cpjcombate = self.builder.get_object("combo-pj-combate")
         cpjcombate.connect("changed", Handler.onSeleccionarPj)
+        cpjcombate.connect("notify::popup-shown", Handler.onSeleccionarPj)
 
         cpnjcombate = self.builder.get_object("combo-pnj-combate")
         cpnjcombate.connect("changed", Handler.onSeleccionarPnj)
+        cpjcombate.connect("notify::popup-shown", Handler.onSeleccionarPnj)
 
         hppj_combate = self.get_object("spin-hppj-combate")
         hppj_combate.connect("value-changed", Handler.onChangevaluePjHp)
@@ -1358,9 +1360,14 @@ class Handler:
         if cpjini_ai:
             id_pj = cpjini.get_model()[cpjini_ai][-2]
             personaje = con.get_personaje(id_pj)
+            # configurar variable de pj
             gui.id_pj_ini = personaje.id
             spin_hp_pj = gui.get_object("spin-hppj-combate")
             spin_hp_pj.set_value(personaje.hp)
+            # poner nombre
+            nombre_hp = '{} ({})'.format(personaje.nombre, personaje.hp)
+            label_inipj = gui.get_object("label-tirarini-nombre-pj1")
+            label_inipj.set_text(nombre_hp)
 
     def onSeleccionarPnj(self, *args):
         gui, con = get_utils()
@@ -1372,9 +1379,14 @@ class Handler:
         if cpnjini_ai:
             id_pnj = cpnjini.get_model()[cpnjini_ai][-2]
             personaje = con.get_personaje(id_pnj)
+            # configurar variable de pnj
             gui.id_pnj_ini = personaje.id
             spin_hp_pnj = gui.get_object("spin-hppnj-combate")
             spin_hp_pnj.set_value(personaje.hp)
+            # poner nombre y hp
+            nombre_hp = '{} ({})'.format(personaje.nombre, personaje.hp)
+            label_inipnj = gui.get_object("label-tirarini-nombre-pnj")
+            label_inipnj.set_text(nombre_hp)
 
     def onChangevaluePjHp(self, *args):
         gui, con = get_utils()
@@ -1447,8 +1459,10 @@ class Handler:
             id_pnj = cpnjini.get_model()[cpnjnini_ai][-2]
             res = con.iniciativa(id_pj, id_pnj, magia, bonus_pj, bonus_pnj)
 
-            nombre_pj = con.get_personaje(id_pj).nombre
-            nombre_pnj = con.get_personaje(id_pnj).nombre
+            pjmodel = con.get_personaje(id_pj)
+            pnjmodel = con.get_personaje(id_pnj)
+            nombre_pj = pjmodel.nombre
+            nombre_pnj = pnjmodel.nombre
 
             cuenta_pj = res['pjagil'] + res['dado1'] + res['equipo_bonus_pj1'] + bonus_pj
             cuenta_pnj = res['pnjagil'] + res['dado2'] + res['equipo_bonus_pnj'] + bonus_pj
@@ -1558,11 +1572,14 @@ class Handler:
             label_resultado_pj1 = gui.get_object("label-resultini-combate-pj1")
             label_resultado_pnj = gui.get_object("label-resultini-combate-pnj")
 
+            nombrepj_hp = '{} ({})'.format(nombre_pj, pjmodel.hp)
+            nombrepnj_hp = '{} ({})'.format(nombre_pnj, pnjmodel.hp)
+
             label_tirada.set_text(txt_tirada)
             label_tirada_pj1.set_text(txt_tirada_pj1)
             label_tirada_pnj.set_text(txt_tirada_pnj)
-            label_nombre_pj1.set_text(nombre_pj)
-            label_nombre_pnj.set_text(nombre_pnj)
+            label_nombre_pj1.set_text(nombrepj_hp)
+            label_nombre_pnj.set_text(nombrepnj_hp)
             label_dado_pj1.set_text(str(res['dado1']))
             label_dado_pnj.set_text(str(res['dado2']))
 
@@ -1597,6 +1614,7 @@ class Handler:
         if gui.ataca_pj != None and gui.id_pj_ataca and gui.id_pj_defiende:
             id_pj = gui.id_pj_ataca if gui.ataca_pj else gui.id_pj_defiende
             id_pnj = gui.id_pj_ataca if not gui.ataca_pj else gui.id_pj_defiende
+
             nombre_pj = con.get_personaje(id_pj).nombre
             nombre_pnj = con.get_personaje(id_pnj).nombre
 
@@ -1822,8 +1840,6 @@ class Handler:
             label_tirada.set_text(txt_tirada)
             label_tirada_pj1.set_text(txt_tirada_pj1)
             label_tirada_pnj.set_text(txt_tirada_pnj)
-            label_nombre_pj1.set_text(nombre_pj)
-            label_nombre_pnj.set_text(nombre_pnj)
             label_dado_pj1.set_text(str(pj1_dado))
             label_dado_pnj.set_text(str(pnj_dado))
 
@@ -1847,6 +1863,14 @@ class Handler:
 
             hppj_combate.set_value(pj.hp)
             hppnj_combate.set_value(pnj.hp)
+
+            # actualizar hp en pantalla de jugador
+            pjmodel = con.get_personaje(id_pj)
+            pnjmodel = con.get_personaje(id_pnj)
+            nombrepj_hp = '{} ({})'.format(nombre_pj, pjmodel.hp)
+            nombrepnj_hp = '{} ({})'.format(nombre_pnj, pnjmodel.hp)
+            label_nombre_pj1.set_text(nombrepj_hp)
+            label_nombre_pnj.set_text(nombrepnj_hp)
 
             # desactivar botón tirar
             btirarcom = gui.get_object("button-tirarcomb-combate")
