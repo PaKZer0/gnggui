@@ -1197,14 +1197,16 @@ class Handler:
             old_text = label_pj.get_text()
             old_text = Handler.recortarCadena(self, old_text)
             new_txt = '{} ({})'.format(old_text, valor_mod_pj)
-            label_pj.set_text(new_txt)
+            if old_text:
+                label_pj.set_text(new_txt)
 
         if pnj:
             valor_mod_pnj = con.bonus_mod_personaje(modmodel, pnj)
             old_text = label_pnj.get_text()
             old_text = Handler.recortarCadena(self, old_text)
             new_txt = '{} ({})'.format(old_text, valor_mod_pnj)
-            label_pnj.set_text(new_txt)
+            if old_text:
+                label_pnj.set_text(new_txt)
 
     def onChangeSelPnjTirada(self, *args):
         gui, con = get_utils()
@@ -1240,10 +1242,19 @@ class Handler:
         typelabel = gui.get_object("label-tirada-tipo")
         nombrepj_label = gui.get_object("label-tirada-nombre-pj1")
         nombrepnj_label = gui.get_object("label-tirada-nombre-pnj")
+        dadopj_label = gui.get_object("label-tirada-dado-pj1")
+        dadopnj_label = gui.get_object("label-tirada-dado-pnj")
+        tiradapj_label = gui.get_object("label-tirada-tirada-pj1")
+        tiradapnj_label = gui.get_object("label-tirada-tirada-pnj") #
+        resultadopj_label = gui.get_object("label-tirada-resultado-pj1")
+        resultadopnj_label = gui.get_object("label-tirada-resultado-pnj")
 
-        typelabel.set_text('')
-        nombrepj_label.set_text('')
-        nombrepnj_label.set_text('')
+        all_labels = (typelabel, nombrepj_label, nombrepnj_label, dadopj_label,
+                        dadopnj_label, dadopnj_label, tiradapj_label,
+                        tiradapnj_label, resultadopj_label, resultadopnj_label)
+
+        for label in all_labels:
+            label.set_text('')
 
     def onTirarSinOposicion(self, *args):
         gui, con = get_utils()
@@ -1304,6 +1315,60 @@ class Handler:
             label_resultado = gui.get_object("label-resso-tirada")
             label_tirada.set_text(txt_tirada)
             label_resultado.set_text(txt_resultado)
+
+            ## mostrar pantalla personajes
+            # mostrar tipo tirada completo
+            type_text = '{} ({}) {}'.format(
+                gui.text_tirada_sinopo,
+                modmodel.nombre,
+                difmodel.texto
+            )
+            label_type = gui.get_object("label-tirada-tipo")
+            label_type.set_text(type_text)
+
+            # mostramos etiqueta personaje con valor mod
+            valor_mod_pj = con.bonus_mod_personaje(modmodel, pjmodel)
+            txt_nombre_pj1 = '{} ({})'.format(pjmodel.nombre, valor_mod_pj)
+            pj_label = gui.get_object("label-tirada-nombre-pj1")
+            pj_label.set_text(txt_nombre_pj1)
+
+            # borramos posible pnj en oposición
+            pnj_label = gui.get_object("label-tirada-nombre-pnj")
+            pnj_label.set_text('')
+
+            # mostramos dado
+            dado_label_pj1 = gui.get_object("label-tirada-dado-pj1")
+            dado_label_pj1.set_text(str(dado_pj1))
+
+            # formateamos y mostramos cuenta
+            txt_tirada_pj1 = \
+                "\t{}:\t {}\
+                \n\tDado:\t\t[{}]\
+                \n\tEquipo:\t\t {}\
+                \n\tBonus:\t\t {}\
+                \n\tTotal:\t\t {}\
+                \n\tResultado: {} {} Dificulad: {}".format(
+                modmodel.nombre,
+                pj1_mod_value,
+                dado_pj1,
+                pj1_equipo_bonus,
+                bonus,
+                cuenta,
+                cuenta,
+                symbol,
+                res['dif']
+            )
+            dado_tirada_pj1 = gui.get_object("label-tirada-tirada-pj1")
+            dado_tirada_pj1.set_text(txt_tirada_pj1)
+
+            # mostramos el resultado final
+            texto_final_ok = '{} lo ha logrado'
+            texto_final_ko = '{} ha fracasado'
+            texto_final = texto_final_ok if res['resultado'] else texto_final_ko
+            texto_final = texto_final.format(pjmodel.nombre)
+            label_fin_pj1 = gui.get_object("label-tirada-resultado-pj1")
+            label_fin_pj1.set_text(texto_final)
+
 
     def onBorrarSinOposicion(self, *args):
         gui, con = get_utils()
