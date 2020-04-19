@@ -341,7 +341,7 @@ class GnGGladeGui(AbstractGui):
 
         cpnjcombate = self.builder.get_object("combo-pnj-combate")
         cpnjcombate.connect("changed", Handler.onSeleccionarPnj)
-        cpjcombate.connect("notify::popup-shown", Handler.onSeleccionarPnj)
+        cpnjcombate.connect("notify::popup-shown", Handler.onSeleccionarPnj)
 
         hppj_combate = self.get_object("spin-hppj-combate")
         hppj_combate.connect("value-changed", Handler.onChangevaluePjHp)
