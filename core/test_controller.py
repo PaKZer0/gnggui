@@ -165,6 +165,37 @@ class ControllerTestCase(unittest.TestCase):
         personajes = self.con.get_personajes()
         self.assertEqual(len(personajes), 0)
 
+    def test_personaje_partida(self):
+        # create and gets
+        partida = self.crear_partida()
+        personaje = self.crear_personaje()
+
+        # personaje_en_partida
+        pj_en_partida = self.con.personaje_en_partida(personaje.id, partida.id)
+        self.assertTrue(pj_en_partida, "El personaje debe existir en la partida")
+
+        partida2 = self.con.crear_partida('La sombra', 'La vuelta de la sombra...')
+        pj_en_partida = self.con.personaje_en_partida(personaje.id, partida2.id)
+        self.assertFalse(pj_en_partida, "El personaje no debe existir en la partida")
+
+        # asignar_personaje_partida
+        self.con.asignar_personaje_partida(personaje.id, partida2.id)
+        pj_en_partida = self.con.personaje_en_partida(personaje.id, partida2.id)
+        self.assertTrue(pj_en_partida, "El personaje debe existir en la partida")
+
+        # get_partidas_personaje
+        partidas_pj = self.con.get_partidas_personaje(personaje.id)
+        self.assertTrue(len(partidas_pj) == 2, "El personaje existe en 2 partidas")
+        puede = self.con.puede_quitar_pj_partida(personaje.id)
+        self.assertTrue(puede)
+
+        # quitar_personaje_partida
+        self.con.quitar_personaje_partida(personaje.id, partida2.id)
+        pj_en_partida = self.con.personaje_en_partida(personaje.id, partida2.id)
+        self.assertFalse(pj_en_partida, "El personaje no debe existir en la partida")
+        puede = self.con.puede_quitar_pj_partida(personaje.id)
+        self.assertFalse(puede)
+
     def test_asignar_robar(self):
         self.crear_partida()
         equipo =self.crear_equipo()

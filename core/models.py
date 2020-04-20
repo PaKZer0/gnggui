@@ -150,7 +150,6 @@ class Player(BaseModel):
     magia = IntegerField()
     sociales = IntegerField()
     notas = TextField(null = True)
-    partida = ForeignKeyField(Partida)
 
     def __str__(self):
         return '{} | {} | {} | HP {}'.format(
@@ -169,4 +168,13 @@ class PlayerEquipo(BaseModel):
         return '{} | {}'.format(self.player, self.equipo)
 
 
-MODELS = [Dificultad, Partida, Raza, Mod, Equipo, Player, PlayerEquipo]
+class PlayerPartida(BaseModel):
+    player = ForeignKeyField(Player)
+    partida = ForeignKeyField(Partida)
+
+    def __str__(self):
+        return '{} | {}'.format(self.player, self.partida)
+
+
+MODELS = [Dificultad, Partida, Raza, Mod, Equipo, Player, PlayerEquipo, \
+            PlayerPartida]

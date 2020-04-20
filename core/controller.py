@@ -112,11 +112,16 @@ class Controller():
 
     ### PERSONAJES ###
     def get_personajes(self, id_partida = None):
-        personajes = Player.select()
+        ret = []
+
         if id_partida:
-            personajes = Player.select().join(Partida).where(
-                            Partida.id == id_partida)
-        ret = [personaje for personaje in personajes]
+            partidapjs = PlayerPartida.select().join(Partida)\
+                        .where(Partida.id == id_partida).execute()
+
+            for partidapj in partidapjs:
+                ret.append(partidapj.player)
+        else:
+            ret = [personaje for personaje in Player.select()]
 
         return ret
 
@@ -176,11 +181,12 @@ class Controller():
         if 'notas' in datos:
             personaje.notas = datos['notas']
 
-        if 'partida' in datos:
-            partida = Partida.get(Partida.id == datos['partida'])
-            personaje.partida = partida
-
         personaje.save()
+
+        if 'partida' in datos:
+            id_partida = datos['partida']
+            self.asignar_personaje_partida(personaje.id, id_partida)
+
         return personaje
 
     def editar_personaje(self, id_personaje, datos):
@@ -233,8 +239,8 @@ class Controller():
             personaje.notas = datos['notas']
 
         if 'partida' in datos:
-            partida = Partida.get(Partida.id == datos['partida'])
-            personaje.partida = partida
+            id_partida = datos['partida']
+            self.asignar_personaje_partida(personaje.id, id_partida)
 
         personaje.save()
         return personaje
@@ -243,6 +249,45 @@ class Controller():
         player = self.get_personaje(id_personaje)
         PlayerEquipo.delete().where(PlayerEquipo.player == player).execute()
         self.get_personaje(id_personaje).delete_instance()
+
+    def personaje_en_partida(self, id_personaje, id_partida):
+        pjpartida = Player.select().join(PlayerPartida).join(Partida)\
+                    .where(
+                        Player.id == id_personaje,
+                        Partida.id == id_partida).execute()
+
+        return len(pjpartida) > 0
+
+    def asignar_personaje_partida(self, id_personaje, id_partida):
+        personaje = self.get_personaje(id_personaje)
+        partida = self.get_partida(id_partida)
+
+        rel = PlayerPartida.get_or_create(player=personaje, partida=partida)
+
+        return rel
+
+    def quitar_personaje_partida(self, id_personaje, id_partida):
+        personaje = self.get_personaje(id_personaje)
+
+        PlayerPartida.delete().where(
+            PlayerPartida.player==personaje,
+        ).execute()
+
+    def get_partidas_personaje(self, id_personaje):
+        ret = []
+
+        pjpartidas = PlayerPartida.select().join(Player)\
+                    .where(Player.id == id_personaje).execute()
+
+        for pjpartida in pjpartidas:
+            ret.append(pjpartida.partida)
+
+        return ret
+
+    def puede_quitar_pj_partida(self, id_personaje):
+        pjpartidas = self.get_partidas_personaje(id_personaje)
+
+        return len(pjpartidas) > 1
 
     def restaurar_personaje(self, id_personaje):
         personaje = self.get_personaje(id_personaje)
