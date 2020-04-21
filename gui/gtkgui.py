@@ -126,12 +126,7 @@ class GnGGladeGui(AbstractGui):
         self.pj_iters = {}
 
         for personaje in personajes:
-            txt_nombre = '{} lu {} : {} : ({})'.format(
-                personaje.nombre,
-                personaje.profesion,
-                personaje.raza.nombre,
-                personaje.pueblo,
-            )
+            txt_nombre = personaje.combo_str()
             logger.debug('Cargando personaje id {} nombre {}'.format(
                             personaje.id, txt_nombre))
             new_iter = ret.append([personaje.id, txt_nombre])
@@ -157,6 +152,36 @@ class GnGGladeGui(AbstractGui):
 
         self.id_pj_ini = None
         self.id_pnj_ini = None
+
+    def get_personajes_disponibles_options(self):
+        logger.debug('Cargando personajes disponibles para {}'.format(self.partida.id))
+        personajes = self.con.get_personajes_disponibles(self.partida.id)
+        ret = Gtk.ListStore(int, str)
+
+        # iniciar iter list equipo pj
+        self.pj_iters = {}
+
+        for personaje in personajes:
+            txt_nombre = personaje.combo_str()
+            logger.debug('Cargando personaje id {} nombre {}'.format(
+                            personaje.id, txt_nombre))
+            new_iter = ret.append([personaje.id, txt_nombre])
+
+        return ret
+
+    def load_personajes_disponibles_combos(self):
+        # cargar combo equipos
+        renderer_text = Gtk.CellRendererCombo()
+
+        combos_pj = []
+        combos_pj.append(self.builder.get_object("combo-personaje-importar"))
+        pjs_store = self.get_personajes_disponibles_options()
+
+        for combo in combos_pj:
+            combo.clear()
+            combo.set_model(pjs_store)
+            combo.pack_start(renderer_text, True)
+            combo.add_attribute(renderer_text, "text", 1)
 
     def get_dificultades_options(self):
         dificultades = self.con.get_dificultades()
@@ -299,6 +324,9 @@ class GnGGladeGui(AbstractGui):
 
         bmultiplicarpj = self.builder.get_object("button-personaje-multiplicar")
         bmultiplicarpj.connect("clicked", Handler.onMultiplicarPersonaje)
+
+        bimportarpj = self.builder.get_object("button-personaje-importar")
+        bimportarpj.connect("clicked", Handler.onImportarPersonaje)
 
         ## tab tiradas ##
         seltiradapj = self.builder.get_object("combo-pj-tirada")
@@ -531,6 +559,15 @@ class GnGGladeGui(AbstractGui):
             button_borrar.connect('clicked', Handler.onClonarPersonaje, {'id_personaje': personaje.id})
             buttongrid.add(button_borrar)
 
+            button_quitar = Gtk.Button.new_with_label("Quitar")
+            if self.con.puede_quitar_pj_partida(personaje.id):
+                button_quitar.set_sensitive(True)
+                button_quitar.connect('clicked', Handler.onQuitarPersonaje, {'id_personaje': personaje.id})
+            else:
+                button_quitar.set_sensitive(False)
+
+            buttongrid.add(button_quitar)
+
             hbox.pack_start(buttongrid, True, True, 0)
 
             list_personaje.add(row)
@@ -700,6 +737,7 @@ class Handler:
             gui.load_list_personajes()
             gui.limpiar_form_personaje()
             gui.load_personajes_combos()
+            gui.load_personajes_disponibles_combos()
 
     def onBorrarPartida(self, *args):
         gui, con = get_utils()
@@ -1047,6 +1085,35 @@ class Handler:
         con.clonar_personaje(id_personaje)
         gui.refrescar_lista_personajes()
         gui.load_personajes_combos()
+
+    def onImportarPersonaje(self, *args):
+        gui, con = get_utils()
+
+        # obtener personaje seleccionado
+        combo_avalpj = gui.get_object("combo-personaje-importar")
+        active_iter = combo_avalpj.get_active_iter()
+
+        # si no es null, asignar personaje
+        if active_iter and gui.partida:
+            id_personaje = combo_avalpj.get_model()[active_iter][-2]
+            print('Importando personaje id {} a partida {}'.format(
+                id_personaje, gui.partida.id
+            ))
+            con.asignar_personaje_partida(id_personaje, gui.partida.id)
+
+            gui.load_personajes_combos()
+            gui.load_list_personajes()
+            gui.load_personajes_disponibles_combos()
+
+    def onQuitarPersonaje(self, *args):
+        gui, con = get_utils()
+        id_personaje = args[0]['id_personaje']
+
+        if id_personaje and gui.partida:
+            con.quitar_personaje_partida(id_personaje, gui.partida.id)
+            gui.load_personajes_combos()
+            gui.load_list_personajes()
+            gui.load_personajes_disponibles_combos()
 
     def onMultiplicarPersonaje(self, *args):
         gui, con = get_utils()

@@ -178,6 +178,10 @@ class ControllerTestCase(unittest.TestCase):
         pj_en_partida = self.con.personaje_en_partida(personaje.id, partida2.id)
         self.assertFalse(pj_en_partida, "El personaje no debe existir en la partida")
 
+        # get_personajes_disponibles
+        pj_disponibles = self.con.get_personajes_disponibles(partida2.id)
+        self.assertEqual(pj_disponibles, [personaje])
+
         # asignar_personaje_partida
         self.con.asignar_personaje_partida(personaje.id, partida2.id)
         pj_en_partida = self.con.personaje_en_partida(personaje.id, partida2.id)

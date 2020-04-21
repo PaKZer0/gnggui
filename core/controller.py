@@ -125,6 +125,17 @@ class Controller():
 
         return ret
 
+    def get_personajes_disponibles(self, id_partida):
+        ret = []
+
+        partidapjs = PlayerPartida.select().join(Partida)\
+                    .where(Partida.id != id_partida).execute()
+
+        for partidapj in partidapjs:
+            ret.append(partidapj.player)
+
+        return ret
+
     def get_personaje(self, id_personaje):
         personaje = Player.get(Player.id == id_personaje)
 

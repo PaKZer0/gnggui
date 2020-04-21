@@ -159,6 +159,14 @@ class Player(BaseModel):
             self.hp,
         )
 
+    def combo_str(self):
+        return '{} lu {} : {} : ({})'.format(
+            self.nombre,
+            self.profesion,
+            self.raza.nombre,
+            self.pueblo,
+        )
+
 
 class PlayerEquipo(BaseModel):
     player = ForeignKeyField(Player)
