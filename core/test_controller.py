@@ -182,6 +182,9 @@ class ControllerTestCase(unittest.TestCase):
         pj_disponibles = self.con.get_personajes_disponibles(partida2.id)
         self.assertEqual(pj_disponibles, [personaje])
 
+        pj_disponibles = self.con.get_personajes_disponibles(partida.id)
+        self.assertEqual(pj_disponibles, [])
+
         # asignar_personaje_partida
         self.con.asignar_personaje_partida(personaje.id, partida2.id)
         pj_en_partida = self.con.personaje_en_partida(personaje.id, partida2.id)
@@ -199,6 +202,11 @@ class ControllerTestCase(unittest.TestCase):
         self.assertFalse(pj_en_partida, "El personaje no debe existir en la partida")
         puede = self.con.puede_quitar_pj_partida(personaje.id)
         self.assertFalse(puede)
+
+        pj_disponibles = self.con.get_personajes_disponibles(partida2.id)
+        self.assertEqual(pj_disponibles, [personaje])
+        pj_disponibles = self.con.get_personajes_disponibles(partida.id)
+        self.assertEqual(pj_disponibles, [])
 
     def test_asignar_robar(self):
         self.crear_partida()

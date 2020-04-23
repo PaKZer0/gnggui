@@ -1,6 +1,7 @@
 from peewee import *
 
-db = SqliteDatabase('gng.db')
+db_name = 'gng.db'
+db = SqliteDatabase(db_name)
 
 DIFICULTADES = [
     (2, 'Cualquiera puede hacerlo'),
