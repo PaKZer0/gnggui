@@ -47,7 +47,7 @@ class ControllerTestCase(unittest.TestCase):
             mod_magia.id,
         )
 
-    def crear_personaje(self):
+    def crear_personaje(self, nombre=None):
         datos = {
             'nombre': 'Salvajius',
             'profesion': 'Pescadero',
@@ -72,7 +72,7 @@ class ControllerTestCase(unittest.TestCase):
         datos = {
             'nombre': 'Gork',
             'profesion': 'Artillero',
-            'raza': 6, # Humano
+            'raza': 6, # Goblin
             'pueblo': 'Morgul',
             'fuerza': 2,
             'agilidad': 2,
@@ -210,6 +210,17 @@ class ControllerTestCase(unittest.TestCase):
         self.assertEqual(pj_disponibles, [personaje])
         pj_disponibles = self.con.get_personajes_disponibles(partida.id)
         self.assertEqual(pj_disponibles, [])
+
+        # probamos con 2 jugadores
+        adversario = self.crear_adversario()
+        pj_disponibles = self.con.get_personajes_disponibles(partida.id)
+        self.assertEqual(pj_disponibles, [])
+        pj_disponibles = self.con.get_personajes_disponibles(partida2.id)
+        self.assertEqual(pj_disponibles, [personaje, adversario])
+
+        self.con.asignar_personaje_partida(adversario.id, partida2.id)
+        pj_disponibles = self.con.get_personajes_disponibles(partida2.id)
+        self.assertEqual(pj_disponibles, [personaje])
 
     def test_asignar_robar(self):
         self.crear_partida()

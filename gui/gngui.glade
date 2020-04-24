@@ -441,6 +441,8 @@
   <object class="GtkWindow" id="window1">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Goblins and Grutas manager</property>
+    <property name="default_width">1039</property>
+    <property name="default_height">722</property>
     <child>
       <placeholder/>
     </child>
@@ -1545,8 +1547,6 @@
                       <object class="GtkComboBox" id="combo-personaje-importar">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_right">70</property>
-                        <property name="hexpand">True</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>

@@ -127,12 +127,17 @@ class Controller():
 
     def get_personajes_disponibles(self, id_partida):
         ret = []
+        partidapjs = PlayerPartida.select().execute()
+        pjs_de_partida = self.get_personajes(id_partida)
 
-        partidapjs = PlayerPartida.select().join(Partida)\
-                    .where(Partida.id != id_partida).execute()
-
+        # solución guarra pero funciona xD
         for partidapj in partidapjs:
-            ret.append(partidapj.player)
+            the_player = partidapj.player
+
+            if partidapj.partida.id != id_partida and \
+                the_player not in ret and \
+                the_player not in pjs_de_partida:
+                ret.append(the_player)
 
         return ret
 

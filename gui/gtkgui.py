@@ -1096,7 +1096,7 @@ class Handler:
         # si no es null, asignar personaje
         if active_iter and gui.partida:
             id_personaje = combo_avalpj.get_model()[active_iter][-2]
-            print('Importando personaje id {} a partida {}'.format(
+            logger.debug('Importando personaje id {} a partida {}'.format(
                 id_personaje, gui.partida.id
             ))
             con.asignar_personaje_partida(id_personaje, gui.partida.id)
