@@ -77,7 +77,7 @@ def init_db(test=False):
 
 def drop_db():
     db.drop_tables([Partida, Dificultad, Raza, Mod, Player,
-            PlayerEquipo])
+            PlayerEquipo, PlayerPartida])
 
 def close_db():
     db.close()

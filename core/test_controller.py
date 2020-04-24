@@ -203,6 +203,9 @@ class ControllerTestCase(unittest.TestCase):
         puede = self.con.puede_quitar_pj_partida(personaje.id)
         self.assertFalse(puede)
 
+        pjs_partida1 = self.con.get_personajes(partida.id)
+        self.assertEqual(pjs_partida1, [personaje])
+
         pj_disponibles = self.con.get_personajes_disponibles(partida2.id)
         self.assertEqual(pj_disponibles, [personaje])
         pj_disponibles = self.con.get_personajes_disponibles(partida.id)

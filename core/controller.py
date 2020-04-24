@@ -259,6 +259,7 @@ class Controller():
     def borrar_personaje(self, id_personaje):
         player = self.get_personaje(id_personaje)
         PlayerEquipo.delete().where(PlayerEquipo.player == player).execute()
+        PlayerPartida.delete().where(PlayerPartida.player == player).execute()
         self.get_personaje(id_personaje).delete_instance()
 
     def personaje_en_partida(self, id_personaje, id_partida):
@@ -278,11 +279,17 @@ class Controller():
         return rel
 
     def quitar_personaje_partida(self, id_personaje, id_partida):
-        personaje = self.get_personaje(id_personaje)
+        pjpartidas = PlayerPartida.select().join(Player)\
+                    .where(Player.id == id_personaje).execute()
 
-        PlayerPartida.delete().where(
-            PlayerPartida.player==personaje,
-        ).execute()
+        # guarrería pero funciona xD
+        id_pj_partida = None
+        for pjpartida in pjpartidas:
+            if pjpartida.partida.id == id_partida:
+                id_pj_partida = pjpartida.id
+
+        if id_pj_partida:
+            PlayerPartida.get(PlayerPartida.id == id_pj_partida).delete_instance()
 
     def get_partidas_personaje(self, id_personaje):
         ret = []
