@@ -556,9 +556,9 @@ class GnGGladeGui(AbstractGui):
             button_multiplicar.connect('clicked', Handler.onMultiplicarPersonaje, {'id_personaje': personaje.id})
             buttongrid.add(button_multiplicar)
 
-            button_borrar = Gtk.Button.new_with_label("Clonar")
-            button_borrar.connect('clicked', Handler.onClonarPersonaje, {'id_personaje': personaje.id})
-            buttongrid.add(button_borrar)
+            button_clonar = Gtk.Button.new_with_label("Clonar")
+            button_clonar.connect('clicked', Handler.onClonarPersonaje, {'id_personaje': personaje.id})
+            buttongrid.add(button_clonar)
 
             button_quitar = Gtk.Button.new_with_label("Quitar")
             if self.con.puede_quitar_pj_partida(personaje.id):
@@ -1082,8 +1082,9 @@ class Handler:
     def onClonarPersonaje(self, *args):
         gui, con = get_utils()
         id_personaje = args[0]['id_personaje']
+        id_partida = gui.partida.id
         logger.debug('Clonando personaje con id {}'.format(id_personaje))
-        con.clonar_personaje(id_personaje)
+        con.clonar_personaje(id_personaje, id_partida)
         gui.refrescar_lista_personajes()
         gui.load_personajes_combos()
 
@@ -1123,6 +1124,7 @@ class Handler:
         # o del seleccionado actualmente
         # o del que entra por parámetros
         id_personaje = None
+        id_partida = gui.partida.id
 
         if not hasattr(gui, 'id_personaje_sel') or not gui.id_personaje_sel and args:
             id_personaje = args[0].get('id_personaje', None)
@@ -1142,7 +1144,7 @@ class Handler:
 
         logger.debug('Multiplicando personaje con id {} por {}'.format(
             id_personaje, multiplo))
-        con.multiplicar_personaje(id_personaje, multiplo)
+        con.multiplicar_personaje(id_personaje, id_partida, multiplo)
         gui.refrescar_lista_personajes()
         gui.load_personajes_combos()
 

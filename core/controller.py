@@ -320,7 +320,7 @@ class Controller():
 
         return new_hp
 
-    def clonar_personaje(self, id_personaje, nombre=None):
+    def clonar_personaje(self, id_personaje, id_partida, nombre=None):
         personaje = self.get_personaje(id_personaje)
 
         if not nombre:
@@ -342,9 +342,11 @@ class Controller():
             magia = personaje.magia,
             sociales = personaje.sociales,
             notas = personaje.notas,
-            partida = personaje.partida
         )
         clon.save()
+
+        # asignar a partida
+        self.asignar_personaje_partida(clon.id, id_partida)
 
         # clonar equipo
         equipos = self.get_equipos_personaje(id_personaje)
@@ -353,11 +355,11 @@ class Controller():
 
         return clon
 
-    def multiplicar_personaje(self, id_personaje, multiplo):
+    def multiplicar_personaje(self, id_personaje, id_partida, multiplo):
         for i in range(multiplo):
             nombre = self.get_personaje(id_personaje).nombre
             nombre = '{} {}'.format(nombre, i+1)
-            self.clonar_personaje(id_personaje, nombre)
+            self.clonar_personaje(id_personaje, id_partida, nombre=nombre)
 
     def get_equipos_personaje(self, id_personaje):
         equipospj = PlayerEquipo.select().join(Player)\
