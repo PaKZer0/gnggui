@@ -217,7 +217,7 @@ class GnGGladeGui(AbstractGui):
         pj_latrocinio = self.get_object("spinner-personaje-latrocinio")
         pj_magia = self.get_object("spinner-personaje-magia")
         pj_sociales = self.get_object("spinner-personaje-sociales")
-        pj_multiplicar = self.get_object("spin-bonuscombpnj-combate")
+        pj_multiplicar = self.get_object("spinner-personaje-multiplicar")
         bonuspj_tirada = self.get_object("spinner-bonuspj-tirada")
         bonuspnj_tirada = self.get_object("spinner-bonuspnj-tirada")
         hppj_combate = self.get_object("spin-hppj-combate")
@@ -225,18 +225,19 @@ class GnGGladeGui(AbstractGui):
         bonusinipj_combate = self.get_object("spin-bonusinipj-combate")
         bonusinipnj_combate = self.get_object("spin-bonusinipnj-combate")
         bonuscombpj_combate = self.get_object("spin-bonuscombpj-combate")
-        bonuscombpnj_combate = self.get_object("spinner-personaje-multiplicar")
+        bonuscombpnj_combate = self.get_object("spin-bonuscombpnj-combate")
 
         skill_spiners = [pj_fuerza, pj_agilidad, pj_inteligencia,
                             pj_inteligencia, pj_carisma, pj_combate,
                             pj_conocimientos, pj_latrocinio, pj_magia,
-                            pj_sociales, pj_multiplicar]
+                            pj_sociales]
 
         hp_spinners = [pj_hp, hppj_combate, hppnj_combate]
 
         all_spiners = [ equipo_valor, bonuspj_tirada, bonuspnj_tirada,
                             bonusinipj_combate, bonusinipnj_combate,
-                            bonuscombpj_combate, bonuscombpnj_combate
+                            bonuscombpj_combate, bonuscombpnj_combate,
+                            pj_multiplicar
                         ] + skill_spiners + hp_spinners
 
         # set all to integer spinners
@@ -1731,7 +1732,7 @@ class Handler:
             nombre_pnj = pnjmodel.nombre
 
             cuenta_pj = res['pjagil'] + res['dado1'] + res['equipo_bonus_pj1'] + bonus_pj
-            cuenta_pnj = res['pnjagil'] + res['dado2'] + res['equipo_bonus_pnj'] + bonus_pj
+            cuenta_pnj = res['pnjagil'] + res['dado2'] + res['equipo_bonus_pnj'] + bonus_pnj
             symbol = '>' if res['resultado'] else '<'
             magia_pjtx  = ''
             magia_pjtxfmt = ''
@@ -1876,6 +1877,12 @@ class Handler:
         ckmagia = gui.get_object("check-magia-partida")
         magia = ckmagia.get_active()
 
+        # obtener check distancia
+        ckdistancia = gui.get_object("check-distancia-partida")
+        distancia = ckdistancia.get_active()
+
+        print('Distancia vale: {}'.format(distancia))
+
         # tirar
         if gui.ataca_pj != None and gui.id_pj_ataca and gui.id_pj_defiende:
             id_pj = gui.id_pj_ataca if gui.ataca_pj else gui.id_pj_defiende
@@ -1892,7 +1899,7 @@ class Handler:
                 bonus_pdefiende = bonus_pj
 
             res = con.combate(gui.id_pj_ataca, gui.id_pj_defiende, magia,
-                                bonus_pataca, bonus_pdefiende)
+                                bonus_pataca, bonus_pdefiende, distancia)
 
             cuenta_pataca = res['pataca_val'] + res['dado1'] + res['equipo_bonus_pata'] + bonus_pataca
             cuenta_pdefie = res['pdefiende_val'] + res['dado2'] + res['equipo_bonus_pdef'] + bonus_pdefiende
@@ -2083,6 +2090,10 @@ class Handler:
                     txt_resultado_pnj = '' if not gui.ataca_pj else txt_resultado
                 elif res['resultado'] < 0:
                     txt_resultado = '{} FALLA Y SE HACE {} HERIDAS'.format(nombre_pataca, res['resultado'] * -1)
+
+                    if distancia: # la distancia evita el ataque patético
+                        txt_resultado = '{} ERRA SU DISPARO'.format(nombre_pataca)
+
                     txt_resultado_pj1 = '' if not gui.ataca_pj else txt_resultado
                     txt_resultado_pnj = '' if gui.ataca_pj else txt_resultado
             else:

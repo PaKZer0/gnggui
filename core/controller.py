@@ -596,7 +596,7 @@ class Controller():
         return ret
 
     def combate(self, id_pataca, id_pdefiende, magia=False,
-                bonus_ata=0, bonus_def=0):
+                bonus_ata=0, bonus_def=0, distancia=False):
         pataca      = self.get_personaje(id_pataca)
         pdefiende   = self.get_personaje(id_pdefiende)
         mod_ataque  = Mod.get(Mod.nombre == MOD_TYPE[0][1])
@@ -655,7 +655,10 @@ class Controller():
                 datos['hp'] = herido.hp - ret_tirada[0]
             elif ret_tirada[0] < 0: # ataque patético
                 herido = pataca
-                datos['hp'] = herido.hp + ret_tirada[0]
+                if not distancia: # surge efecto
+                    datos['hp'] = herido.hp + ret_tirada[0]
+                else: # la distancia evita el ataque patético
+                    datos['hp'] = herido.hp
 
             if datos['hp'] < 0:
                 datos['hp'] = 0
