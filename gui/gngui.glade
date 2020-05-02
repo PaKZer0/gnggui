@@ -693,6 +693,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip_text" translatable="yes">Lorem ipsum dolor sit amet</property>
+                            <property name="margin_left">200</property>
+                            <property name="margin_right">200</property>
                             <property name="wrap_mode">word</property>
                             <property name="buffer">textbuffer1</property>
                           </object>
