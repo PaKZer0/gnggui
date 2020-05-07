@@ -122,6 +122,8 @@ class Equipo(BaseModel):
     descripcion = CharField(null = True)
     valor = IntegerField(null = True)
     mod = ForeignKeyField(Mod, null = True)
+    unidades = IntegerField(null = True)
+    arma_asociada = ForeignKeyField('self', null = True)
 
     def __str__(self):
         mod_txt = ''
@@ -132,7 +134,20 @@ class Equipo(BaseModel):
                 self.mod,
             )
 
-        return '{}{}'.format(self.nombre, mod_txt)
+        uds_txt = ''
+        if self.unidades > 0:
+            uds_txt = ' {} uds.'.format(self.unidades)
+
+        arma_txt = ''
+        if self.arma_asociada:
+            arma_txt = ' (usado por {})'.format(self.arma_asociada)
+
+        return '{}{}{}{}'.format(
+            self.nombre,
+            mod_txt,
+            uds_txt,
+            arma_txt,
+        )
 
 
 class Player(BaseModel):

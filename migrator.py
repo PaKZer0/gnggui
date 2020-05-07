@@ -60,3 +60,31 @@ def run_migrations():
         init_db()
         # borramos la columna partida de Player
         migrate( migrator.add_column('player', 'is_pj', Player.is_pj))
+
+
+    migration_check_3 = "SELECT COUNT(*) AS CNTREC " \
+                        "FROM pragma_table_info('equipo') " \
+                        "WHERE name='unidades'"
+
+    # the migration is not applied if the column doesn't exist yet
+    migration_applied_3 = run_migration_check(migration_check_3)
+
+    if not migration_applied_3:
+        migrator = SqliteMigrator(db)
+        init_db()
+        # borramos la columna partida de Player
+        migrate( migrator.add_column('equipo', 'unidades', Equipo.unidades))
+
+
+    migration_check_4 = "SELECT COUNT(*) AS CNTREC " \
+                        "FROM pragma_table_info('equipo') " \
+                        "WHERE name='arma_asociada_id'"
+
+    # the migration is not applied if the column doesn't exist yet
+    migration_applied_4 = run_migration_check(migration_check_4)
+
+    if not migration_applied_4:
+        migrator = SqliteMigrator(db)
+        init_db()
+        # borramos la columna partida de Player
+        migrate( migrator.add_column('equipo', 'arma_asociada', Equipo.arma_asociada))
