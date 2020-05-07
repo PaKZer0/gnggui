@@ -197,6 +197,9 @@ class Controller():
         if 'notas' in datos:
             personaje.notas = datos['notas']
 
+        if 'is_pj' in datos:
+            personaje.is_pj = datos['is_pj']
+
         personaje.save()
 
         if 'partida' in datos:
@@ -253,6 +256,9 @@ class Controller():
 
         if 'notas' in datos:
             personaje.notas = datos['notas']
+
+        if 'is_pj' in datos:
+            personaje.is_pj = datos['is_pj']
 
         if 'partida' in datos:
             id_partida = datos['partida']
@@ -342,6 +348,7 @@ class Controller():
             magia = personaje.magia,
             sociales = personaje.sociales,
             notas = personaje.notas,
+            is_pj = personaje.is_pj,
         )
         clon.save()
 

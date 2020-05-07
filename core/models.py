@@ -151,6 +151,7 @@ class Player(BaseModel):
     magia = IntegerField()
     sociales = IntegerField()
     notas = TextField(null = True)
+    is_pj = BooleanField(default = False)
 
     def __str__(self):
         return '{} | {} | {} | HP {}'.format(

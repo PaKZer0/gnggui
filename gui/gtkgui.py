@@ -518,11 +518,12 @@ class GnGGladeGui(AbstractGui):
             hbox.set_homogeneous(True)
             row.add(hbox)
 
-            txt_nombre = '{} lu {} : {} : ({})'.format(
+            txt_nombre = '{} lu {} : {} : ({}){}'.format(
                 personaje.nombre,
                 personaje.profesion,
                 personaje.raza.nombre,
                 personaje.pueblo,
+                '' if personaje.is_pj else ' (PNJ)',
             )
             label_nombre = Gtk.Label(txt_nombre, xalign=0)
             hbox.pack_start(label_nombre, True, True, 0)
@@ -643,6 +644,7 @@ class GnGGladeGui(AbstractGui):
         spinner_latrocinio = self.get_object("spinner-personaje-latrocinio")
         spinner_magia = self.get_object("spinner-personaje-magia")
         spinner_sociales = self.get_object("spinner-personaje-sociales")
+        check_ispj = self.get_object("check-personaje-ispj")
         text_notas = self.get_object("text-personaje-notas")
         button_asignar = self.get_object("button-personaje-equipo")
         button_resetear = self.get_object("button-personaje-resetform")
@@ -666,6 +668,7 @@ class GnGGladeGui(AbstractGui):
         combo_raza.set_active_iter(None)
         label_ataque.set_text('_')
         label_defensa.set_text('_')
+        check_ispj.set_active(False)
 
         button_asignar.set_sensitive(False)
         button_asignar.connect("clicked", Handler.voidCallback)
@@ -895,6 +898,7 @@ class Handler:
         spinner_magia = gui.get_object("spinner-personaje-magia")
         spinner_sociales = gui.get_object("spinner-personaje-sociales")
         text_notas = gui.get_object("text-personaje-notas")
+        check_ispj = gui.get_object("check-personaje-ispj")
 
         ## llenando data
         data = {}
@@ -920,6 +924,7 @@ class Handler:
         data['magia'] = spinner_magia.get_value_as_int()
         data['sociales'] = spinner_sociales.get_value_as_int()
         data['partida'] = gui.partida.id
+        data['is_pj'] = check_ispj.get_active()
 
         # notas
         data['notas'] = text_notas.get_buffer().get_text(
@@ -1017,6 +1022,7 @@ class Handler:
         spinner_magia = gui.get_object("spinner-personaje-magia")
         spinner_sociales = gui.get_object("spinner-personaje-sociales")
         text_notas = gui.get_object("text-personaje-notas")
+        check_ispj = gui.get_object("check-personaje-ispj")
 
         personaje = con.get_personaje(args[0]['id_personaje'])
 
@@ -1036,6 +1042,8 @@ class Handler:
         spinner_latrocinio.set_value(personaje.latrocinio)
         spinner_magia.set_value(personaje.magia)
         spinner_sociales.set_value(personaje.sociales)
+        check_ispj.set_active(personaje.is_pj)
+
         # get active iter
         active_iter = gui.pjraza_iters[personaje.raza.id]
         combo_raza.set_active_iter(active_iter)
