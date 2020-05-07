@@ -2238,9 +2238,11 @@ class Handler:
         pass
 
 
-def run_gui():
-    gui = GnGGladeGui.get_instance()
+def run_gui(test=False):
+    gui = GnGGladeGui.get_instance(test)
     gui = gui.run()
+
+    return gui
 
 if __name__ == '__main__':
     run_gui()

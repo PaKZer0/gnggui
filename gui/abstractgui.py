@@ -3,13 +3,13 @@ from core.controller import Controller
 class AbstractGui():
     instance = None
 
-    def __init__(self):
-        self.con = Controller()
+    def __init__(self, test=False):
+        self.con = Controller(test)
 
     @classmethod
-    def get_instance(cls):
+    def get_instance(cls, test=False):
         if not cls.instance:
-            cls.instance = cls()
+            cls.instance = cls(test)
 
         return cls.instance
 
