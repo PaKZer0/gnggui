@@ -3,16 +3,16 @@ dist: bionic
 language: python
 
 python:
-  - 3.6
-  - 3.8
+  - 3.7
 
 
 install:
-  - sudo apt install python-gtk2
+  - echo "install"
+  - pip3 install peewee
 
 before_script:
   - echo "Hola"
   - echo "Adios"
 
 script:
-  - python -m unittest discover -s tests/
+  - python3 -m unittest discover -s tests/
