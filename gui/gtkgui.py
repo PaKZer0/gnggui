@@ -510,68 +510,69 @@ class GnGGladeGui(AbstractGui):
         for child in children:
             list_personaje.remove(child)
 
-        personajes = self.con.get_personajes(self.partida.id)
+        if self.partida:
+            personajes = self.con.get_personajes(self.partida.id)
 
-        for personaje in personajes:
-            row = Gtk.ListBoxRow()
-            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
-            hbox.set_homogeneous(True)
-            row.add(hbox)
+            for personaje in personajes:
+                row = Gtk.ListBoxRow()
+                hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+                hbox.set_homogeneous(True)
+                row.add(hbox)
 
-            txt_nombre = '{} lu {} : {} : ({})'.format(
-                personaje.nombre,
-                personaje.profesion,
-                personaje.raza.nombre,
-                personaje.pueblo,
-            )
-            label_nombre = Gtk.Label(txt_nombre, xalign=0)
-            hbox.pack_start(label_nombre, True, True, 0)
+                txt_nombre = '{} lu {} : {} : ({})'.format(
+                    personaje.nombre,
+                    personaje.profesion,
+                    personaje.raza.nombre,
+                    personaje.pueblo,
+                )
+                label_nombre = Gtk.Label(txt_nombre, xalign=0)
+                hbox.pack_start(label_nombre, True, True, 0)
 
-            txt_stats = 'HP{} FU{} AG{} IN{} CA{} CO{} CN{} LA{} MA{} SO{}'.format(
-                personaje.hp,
-                personaje.fuerza,
-                personaje.agilidad,
-                personaje.inteligencia,
-                personaje.carisma,
-                personaje.combate,
-                personaje.conocimientos,
-                personaje.latrocinio,
-                personaje.magia,
-                personaje.sociales,
-            )
-            label_stats = Gtk.Label(txt_stats, xalign=0)
-            hbox.pack_start(label_stats, True, True, 0)
+                txt_stats = 'HP{} FU{} AG{} IN{} CA{} CO{} CN{} LA{} MA{} SO{}'.format(
+                    personaje.hp,
+                    personaje.fuerza,
+                    personaje.agilidad,
+                    personaje.inteligencia,
+                    personaje.carisma,
+                    personaje.combate,
+                    personaje.conocimientos,
+                    personaje.latrocinio,
+                    personaje.magia,
+                    personaje.sociales,
+                )
+                label_stats = Gtk.Label(txt_stats, xalign=0)
+                hbox.pack_start(label_stats, True, True, 0)
 
-            buttongrid = Gtk.Grid()
+                buttongrid = Gtk.Grid()
 
-            button_editar = Gtk.Button.new_with_label("Editar")
-            button_editar.connect('clicked', Handler.onEditarPersonajeButton, {'id_personaje': personaje.id})
-            buttongrid.add(button_editar)
+                button_editar = Gtk.Button.new_with_label("Editar")
+                button_editar.connect('clicked', Handler.onEditarPersonajeButton, {'id_personaje': personaje.id})
+                buttongrid.add(button_editar)
 
-            button_borrar = Gtk.Button.new_with_label("Borrar")
-            button_borrar.connect('clicked', Handler.onBorrarPersonajeButton, {'id_personaje': personaje.id})
-            buttongrid.add(button_borrar)
+                button_borrar = Gtk.Button.new_with_label("Borrar")
+                button_borrar.connect('clicked', Handler.onBorrarPersonajeButton, {'id_personaje': personaje.id})
+                buttongrid.add(button_borrar)
 
-            button_multiplicar = Gtk.Button.new_with_label("Multiplicar")
-            button_multiplicar.connect('clicked', Handler.onMultiplicarPersonaje, {'id_personaje': personaje.id})
-            buttongrid.add(button_multiplicar)
+                button_multiplicar = Gtk.Button.new_with_label("Multiplicar")
+                button_multiplicar.connect('clicked', Handler.onMultiplicarPersonaje, {'id_personaje': personaje.id})
+                buttongrid.add(button_multiplicar)
 
-            button_clonar = Gtk.Button.new_with_label("Clonar")
-            button_clonar.connect('clicked', Handler.onClonarPersonaje, {'id_personaje': personaje.id})
-            buttongrid.add(button_clonar)
+                button_clonar = Gtk.Button.new_with_label("Clonar")
+                button_clonar.connect('clicked', Handler.onClonarPersonaje, {'id_personaje': personaje.id})
+                buttongrid.add(button_clonar)
 
-            button_quitar = Gtk.Button.new_with_label("Quitar")
-            if self.con.puede_quitar_pj_partida(personaje.id):
-                button_quitar.set_sensitive(True)
-                button_quitar.connect('clicked', Handler.onQuitarPersonaje, {'id_personaje': personaje.id})
-            else:
-                button_quitar.set_sensitive(False)
+                button_quitar = Gtk.Button.new_with_label("Quitar")
+                if self.con.puede_quitar_pj_partida(personaje.id):
+                    button_quitar.set_sensitive(True)
+                    button_quitar.connect('clicked', Handler.onQuitarPersonaje, {'id_personaje': personaje.id})
+                else:
+                    button_quitar.set_sensitive(False)
 
-            buttongrid.add(button_quitar)
+                buttongrid.add(button_quitar)
 
-            hbox.pack_start(buttongrid, True, True, 0)
+                hbox.pack_start(buttongrid, True, True, 0)
 
-            list_personaje.add(row)
+                list_personaje.add(row)
 
         list_personaje.show_all()
 
