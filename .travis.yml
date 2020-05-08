@@ -12,6 +12,7 @@ install:
 
 before_script:
   - echo "Hola"
+  - echo "Adios"
 
 script:
   - python -m unittest discover -s tests/
