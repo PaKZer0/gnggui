@@ -5,6 +5,7 @@ class AbstractGui():
 
     def __init__(self, test=False):
         self.con = Controller(test)
+        self.is_test = test
 
     @classmethod
     def get_instance(cls, test=False):

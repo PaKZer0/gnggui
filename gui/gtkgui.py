@@ -692,7 +692,11 @@ class GnGGladeGui(AbstractGui):
         super().run()
         self.build()
         self.bind_signals()
-        Gtk.main()
+
+        if not self.is_test:
+            Gtk.main()
+
+        return self
 
 
 class Handler:
