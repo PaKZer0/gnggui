@@ -8,7 +8,8 @@ python:
 
 install:
   - echo "install"
-  - pip3 install peewee pygobject
+  - pip3 install peewee
+  - sudo apt install libgirepository1.0-dev
 
 before_script:
   - echo "Hola"
