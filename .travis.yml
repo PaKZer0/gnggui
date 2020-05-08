@@ -13,4 +13,6 @@ install:
   - pip3 install wheel peewee pygobject
 
 script:
-  - python3 -m unittest discover -s tests/
+  - python3 -m unittest tests.test_controller
+  - python3 -m unittest tests.test_core
+  - python3 -m unittest tests.test_models
