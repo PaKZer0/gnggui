@@ -1,0 +1,17 @@
+sudo: required
+dist: bionic
+language: python
+
+python:
+  - 3.6
+  - 3.8
+
+
+install:
+  - sudo apt install python-gtk2
+
+before_script:
+  - echo "Hola"
+
+script:
+  - python -m unittest discover -s tests/
