@@ -5,15 +5,12 @@ language: python
 python:
   - 3.7
 
-
-install:
-  - echo "install"
-  - pip3 install peewee
+before_install:
+  - sudo apt update
   - sudo apt install libgirepository1.0-dev
 
-before_script:
-  - echo "Hola"
-  - echo "Adios"
+install:
+  - pip3 install wheel peewee pygobject
 
 script:
   - python3 -m unittest discover -s tests/
