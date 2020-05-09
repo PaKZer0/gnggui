@@ -59,15 +59,7 @@ class BorrarPartidaTest(BaseTestGtkGui):
         self.assertEqual(partidas, [])
 
 
-class CargarPartidaTest(BaseTestGtkGui):
-    def setUp(self):
-        con = Controller(True)
-        self.db_creator = DatabaseCreator.get_instance(con=con)
-        self.db_creator.fill_full_db()
-        db_instance = con.get_db()
-
-        super().setUp(db_instance=db_instance)
-
+class CargarPartidaTest(BaseConDatosGtkGui):
     def comprobar_pestanyas(self, should_be_active=True):
         tab1 = self.gui.builder.get_object("tab-partida")
         tab2 = self.gui.builder.get_object("tab-equipo")
@@ -162,3 +154,24 @@ class CargarPartidaTest(BaseTestGtkGui):
         cselpartida = self.gui.get_object("combo-partida")
         nombre_partida = cselpartida.get_model()[0][1]
         self.assertEqual(new_nombre, nombre_partida)
+
+        # comprobar que se cargan los personajes en los combos
+        combos_pj = []
+        combos_pj.append(self.gui.get_object("combo-pj-tirada"))
+        combos_pj.append(self.gui.get_object("combo-pnj-tirada"))
+        combos_pj.append(self.gui.get_object("combo-pj-combate"))
+        combos_pj.append(self.gui.get_object("combo-pnj-combate"))
+
+        personajes_partida = self.con.get_personajes(partida_db.id)
+
+        for combo_pj in combos_pj:
+            i = 0
+
+            for pj_model in combo_pj.get_model():
+                pjtest = personajes_partida[i]
+                self.assertEqual(pj_model[0], pjtest.id)
+                self.assertEqual(pj_model[1], pjtest.combo_str())
+
+                i = i + 1
+
+        # comprobar que se carga la lista de personajes

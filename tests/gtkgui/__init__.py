@@ -139,13 +139,17 @@ class DatabaseCreator:
             'notas': self.fake.paragraph(),
         }
 
-    def crear_personajes(self):
+    def crear_personajes(self, id_partida=None):
         for pj_values in self.default_values['personajes']:
-            self.con.crear_personaje(datos=pj_values)
+            datos = pj_values
+            if id_partida:
+                datos['partida'] = id_partida
+
+            self.con.crear_personaje(datos=datos)
 
     def fill_full_db(self):
-        self.crear_partida()
-        self.crear_personajes()
+        partida = self.crear_partida()
+        personajes = self.crear_personajes(id_partida=partida.id)
 
 
 class BaseTestGtkGui(TestCase):
@@ -165,6 +169,15 @@ class BaseTestGtkGui(TestCase):
         self.con.drop_db()
         self.con.close_db()
         self.gui.exit()
+
+class BaseConDatosGtkGui(BaseTestGtkGui):
+    def setUp(self):
+        con = Controller(True)
+        self.db_creator = DatabaseCreator.get_instance(con=con)
+        self.db_creator.fill_full_db()
+        db_instance = con.get_db()
+
+        super().setUp(db_instance=db_instance)
 
 
 from .partida import *
