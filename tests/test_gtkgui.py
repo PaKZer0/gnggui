@@ -6,7 +6,8 @@ from unittest import TestCase, main
 from faker import Faker
 
 from gui.gtkgui import run_gui
-from core.models import *
+from core.models import init_db
+from core.controller import Controller
 
 # http://unpythonic.blogspot.com/2007/03/unit-testing-pygtk.html
 def refresh_gui(delay=0):
@@ -26,7 +27,7 @@ class DatabaseCreator:
         fake = Faker()
         default_values = {
             'partida':{
-                'nombre': fake.catch_phrase(),
+                'nombre': fake.company(),
                 'descripcion': fake.paragraph(),
             }
         }
@@ -59,9 +60,8 @@ class BaseTestGtkGui(TestCase):
 
         return txt_partida
 
-    def setUp(self):
-        init_db(test=True)
-        self.gui = run_gui(test=True)
+    def setUp(self, db_instance=None):
+        self.gui = run_gui(test=True, db_instance=db_instance)
         self.con = self.gui.get_controller()
 
     def tearDown(self):
@@ -71,6 +71,10 @@ class BaseTestGtkGui(TestCase):
 
 
 class CrearPartidaTest(BaseTestGtkGui):
+    def setUp(self, db_instance=None):
+        init_db(test=True, db_instance=db_instance)
+        super().setUp(db_instance=db_instance)
+
     def test_crear_partida(self):
         bt_crear_partida = self.gui.builder.get_object("button-new-partida")
         txt_crear_partida = self.gui.builder.get_object("entry-partida")
@@ -99,7 +103,7 @@ class CrearPartidaTest(BaseTestGtkGui):
 
 
 class BorrarPartidaTest(BaseTestGtkGui):
-    def test_borrar_partidad(self):
+    def test_borrar_partida(self):
         bt_crear_partida = self.gui.builder.get_object("button-new-partida")
         bt_borrar_partida = self.gui.builder.get_object("button-remove-partida")
         txt_crear_partida = self.gui.builder.get_object("entry-partida")
@@ -127,20 +131,55 @@ class BorrarPartidaTest(BaseTestGtkGui):
 
 class CargarPartidaTest(BaseTestGtkGui):
     def setUp(self):
-        super().setUp()
-        self.db_creator = DatabaseCreator.get_instance(con=self.con)
+        con = Controller(True)
+        self.db_creator = DatabaseCreator.get_instance(con=con)
         self.db_creator.crear_partida()
+        db_instance = con.get_db()
+
+        super().setUp(db_instance=db_instance)
+
+    def comprobar_pestanyas(self, should_be_active=True):
+        tab1 = self.gui.builder.get_object("tab-partida")
+        tab2 = self.gui.builder.get_object("tab-equipo")
+        tab3 = self.gui.builder.get_object("tab-personaje")
+        tab4 = self.gui.builder.get_object("tab-tiradas")
+        tab5 = self.gui.builder.get_object("tab-combate")
+
+        assert_function = 'assertFalse'
+
+        if should_be_active:
+            assert_function = 'assertTrue'
+
+        getattr(self, assert_function)(tab1.is_sensitive())
+        getattr(self, assert_function)(tab3.is_sensitive())
+        getattr(self, assert_function)(tab4.is_sensitive())
+        getattr(self, assert_function)(tab5.is_sensitive())
 
     def test_cargar_partida(self):
-        # seleccionar fila
+        # comprobar partida presente en combo
         cselpartida = self.gui.get_object("combo-partida")
+        partidas_comboentries = [x for x in cselpartida.get_model()]
+        self.assertEqual(len(partidas_comboentries), 1)
+
+        # comprobar pestañas desactivadas
+        self.comprobar_pestanyas(should_be_active=False)
+
+        # seleccionar fila
         cselpartida.popup() # quizas no sea necesario ahora
         cselpartida.set_active(0)
         cselpartida.popdown() # quizás no sea necesario
+        refresh_gui()
 
         # click en cargar
         bt_load_partida = self.gui.builder.get_object("button-load-partida")
         bt_load_partida.clicked()
         refresh_gui()
 
-        # comprobar pestañas cargadas
+        # comprobamos que se ha cargado la partida internamente
+        partida_cargada = getattr(self.gui, 'partida', None)
+        self.assertNotEqual(partida_cargada, None)
+
+        # comprobar pestañas activas
+        self.comprobar_pestanyas()
+
+        # comprobar descripción de la partida

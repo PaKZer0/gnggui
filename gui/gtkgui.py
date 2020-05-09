@@ -2243,8 +2243,8 @@ class Handler:
         pass
 
 
-def run_gui(test=False):
-    gui = GnGGladeGui.get_instance(test)
+def run_gui(test=False, db_instance=None):
+    gui = GnGGladeGui.get_instance(test=test, db_instance=db_instance)
     gui = gui.run()
 
     return gui
