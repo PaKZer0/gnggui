@@ -166,7 +166,9 @@ class CargarPartidaTest(BaseTestGtkGui):
 
         # seleccionar fila
         cselpartida.popup() # quizas no sea necesario ahora
+        refresh_gui()
         cselpartida.set_active(0)
+        refresh_gui()
         cselpartida.popdown() # quizás no sea necesario
         refresh_gui()
 
@@ -182,4 +184,20 @@ class CargarPartidaTest(BaseTestGtkGui):
         # comprobar pestañas activas
         self.comprobar_pestanyas()
 
+        # comprobar título de la partida
+        partida_db = self.con.get_partidas()[0]
+        entry_nombre = self.gui.get_object("entry-partida-name")
+        txt_nombre = entry_nombre.get_text()
+        db_nombre = partida_db.nombre
+        self.assertEqual(txt_nombre, db_nombre)
+
         # comprobar descripción de la partida
+        text_buffer = self.gui.get_object("text-partida-descripcion")\
+                                .get_buffer()
+        start = text_buffer.get_start_iter()
+        end = text_buffer.get_end_iter()
+        txt_descripcion = text_buffer.get_text(start, end, False)
+
+        db_descripcion = self.con.get_partidas()[0].descripcion
+
+        self.assertEqual(txt_descripcion, db_descripcion)
