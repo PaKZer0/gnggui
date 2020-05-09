@@ -85,7 +85,8 @@ class CargarPartidaTest(BaseTestGtkGui):
         getattr(self, assert_function)(tab4.is_sensitive())
         getattr(self, assert_function)(tab5.is_sensitive())
 
-    def test_cargar_partida(self):
+    def test_cargar_editar_partida(self):
+        ## cargar
         # comprobar partida presente en combo
         cselpartida = self.gui.get_object("combo-partida")
         partidas_comboentries = [x for x in cselpartida.get_model()]
@@ -122,12 +123,41 @@ class CargarPartidaTest(BaseTestGtkGui):
         self.assertEqual(txt_nombre, db_nombre)
 
         # comprobar descripción de la partida
-        text_buffer = self.gui.get_object("text-partida-descripcion")\
-                                .get_buffer()
+        texta_descripcion = self.gui.get_object("text-partida-descripcion")
+        text_buffer = texta_descripcion.get_buffer()
         start = text_buffer.get_start_iter()
         end = text_buffer.get_end_iter()
         txt_descripcion = text_buffer.get_text(start, end, False)
 
-        db_descripcion = self.con.get_partidas()[0].descripcion
+        db_descripcion = partida_db.descripcion
 
         self.assertEqual(txt_descripcion, db_descripcion)
+
+        ## editar
+        # cambiar nombre y descripción
+        new_nombre = self.db_creator.partida_nombre()
+        new_descripcion = self.db_creator.partida_descripcion()
+
+        entry_nombre.set_text(new_nombre)
+        info_buffer = Gtk.TextBuffer()
+        info_buffer.set_text(new_descripcion)
+        texta_descripcion.set_buffer(info_buffer)
+        refresh_gui()
+
+        # guardamos
+        bt_edit_partida = self.gui.builder.get_object("button-edit-partida")
+        bt_edit_partida.clicked()
+        refresh_gui()
+
+        # comprobar que los valores han cambiado en base de datos
+        partida_db = self.con.get_partidas()[0]
+        db_nombre = partida_db.nombre
+        db_descripcion = partida_db.descripcion
+
+        self.assertEqual(new_nombre, db_nombre)
+        self.assertEqual(new_descripcion, db_descripcion)
+
+        # comprobar que se ha cambiado el valor en el combo de partidas
+        cselpartida = self.gui.get_object("combo-partida")
+        nombre_partida = cselpartida.get_model()[0][1]
+        self.assertEqual(new_nombre, nombre_partida)

@@ -24,15 +24,21 @@ class DatabaseCreator:
         # añadir conexión con la que interaccionaremos con la base de datos
         self.con = con
 
-        fake = Faker()
+        self.fake = Faker()
         default_values = {
             'partida':{
-                'nombre': fake.company(),
-                'descripcion': fake.paragraph(),
+                'nombre': self.partida_nombre(),
+                'descripcion': self.partida_descripcion(),
             }
         }
 
         self.default_values = default_values
+
+    def partida_nombre(self):
+        return self.fake.company()
+
+    def partida_descripcion(self):
+        return self.fake.paragraph()
 
     @classmethod
     def get_instance(cls, *args, **kwargs):
