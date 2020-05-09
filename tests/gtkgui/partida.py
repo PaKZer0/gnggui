@@ -63,7 +63,7 @@ class CargarPartidaTest(BaseTestGtkGui):
     def setUp(self):
         con = Controller(True)
         self.db_creator = DatabaseCreator.get_instance(con=con)
-        self.db_creator.crear_partida()
+        self.db_creator.fill_full_db()
         db_instance = con.get_db()
 
         super().setUp(db_instance=db_instance)
@@ -135,8 +135,9 @@ class CargarPartidaTest(BaseTestGtkGui):
 
         ## editar
         # cambiar nombre y descripción
-        new_nombre = self.db_creator.partida_nombre()
-        new_descripcion = self.db_creator.partida_descripcion()
+        new_partida = self.db_creator.generar_partida()
+        new_nombre = new_partida['nombre']
+        new_descripcion = new_partida['descripcion']
 
         entry_nombre.set_text(new_nombre)
         info_buffer = Gtk.TextBuffer()
