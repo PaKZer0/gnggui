@@ -156,22 +156,6 @@ class CargarPartidaTest(BaseConDatosGtkGui):
         self.assertEqual(new_nombre, nombre_partida)
 
         # comprobar que se cargan los personajes en los combos
-        combos_pj = []
-        combos_pj.append(self.gui.get_object("combo-pj-tirada"))
-        combos_pj.append(self.gui.get_object("combo-pnj-tirada"))
-        combos_pj.append(self.gui.get_object("combo-pj-combate"))
-        combos_pj.append(self.gui.get_object("combo-pnj-combate"))
-
-        personajes_partida = self.con.get_personajes(partida_db.id)
-
-        for combo_pj in combos_pj:
-            i = 0
-
-            for pj_model in combo_pj.get_model():
-                pjtest = personajes_partida[i]
-                self.assertEqual(pj_model[0], pjtest.id)
-                self.assertEqual(pj_model[1], pjtest.combo_str())
-
-                i = i + 1
+        self.comprobar_combos_personaje(partida_db.id)
 
         # comprobar que se carga la lista de personajes
