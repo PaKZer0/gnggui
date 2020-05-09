@@ -87,18 +87,7 @@ class CargarPartidaTest(BaseConDatosGtkGui):
         # comprobar pestañas desactivadas
         self.comprobar_pestanyas(should_be_active=False)
 
-        # seleccionar fila
-        cselpartida.popup() # quizas no sea necesario ahora
-        refresh_gui()
-        cselpartida.set_active(0)
-        refresh_gui()
-        cselpartida.popdown() # quizás no sea necesario
-        refresh_gui()
-
-        # click en cargar
-        bt_load_partida = self.gui.builder.get_object("button-load-partida")
-        bt_load_partida.clicked()
-        refresh_gui()
+        self.seleccionar_partida()
 
         # comprobamos que se ha cargado la partida internamente
         partida_cargada = getattr(self.gui, 'partida', None)

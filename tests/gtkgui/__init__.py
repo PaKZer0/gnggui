@@ -202,5 +202,20 @@ class BaseConDatosGtkGui(BaseTestGtkGui):
 
                 i = i + 1
 
+    def seleccionar_partida(self):
+        # seleccionar fila
+        cselpartida = self.gui.get_object("combo-partida")
+        cselpartida.popup() # quizas no sea necesario ahora
+        refresh_gui()
+        cselpartida.set_active(0)
+        refresh_gui()
+        cselpartida.popdown() # quizás no sea necesario
+        refresh_gui()
+
+        # click en cargar
+        bt_load_partida = self.gui.builder.get_object("button-load-partida")
+        bt_load_partida.clicked()
+        refresh_gui()
+
 
 from .partida import *
