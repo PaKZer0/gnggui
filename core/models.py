@@ -174,6 +174,20 @@ class Player(BaseModel):
             self.pueblo,
         )
 
+    def listapj_stats(self):
+        return 'HP{} FU{} AG{} IN{} CA{} CO{} CN{} LA{} MA{} SO{}'.format(
+            self.hp,
+            self.fuerza,
+            self.agilidad,
+            self.inteligencia,
+            self.carisma,
+            self.combate,
+            self.conocimientos,
+            self.latrocinio,
+            self.magia,
+            self.sociales,
+        )
+
 
 class PlayerEquipo(BaseModel):
     player = ForeignKeyField(Player)

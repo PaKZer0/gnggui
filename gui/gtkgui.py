@@ -519,27 +519,11 @@ class GnGGladeGui(AbstractGui):
                 hbox.set_homogeneous(True)
                 row.add(hbox)
 
-                txt_nombre = '{} lu {} : {} : ({})'.format(
-                    personaje.nombre,
-                    personaje.profesion,
-                    personaje.raza.nombre,
-                    personaje.pueblo,
-                )
+                txt_nombre = personaje.combo_str()
                 label_nombre = Gtk.Label(txt_nombre, xalign=0)
                 hbox.pack_start(label_nombre, True, True, 0)
 
-                txt_stats = 'HP{} FU{} AG{} IN{} CA{} CO{} CN{} LA{} MA{} SO{}'.format(
-                    personaje.hp,
-                    personaje.fuerza,
-                    personaje.agilidad,
-                    personaje.inteligencia,
-                    personaje.carisma,
-                    personaje.combate,
-                    personaje.conocimientos,
-                    personaje.latrocinio,
-                    personaje.magia,
-                    personaje.sociales,
-                )
+                txt_stats = personaje.listapj_stats()
                 label_stats = Gtk.Label(txt_stats, xalign=0)
                 hbox.pack_start(label_stats, True, True, 0)
 
