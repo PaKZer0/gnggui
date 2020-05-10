@@ -1,6 +1,6 @@
 from . import *
 
-class CrudEquipoTest(BaseTestGtkGui):
+class CrudEquipoTest(BaseConDatosGtkGui):
     def rellenar_formulario(self, entry_nombre, text_descripcion, bt_guardar,
                             sp_valor, combo_mod, equipo_nombre,
                             equipo_descripcion, equipo_valor, equipo_i_mod):
