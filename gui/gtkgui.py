@@ -23,6 +23,7 @@ class GnGGladeGui(AbstractGui):
     text_tirada_conopo = "Con oposición"
 
     _buttons_equipos = {}
+    _buttons_personajes = {}
 
     def get_mods_options(self, with_empty=True):
         mods = self.con.get_mods()
@@ -517,6 +518,8 @@ class GnGGladeGui(AbstractGui):
         for child in children:
             list_personaje.remove(child)
 
+        self._buttons_personajes = {}
+
         if self.partida:
             personajes = self.con.get_personajes(self.partida.id)
 
@@ -564,6 +567,13 @@ class GnGGladeGui(AbstractGui):
                 hbox.pack_start(buttongrid, True, True, 0)
 
                 list_personaje.add(row)
+                self._buttons_personajes[personaje.id] = {
+                    'edit': button_editar,
+                    'delete': button_borrar,
+                    'multi': button_multiplicar,
+                    'clone': button_clonar,
+                    'quitar': button_quitar,
+                }
 
         list_personaje.show_all()
 
