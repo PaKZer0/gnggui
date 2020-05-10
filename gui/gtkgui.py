@@ -250,13 +250,38 @@ class GnGGladeGui(AbstractGui):
 
         # set adjustements
         for spiner in all_spiners:
-            spiner.set_adjustment(Gtk.Adjustment(0, -1000, 1000, 1, 0, 0))
+            #value, lower, upper, step_increment, page_increment, page_size
+            adjustment = dict(
+                value=0,
+                lower=-1000,
+                upper=1000,
+                step_increment=1,
+                page_increment=0,
+                page_size=0,
+            )
+            spiner.set_adjustment(Gtk.Adjustment(**adjustment))
 
         for spiner in skill_spiners:
-            spiner.set_adjustment(Gtk.Adjustment(0, 1, 8, 1, 0, 0))
+            adjustment = dict(
+                value=0,
+                lower=1,
+                upper=8,
+                step_increment=1,
+                page_increment=0,
+                page_size=0,
+            )
+            spiner.set_adjustment(Gtk.Adjustment(**adjustment))
 
         for spiner in hp_spinners:
-            spiner.set_adjustment(Gtk.Adjustment(0, 0, 1000, 1, 0, 0))
+            adjustment = dict(
+                value=0,
+                lower=0,
+                upper=1000,
+                step_increment=1,
+                page_increment=0,
+                page_size=0,
+            )
+            spiner.set_adjustment(Gtk.Adjustment(**adjustment))
 
     def build(self):
         # build glade
@@ -475,10 +500,10 @@ class GnGGladeGui(AbstractGui):
                 equipo.nombre,
                 texto_mod,
             )
-            label_datos = Gtk.Label(texto_nombre, xalign=0)
+            label_datos = Gtk.Label(label=texto_nombre, xalign=0)
             hbox.pack_start(label_datos, True, True, 0)
 
-            label_descrip = Gtk.Label(equipo.descripcion, xalign=0)
+            label_descrip = Gtk.Label(label=equipo.descripcion, xalign=0)
             label_descrip.set_line_wrap(True)
             hbox.pack_start(label_descrip, True, True, 0)
 
