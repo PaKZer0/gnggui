@@ -1,5 +1,4 @@
 from . import *
-from pymouse import PyMouse
 
 class CrudEquipoTest(BaseConDatosGtkGui):
     def rellenar_formulario(self, entry_nombre, text_descripcion, bt_guardar,
