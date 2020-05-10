@@ -2,13 +2,14 @@ from . import *
 from pymouse import PyMouse
 
 class CrudEquipoTest(BaseConDatosGtkGui):
-    def test_crear_equipo_simple(self):
+    def test_crear_borrar_equipo_simple(self):
         entry_nombre = self.gui.get_object("entry-equipo-nombre")
         text_descripcion = self.gui.get_object("equipo-text-descripcion")
 
         equipo_nombre = "Bolsa de dinero"
         equipo_descripcion = "Te la dan gratis pero esta vacía"
 
+        ## crear
         # meter valores
         entry_nombre.set_text(equipo_nombre)
         info_buffer = Gtk.TextBuffer()
@@ -36,3 +37,15 @@ class CrudEquipoTest(BaseConDatosGtkGui):
         equipo = equipos[0]
         self.assertEqual(equipo.nombre, equipo_nombre)
         self.assertEqual(equipo.descripcion, equipo_descripcion)
+
+        ## borrar
+        bt_borrar = self.gui._buttons_equipos[equipo.id]['delete']
+        bt_borrar.clicked()
+        refresh_gui()
+
+        # comprobar que el equipo ya no esta en base de datos
+        equipos = self.con.get_equipos()
+        self.assertEqual(len(equipos), 0)
+
+        # comprobar que no esta en el listado (no hay botones almacenados)
+        self.assertEqual(len(self.gui._buttons_equipos), 0)

@@ -22,6 +22,8 @@ class GnGGladeGui(AbstractGui):
     text_tirada_sinopo = "Sin oposición"
     text_tirada_conopo = "Con oposición"
 
+    _buttons_equipos = {}
+
     def get_mods_options(self, with_empty=True):
         mods = self.con.get_mods()
         ret = Gtk.ListStore(int, str)
@@ -451,6 +453,7 @@ class GnGGladeGui(AbstractGui):
         combo_mod.set_active_iter(None)
 
     def load_list_equipo(self):
+        self._buttons_equipos = {}
         list_equipo = self.get_object("equipos-list")
         equipos = self.con.get_equipos()
 
@@ -491,6 +494,10 @@ class GnGGladeGui(AbstractGui):
             hbox.pack_start(buttongrid, True, True, 0)
 
             list_equipo.add(row)
+            self._buttons_equipos[equipo.id] = {
+                'edit': button_editar,
+                'delete': button_borrar,
+            }
 
         list_equipo.show_all()
 
