@@ -170,6 +170,7 @@ class BaseTestGtkGui(TestCase):
         self.con.close_db()
         self.gui.exit()
 
+
 class BaseConDatosGtkGui(BaseTestGtkGui):
     def setUp(self):
         con = Controller(True)
@@ -219,3 +220,4 @@ class BaseConDatosGtkGui(BaseTestGtkGui):
 
 
 from .partida import *
+from .equipo import *
