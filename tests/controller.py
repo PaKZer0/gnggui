@@ -15,36 +15,36 @@ class ControllerTestCase(unittest.TestCase):
 
     def crear_equipo(self):
         return self.con.crear_equipo(
-            'Hacha',
-            'Hacha guerrera muy antigua',
-            4,
-            1, # ataque
+            nombre='Hacha',
+            descripcion='Hacha guerrera muy antigua',
+            valor=4,
+            id_mod=1, # ataque
         )
 
     def crear_equipo2(self):
         return self.con.crear_equipo(
-            'Escudo de cartón',
-            'Si se moja adiós',
-            -1,
-            2, # defensa
+            nombre='Escudo de cartón',
+            descripcion='Si se moja adiós',
+            valor=-1,
+            id_mod=2, # defensa
         )
 
     def crear_equipom1(self):
         mod_magia = self.con.get_mod(9)
         return self.con.crear_equipo(
-            'Báculo de napalm',
-            'Magia abrasadora',
-            4,
-            mod_magia.id,
+            nombre='Báculo de napalm',
+            descripcion='Magia abrasadora',
+            valor=4,
+            id_mod=mod_magia.id,
         )
 
     def crear_equipom2(self):
         mod_magia = self.con.get_mod(9)
         return self.con.crear_equipo(
-            'Cardo borriquero',
-            'Dicen que da suerte',
-            1,
-            mod_magia.id,
+            nombre='Cardo borriquero',
+            descripcion='Dicen que da suerte',
+            valor=1,
+            id_mod=mod_magia.id,
         )
 
     def crear_personaje(self, nombre=None):
@@ -128,7 +128,8 @@ class ControllerTestCase(unittest.TestCase):
         self.assertEqual(equipos[0], equipo)
 
         # edit
-        self.con.editar_equipo(1, 'Toalla de playa', 'Raspa a jierro')
+        self.con.editar_equipo(
+            id_equipo=1, nombre='Toalla de playa', descripcion='Raspa a jierro')
         equipo = self.con.get_equipo(1)
         self.assertEqual(equipo.nombre, 'Toalla de playa')
 
