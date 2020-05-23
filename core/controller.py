@@ -8,8 +8,8 @@ from .models import *
 logger = logging.getLogger(__name__)
 
 class Controller():
-    def __init__(self, test=False):
-        init_db(test)
+    def __init__(self, test=False, db_instance=None):
+        init_db(test=test, db_instance=db_instance)
         self.core = Core()
 
     def close_db(self):
@@ -17,6 +17,9 @@ class Controller():
 
     def drop_db(self):
         drop_db()
+
+    def get_db(self):
+        get_db()
 
     ### PARTIDAS ###
     def get_partidas(self):
