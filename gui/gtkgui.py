@@ -91,6 +91,9 @@ class GnGGladeGui(AbstractGui):
 
         # iniciar iter list equipo pj
         self.pjequi_iters = {}
+        
+        # añadir equipo vacío
+        ret.append([None, None])
 
         for equipo in equipos:
             texto_mod = ''
@@ -114,11 +117,17 @@ class GnGGladeGui(AbstractGui):
         # cargar combo equipos
         renderer_text = Gtk.CellRendererCombo()
         mods_store = self.get_equipos_options()
-        combo_mods = self.builder.get_object("combo-personaje-equipo")
-        combo_mods.clear()
-        combo_mods.set_model(mods_store)
-        combo_mods.pack_start(renderer_text, True)
-        combo_mods.add_attribute(renderer_text, "text", 1)
+
+        combos_mods = [
+            self.builder.get_object("combo-personaje-equipo"),
+            self.builder.get_object("combo-equipo-asociado"),
+        ]
+
+        for combo_mods in combos_mods:
+            combo_mods.clear()
+            combo_mods.set_model(mods_store)
+            combo_mods.pack_start(renderer_text, True)
+            combo_mods.add_attribute(renderer_text, "text", 1)
 
     def get_personajes_options(self):
         logger.debug('Cargando personajes de partida {}'.format(self.partida.id))
