@@ -854,12 +854,16 @@ class Handler:
             # create
             logger.debug('''Crear equipo: nombre {} / descripcion {} / id_mod {} / valor {}
             '''.format(nombre, descripcion, id_mod, valor))
-            con.crear_equipo(nombre, descripcion, valor, id_mod)
+            con.crear_equipo(
+                nombre=nombre, descripcion=descripcion, valor=valor,
+                id_mod=id_mod)
         else:
             # edit
             logger.debug('''Editar equipo: nombre {} / descripcion {} / id_mod {} / valor {}
             '''.format(nombre, descripcion, id_mod, valor))
-            con.editar_equipo(gui.id_equipo_sel, nombre, descripcion, valor, id_mod)
+            con.editar_equipo(
+                id_equipo=gui.id_equipo_sel, nombre=nombre,
+                descripcion=descripcion, valor=valor, id_mod=id_mod)
             gui.id_equipo_sel = None
 
         gui.limpiar_form_equipo()

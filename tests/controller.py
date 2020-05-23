@@ -47,6 +47,23 @@ class ControllerTestCase(unittest.TestCase):
             id_mod=mod_magia.id,
         )
 
+    def crear_equipo_con_unidades(self):
+        equipo_slave = self.con.crear_equipo(
+            nombre='Carcaj',
+            descripcion='Para llevar las flechas',
+            unidades=20
+        )
+
+        equipo_master = self.con.crear_equipo(
+            nombre='Arco',
+            descripcion='Hecho con guita y maera',
+            valor=1,
+            id_mod=1, # ataque
+            equipo_asociado=equipo_slave.id
+        )
+
+        return equipo_master, equipo_slave
+
     def crear_personaje(self, nombre=None):
         datos = {
             'nombre': 'Salvajius',
@@ -137,6 +154,10 @@ class ControllerTestCase(unittest.TestCase):
         self.con.borrar_equipo(equipo.id)
         equipos = self.con.get_equipos()
         self.assertEqual(len(equipos), 0)
+
+        # equipo dependiente
+        equipo_master, equipo_slave = self.crear_equipo_con_unidades()
+        self.assertEqual(equipo_master.equipo_asociado, equipo_slave)
 
     def test_personaje(self):
         # gets
