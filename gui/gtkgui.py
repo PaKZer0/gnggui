@@ -93,7 +93,8 @@ class GnGGladeGui(AbstractGui):
         self.pjequi_iters = {}
 
         # añadir equipo vacío
-        ret.append([None, None])
+        empty_iter = ret.append([None, None])
+        self.pjequi_iters[-1] = empty_iter
 
         for equipo in equipos:
             texto_mod = ''
@@ -110,6 +111,7 @@ class GnGGladeGui(AbstractGui):
             logger.debug('Cargando equipo id {} nombre {}'.format(
                             equipo.id, texto_nombre))
             new_iter = ret.append([equipo.id, texto_nombre])
+            self.pjequi_iters[equipo.id] = new_iter
 
         return ret
 
@@ -859,6 +861,7 @@ class Handler:
 
         equipo_asociado = None
         eqa_active_iter = combo_equipo_asociado.get_active_iter()
+        
         if eqa_active_iter:
             id_equipo_asociado = combo_equipo_asociado.get_model()[eqa_active_iter][-2]
             equipo_asociado = con.get_equipo(id_equipo=id_equipo_asociado)
@@ -934,7 +937,7 @@ class Handler:
 
         # set equipo asociado
         if equipo.unidades:
-            active_iter = gui.pjequi_iters[equipo.mod.id]
+            active_iter = gui.pjequi_iters[equipo.id]
             combo_equipo_asociado.set_active_iter(active_iter)
 
         # setear id_equipo_sel
