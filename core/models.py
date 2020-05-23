@@ -44,11 +44,14 @@ MOD_TYPE = [
     (10, 'Sociales'),
 ]
 
-def init_db(test=False):
-    if test:
-        db = SqliteDatabase(':memory:')
+def init_db(test=False, db_instance=None):
+    if not db_instance:
+        if test:
+            db = SqliteDatabase(':memory:')
+        else:
+            db = SqliteDatabase('gng.db', pragmas={'foreign_keys': 1})
     else:
-        db = SqliteDatabase('gng.db', pragmas={'foreign_keys': 1})
+        db = db_instance
 
     db.bind(MODELS, bind_refs=False, bind_backrefs=False)
     db.connect()
@@ -74,6 +77,9 @@ def init_db(test=False):
     except:
         for dif in DIFICULTADES:
             Dificultad.create(valor=dif[0], texto=dif[1])
+
+def get_db():
+    return db
 
 def drop_db():
     db.drop_tables([Partida, Dificultad, Raza, Mod, Player,
@@ -166,6 +172,20 @@ class Player(BaseModel):
             self.profesion,
             self.raza.nombre,
             self.pueblo,
+        )
+
+    def listapj_stats(self):
+        return 'HP{} FU{} AG{} IN{} CA{} CO{} CN{} LA{} MA{} SO{}'.format(
+            self.hp,
+            self.fuerza,
+            self.agilidad,
+            self.inteligencia,
+            self.carisma,
+            self.combate,
+            self.conocimientos,
+            self.latrocinio,
+            self.magia,
+            self.sociales,
         )
 
 

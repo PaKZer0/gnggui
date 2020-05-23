@@ -1,0 +1,18 @@
+sudo: required
+dist: bionic
+language: python
+
+python:
+  - 3.7
+
+before_install:
+  - sudo apt update
+  - sudo apt install libgirepository1.0-dev python3-gi gobject-introspection gir1.2-gtk-3.0
+
+install:
+  - pip3 install wheel peewee pygobject faker
+
+script:
+  - python3 -m unittest tests.controller
+  - python3 -m unittest tests.core
+  - python3 -m unittest tests.models

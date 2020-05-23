@@ -1,6 +1,6 @@
 import unittest
 
-from .controller import Controller
+from core.controller import Controller
 
 class ControllerTestCase(unittest.TestCase):
     def setUp(self):
