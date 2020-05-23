@@ -91,7 +91,7 @@ class GnGGladeGui(AbstractGui):
 
         # iniciar iter list equipo pj
         self.pjequi_iters = {}
-        
+
         # añadir equipo vacío
         ret.append([None, None])
 
@@ -219,6 +219,7 @@ class GnGGladeGui(AbstractGui):
     def load_spiners(self):
         # get spinners
         equipo_valor = self.get_object("spin-equipo-valor")
+        equipo_equipoasociado = self.get_object("spin-equipo-unidades")
         pj_hp = self.get_object("spinner-personaje-hp")
         pj_fuerza = self.get_object("spinner-personaje-fuerza")
         pj_agilidad = self.get_object("spinner-personaje-agilidad")
@@ -246,7 +247,8 @@ class GnGGladeGui(AbstractGui):
 
         hp_spinners = [pj_hp, hppj_combate, hppnj_combate]
 
-        all_spiners = [ equipo_valor, bonuspj_tirada, bonuspnj_tirada,
+        all_spiners = [ equipo_valor, equipo_equipoasociado,
+                            bonuspj_tirada, bonuspnj_tirada,
                             bonusinipj_combate, bonusinipnj_combate,
                             bonuscombpj_combate, bonuscombpnj_combate,
                             pj_multiplicar
@@ -481,11 +483,15 @@ class GnGGladeGui(AbstractGui):
         combo_mod = self.get_object("combo-equipo-mod")
         spin_valor = self.get_object("spin-equipo-valor")
         equipo_descripcion = self.get_object("equipo-text-descripcion")
+        spin_unidades = self.get_object("spin-equipo-unidades")
+        combo_equipo_asociado = self.get_object("combo-equipo-asociado")
 
         entry_nombre.set_text('')
         equipo_descripcion.set_buffer(Gtk.TextBuffer())
         spin_valor.set_value(0)
         combo_mod.set_active_iter(None)
+        spin_unidades.set_value(0)
+        combo_equipo_asociado.set_active_iter(None)
 
     def load_list_equipo(self):
         self._buttons_equipos = {}
@@ -834,6 +840,8 @@ class Handler:
         combo_mod = gui.get_object("combo-equipo-mod")
         spin_valor = gui.get_object("spin-equipo-valor")
         equipo_descripcion = gui.get_object("equipo-text-descripcion")
+        spin_unidades = gui.get_object("spin-equipo-unidades")
+        combo_equipo_asociado = gui.get_object("combo-equipo-asociado")
 
         nombre = entry_nombre.get_text()
         descripcion = equipo_descripcion.get_buffer().get_text(
@@ -843,10 +851,17 @@ class Handler:
         )
         id_mod = 0
         valor = spin_valor.get_value_as_int()
+        unidades = spin_unidades.get_value_as_int()
 
         mod_active_iter = combo_mod.get_active_iter()
         if mod_active_iter:
             id_mod = combo_mod.get_model()[mod_active_iter][-2]
+
+        equipo_asociado = None
+        eqa_active_iter = combo_equipo_asociado.get_active_iter()
+        if eqa_active_iter:
+            id_equipo_asociado = combo_equipo_asociado.get_model()[eqa_active_iter][-2]
+            equipo_asociado = con.get_equipo(id_equipo=id_equipo_asociado)
 
         # fix when value comes negative
         if id_mod == -1:
@@ -865,14 +880,15 @@ class Handler:
             '''.format(nombre, descripcion, id_mod, valor))
             con.crear_equipo(
                 nombre=nombre, descripcion=descripcion, valor=valor,
-                id_mod=id_mod)
+                id_mod=id_mod, unidades=unidades, equipo_asociado=equipo_asociado)
         else:
             # edit
             logger.debug('''Editar equipo: nombre {} / descripcion {} / id_mod {} / valor {}
             '''.format(nombre, descripcion, id_mod, valor))
             con.editar_equipo(
                 id_equipo=gui.id_equipo_sel, nombre=nombre,
-                descripcion=descripcion, valor=valor, id_mod=id_mod)
+                descripcion=descripcion, valor=valor, id_mod=id_mod,
+                unidades=unidades, equipo_asociado=equipo_asociado)
             gui.id_equipo_sel = None
 
         gui.limpiar_form_equipo()
@@ -899,6 +915,8 @@ class Handler:
         combo_mod = gui.get_object("combo-equipo-mod")
         spin_valor = gui.get_object("spin-equipo-valor")
         equipo_descripcion = gui.get_object("equipo-text-descripcion")
+        spin_unidades = gui.get_object("spin-equipo-unidades")
+        combo_equipo_asociado = gui.get_object("combo-equipo-asociado")
 
         equipo = con.get_equipo(args[0]['id_equipo'])
 
@@ -907,10 +925,17 @@ class Handler:
         new_buffer.set_text(equipo.descripcion)
         equipo_descripcion.set_buffer(new_buffer)
         spin_valor.set_value(equipo.valor)
-        # get active iter
+        spin_unidades.set_value(equipo.unidades)
+
+        # set mod
         if equipo.mod:
             active_iter = gui.eqmod_iters[equipo.mod.id]
             combo_mod.set_active_iter(active_iter)
+
+        # set equipo asociado
+        if equipo.unidades:
+            active_iter = gui.pjequi_iters[equipo.mod.id]
+            combo_equipo_asociado.set_active_iter(active_iter)
 
         # setear id_equipo_sel
         gui.id_equipo_sel = equipo.id
