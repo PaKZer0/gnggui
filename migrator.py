@@ -78,7 +78,7 @@ def run_migrations():
 
     migration_check_4 = "SELECT COUNT(*) AS CNTREC " \
                         "FROM pragma_table_info('equipo') " \
-                        "WHERE name='arma_asociada_id'"
+                        "WHERE name='equipo_asociado_id'"
 
     # the migration is not applied if the column doesn't exist yet
     migration_applied_4 = run_migration_check(migration_check_4)
@@ -86,5 +86,8 @@ def run_migrations():
     if not migration_applied_4:
         migrator = SqliteMigrator(db)
         init_db()
-        # borramos la columna partida de Player
-        migrate( migrator.add_column('equipo', 'arma_asociada', Equipo.arma_asociada))
+        # Añadimos la columna de equipo asociado
+        # en la llamada al método se referencia a unidades pero por ser un hack:
+        # si referencio a equipo_asociado, al ser una clave sobre si misma
+        # intenta volver a añadir el campo, y de esta manera se añade sin problemas
+        migrate( migrator.add_column('equipo', 'equipo_asociado_id', Equipo.unidades))
