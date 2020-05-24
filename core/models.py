@@ -128,6 +128,8 @@ class Equipo(BaseModel):
     descripcion = CharField(null = True)
     valor = IntegerField(null = True)
     mod = ForeignKeyField(Mod, null = True)
+    unidades = IntegerField(null = True)
+    equipo_asociado = ForeignKeyField('self', null = True)
 
     def __str__(self):
         mod_txt = ''
@@ -138,7 +140,20 @@ class Equipo(BaseModel):
                 self.mod,
             )
 
-        return '{}{}'.format(self.nombre, mod_txt)
+        uds_txt = ''
+        if self.unidades > 0:
+            uds_txt = ' {} uds.'.format(self.unidades)
+
+        arma_txt = ''
+        if self.equipo_asociado:
+            arma_txt = ' (usado por {})'.format(self.equipo_asociado)
+
+        return '{}{}{}{}'.format(
+            self.nombre,
+            mod_txt,
+            uds_txt,
+            arma_txt,
+        )
 
 
 class Player(BaseModel):
@@ -157,6 +172,7 @@ class Player(BaseModel):
     magia = IntegerField()
     sociales = IntegerField()
     notas = TextField(null = True)
+    is_pj = BooleanField(default = False)
 
     def __str__(self):
         return '{} | {} | {} | HP {}'.format(

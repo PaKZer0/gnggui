@@ -206,11 +206,11 @@ class BaseConDatosGtkGui(BaseTestGtkGui):
     def seleccionar_partida(self):
         # seleccionar fila
         cselpartida = self.gui.get_object("combo-partida")
-        cselpartida.popup() # quizas no sea necesario ahora
+        #cselpartida.popup() # quizas no sea necesario ahora
         refresh_gui()
         cselpartida.set_active(0)
         refresh_gui()
-        cselpartida.popdown() # quizás no sea necesario
+        #cselpartida.popdown() # quizás no sea necesario
         refresh_gui()
 
         # click en cargar
