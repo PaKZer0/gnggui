@@ -4,6 +4,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 import logging
 from pprint import pprint
+from collections import OrderedDict
 
 from core.controller import Controller
 from gui.abstractgui import AbstractGui
@@ -24,6 +25,9 @@ class GnGGladeGui(AbstractGui):
 
     _buttons_equipos = {}
     _buttons_personajes = {}
+
+    _stats_pjs = OrderedDict()
+    _stats_pnjs = OrderedDict()
 
     def get_mods_options(self, with_empty=True):
         mods = self.con.get_mods()
@@ -580,8 +584,9 @@ class GnGGladeGui(AbstractGui):
                 row.add(hbox)
 
                 txt_nombre = personaje.combo_str()
-                label_nombre = Gtk.Label(label=txt_nombre, xalign=0)
-                hbox.pack_start(label_nombre, True, True, 0)
+                check_mostrar = Gtk.CheckButton(label=txt_nombre, xalign=0)
+                check_mostrar.set_active(False)
+                hbox.pack_start(check_mostrar, True, True, 0)
 
                 txt_stats = personaje.listapj_stats()
                 label_stats = Gtk.Label(label=txt_stats, xalign=0)
