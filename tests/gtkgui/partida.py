@@ -41,9 +41,9 @@ class BorrarPartidaTest(BaseTestGtkGui):
 
         # seleccionar fila
         cselpartida = self.gui.get_object("combo-partida")
-        cselpartida.popup() # quizas no sea necesario ahora
+        #cselpartida.popup() # quizas no sea necesario ahora
         cselpartida.set_active(0)
-        cselpartida.popdown() # quizás no sea necesario
+        #cselpartida.popdown() # quizás no sea necesario
 
         # click en cargar
         bt_borrar_partida.clicked()

@@ -92,6 +92,10 @@ class GnGGladeGui(AbstractGui):
         # iniciar iter list equipo pj
         self.pjequi_iters = {}
 
+        # añadir equipo vacío
+        empty_iter = ret.append([None, None])
+        self.pjequi_iters[-1] = empty_iter
+
         for equipo in equipos:
             texto_mod = ''
             if equipo.mod:
@@ -107,6 +111,7 @@ class GnGGladeGui(AbstractGui):
             logger.debug('Cargando equipo id {} nombre {}'.format(
                             equipo.id, texto_nombre))
             new_iter = ret.append([equipo.id, texto_nombre])
+            self.pjequi_iters[equipo.id] = new_iter
 
         return ret
 
@@ -114,11 +119,17 @@ class GnGGladeGui(AbstractGui):
         # cargar combo equipos
         renderer_text = Gtk.CellRendererCombo()
         mods_store = self.get_equipos_options()
-        combo_mods = self.builder.get_object("combo-personaje-equipo")
-        combo_mods.clear()
-        combo_mods.set_model(mods_store)
-        combo_mods.pack_start(renderer_text, True)
-        combo_mods.add_attribute(renderer_text, "text", 1)
+
+        combos_mods = [
+            self.builder.get_object("combo-personaje-equipo"),
+            self.builder.get_object("combo-equipo-asociado"),
+        ]
+
+        for combo_mods in combos_mods:
+            combo_mods.clear()
+            combo_mods.set_model(mods_store)
+            combo_mods.pack_start(renderer_text, True)
+            combo_mods.add_attribute(renderer_text, "text", 1)
 
     def get_personajes_options(self):
         logger.debug('Cargando personajes de partida {}'.format(self.partida.id))
@@ -210,6 +221,7 @@ class GnGGladeGui(AbstractGui):
     def load_spiners(self):
         # get spinners
         equipo_valor = self.get_object("spin-equipo-valor")
+        equipo_equipoasociado = self.get_object("spin-equipo-unidades")
         pj_hp = self.get_object("spinner-personaje-hp")
         pj_fuerza = self.get_object("spinner-personaje-fuerza")
         pj_agilidad = self.get_object("spinner-personaje-agilidad")
@@ -237,7 +249,8 @@ class GnGGladeGui(AbstractGui):
 
         hp_spinners = [pj_hp, hppj_combate, hppnj_combate]
 
-        all_spiners = [ equipo_valor, bonuspj_tirada, bonuspnj_tirada,
+        all_spiners = [ equipo_valor, equipo_equipoasociado,
+                            bonuspj_tirada, bonuspnj_tirada,
                             bonusinipj_combate, bonusinipnj_combate,
                             bonuscombpj_combate, bonuscombpnj_combate,
                             pj_multiplicar
@@ -431,7 +444,12 @@ class GnGGladeGui(AbstractGui):
 
     def exit(self):
         super().exit()
-        Gtk.main_quit()
+        try:
+            exit()
+        except SystemExit:
+            pass
+
+        #Gtk.main_quit()
 
     def get_partidas_options(self):
         partidas = self.con.get_partidas()
@@ -472,11 +490,15 @@ class GnGGladeGui(AbstractGui):
         combo_mod = self.get_object("combo-equipo-mod")
         spin_valor = self.get_object("spin-equipo-valor")
         equipo_descripcion = self.get_object("equipo-text-descripcion")
+        spin_unidades = self.get_object("spin-equipo-unidades")
+        combo_equipo_asociado = self.get_object("combo-equipo-asociado")
 
         entry_nombre.set_text('')
         equipo_descripcion.set_buffer(Gtk.TextBuffer())
         spin_valor.set_value(0)
         combo_mod.set_active_iter(None)
+        spin_unidades.set_value(0)
+        combo_equipo_asociado.set_active_iter(None)
 
     def load_list_equipo(self):
         self._buttons_equipos = {}
@@ -555,11 +577,11 @@ class GnGGladeGui(AbstractGui):
                 row.add(hbox)
 
                 txt_nombre = personaje.combo_str()
-                label_nombre = Gtk.Label(txt_nombre, xalign=0)
+                label_nombre = Gtk.Label(label=txt_nombre, xalign=0)
                 hbox.pack_start(label_nombre, True, True, 0)
 
                 txt_stats = personaje.listapj_stats()
-                label_stats = Gtk.Label(txt_stats, xalign=0)
+                label_stats = Gtk.Label(label=txt_stats, xalign=0)
                 hbox.pack_start(label_stats, True, True, 0)
 
                 buttongrid = Gtk.Grid()
@@ -670,6 +692,7 @@ class GnGGladeGui(AbstractGui):
         spinner_latrocinio = self.get_object("spinner-personaje-latrocinio")
         spinner_magia = self.get_object("spinner-personaje-magia")
         spinner_sociales = self.get_object("spinner-personaje-sociales")
+        check_ispj = self.get_object("check-personaje-ispj")
         text_notas = self.get_object("text-personaje-notas")
         button_asignar = self.get_object("button-personaje-equipo")
         button_resetear = self.get_object("button-personaje-resetform")
@@ -693,6 +716,7 @@ class GnGGladeGui(AbstractGui):
         combo_raza.set_active_iter(None)
         label_ataque.set_text('_')
         label_defensa.set_text('_')
+        check_ispj.set_active(False)
 
         button_asignar.set_sensitive(False)
         button_asignar.connect("clicked", Handler.voidCallback)
@@ -823,6 +847,8 @@ class Handler:
         combo_mod = gui.get_object("combo-equipo-mod")
         spin_valor = gui.get_object("spin-equipo-valor")
         equipo_descripcion = gui.get_object("equipo-text-descripcion")
+        spin_unidades = gui.get_object("spin-equipo-unidades")
+        combo_equipo_asociado = gui.get_object("combo-equipo-asociado")
 
         nombre = entry_nombre.get_text()
         descripcion = equipo_descripcion.get_buffer().get_text(
@@ -832,10 +858,18 @@ class Handler:
         )
         id_mod = 0
         valor = spin_valor.get_value_as_int()
+        unidades = spin_unidades.get_value_as_int()
 
         mod_active_iter = combo_mod.get_active_iter()
         if mod_active_iter:
             id_mod = combo_mod.get_model()[mod_active_iter][-2]
+
+        equipo_asociado = None
+        eqa_active_iter = combo_equipo_asociado.get_active_iter()
+
+        if eqa_active_iter:
+            id_equipo_asociado = combo_equipo_asociado.get_model()[eqa_active_iter][-2]
+            equipo_asociado = con.get_equipo(id_equipo=id_equipo_asociado)
 
         # fix when value comes negative
         if id_mod == -1:
@@ -852,12 +886,17 @@ class Handler:
             # create
             logger.debug('''Crear equipo: nombre {} / descripcion {} / id_mod {} / valor {}
             '''.format(nombre, descripcion, id_mod, valor))
-            con.crear_equipo(nombre, descripcion, valor, id_mod)
+            con.crear_equipo(
+                nombre=nombre, descripcion=descripcion, valor=valor,
+                id_mod=id_mod, unidades=unidades, equipo_asociado=equipo_asociado)
         else:
             # edit
             logger.debug('''Editar equipo: nombre {} / descripcion {} / id_mod {} / valor {}
             '''.format(nombre, descripcion, id_mod, valor))
-            con.editar_equipo(gui.id_equipo_sel, nombre, descripcion, valor, id_mod)
+            con.editar_equipo(
+                id_equipo=gui.id_equipo_sel, nombre=nombre,
+                descripcion=descripcion, valor=valor, id_mod=id_mod,
+                unidades=unidades, equipo_asociado=equipo_asociado)
             gui.id_equipo_sel = None
 
         gui.limpiar_form_equipo()
@@ -884,6 +923,8 @@ class Handler:
         combo_mod = gui.get_object("combo-equipo-mod")
         spin_valor = gui.get_object("spin-equipo-valor")
         equipo_descripcion = gui.get_object("equipo-text-descripcion")
+        spin_unidades = gui.get_object("spin-equipo-unidades")
+        combo_equipo_asociado = gui.get_object("combo-equipo-asociado")
 
         equipo = con.get_equipo(args[0]['id_equipo'])
 
@@ -892,10 +933,17 @@ class Handler:
         new_buffer.set_text(equipo.descripcion)
         equipo_descripcion.set_buffer(new_buffer)
         spin_valor.set_value(equipo.valor)
-        # get active iter
+        spin_unidades.set_value(equipo.unidades)
+
+        # set mod
         if equipo.mod:
             active_iter = gui.eqmod_iters[equipo.mod.id]
             combo_mod.set_active_iter(active_iter)
+
+        # set equipo asociado
+        if equipo.unidades:
+            active_iter = gui.pjequi_iters[equipo.id]
+            combo_equipo_asociado.set_active_iter(active_iter)
 
         # setear id_equipo_sel
         gui.id_equipo_sel = equipo.id
@@ -926,6 +974,7 @@ class Handler:
         spinner_magia = gui.get_object("spinner-personaje-magia")
         spinner_sociales = gui.get_object("spinner-personaje-sociales")
         text_notas = gui.get_object("text-personaje-notas")
+        check_ispj = gui.get_object("check-personaje-ispj")
 
         ## llenando data
         data = {}
@@ -951,6 +1000,7 @@ class Handler:
         data['magia'] = spinner_magia.get_value_as_int()
         data['sociales'] = spinner_sociales.get_value_as_int()
         data['partida'] = gui.partida.id
+        data['is_pj'] = check_ispj.get_active()
 
         # notas
         data['notas'] = text_notas.get_buffer().get_text(
@@ -1048,6 +1098,7 @@ class Handler:
         spinner_magia = gui.get_object("spinner-personaje-magia")
         spinner_sociales = gui.get_object("spinner-personaje-sociales")
         text_notas = gui.get_object("text-personaje-notas")
+        check_ispj = gui.get_object("check-personaje-ispj")
 
         personaje = con.get_personaje(args[0]['id_personaje'])
 
@@ -1067,6 +1118,8 @@ class Handler:
         spinner_latrocinio.set_value(personaje.latrocinio)
         spinner_magia.set_value(personaje.magia)
         spinner_sociales.set_value(personaje.sociales)
+        check_ispj.set_active(personaje.is_pj)
+
         # get active iter
         active_iter = gui.pjraza_iters[personaje.raza.id]
         combo_raza.set_active_iter(active_iter)
