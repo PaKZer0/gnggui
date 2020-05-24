@@ -444,7 +444,12 @@ class GnGGladeGui(AbstractGui):
 
     def exit(self):
         super().exit()
-        Gtk.main_quit()
+        try:
+            exit()
+        except SystemExit:
+            pass
+
+        #Gtk.main_quit()
 
     def get_partidas_options(self):
         partidas = self.con.get_partidas()
