@@ -572,11 +572,11 @@ class GnGGladeGui(AbstractGui):
                 row.add(hbox)
 
                 txt_nombre = personaje.combo_str()
-                label_nombre = Gtk.Label(txt_nombre, xalign=0)
+                label_nombre = Gtk.Label(label=txt_nombre, xalign=0)
                 hbox.pack_start(label_nombre, True, True, 0)
 
                 txt_stats = personaje.listapj_stats()
-                label_stats = Gtk.Label(txt_stats, xalign=0)
+                label_stats = Gtk.Label(label=txt_stats, xalign=0)
                 hbox.pack_start(label_stats, True, True, 0)
 
                 buttongrid = Gtk.Grid()
@@ -861,7 +861,7 @@ class Handler:
 
         equipo_asociado = None
         eqa_active_iter = combo_equipo_asociado.get_active_iter()
-        
+
         if eqa_active_iter:
             id_equipo_asociado = combo_equipo_asociado.get_model()[eqa_active_iter][-2]
             equipo_asociado = con.get_equipo(id_equipo=id_equipo_asociado)
