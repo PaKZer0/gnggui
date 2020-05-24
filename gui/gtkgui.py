@@ -452,7 +452,7 @@ class GnGGladeGui(AbstractGui):
         except SystemExit:
             pass
 
-        #Gtk.main_quit()
+        Gtk.main_quit()
 
     def get_partidas_options(self):
         partidas = self.con.get_partidas()
