@@ -346,6 +346,9 @@ class GnGGladeGui(AbstractGui):
         bshowcombates = self.builder.get_object("button-show-combates")
         bshowcombates.connect("clicked", Handler.onShowCombates)
 
+        bshowstats = self.builder.get_object("button-show-stats")
+        bshowstats.connect("clicked", Handler.onShowStats)
+
         ## tab partida ##
         beditpartida = self.builder.get_object("button-edit-partida")
         beditpartida.connect("clicked", Handler.onEditPartida)
@@ -824,6 +827,13 @@ class Handler:
         ## combat window ##
         combat_window = gui.builder.get_object("combat_window")
         combat_window.show_all()
+
+    def onShowStats(self, *args):
+        gui, con = get_utils()
+
+        ## combat window ##
+        stats_window = gui.builder.get_object("stats_window")
+        stats_window.show_all()
 
     def onEditPartida(self, *args):
         gui, con = get_utils()

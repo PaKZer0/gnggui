@@ -439,6 +439,9 @@
   </object>
   <object class="GtkWindow" id="stats_window">
     <property name="can_focus">False</property>
+    <property name="default_width">860</property>
+    <property name="default_height">669</property>
+    <property name="deletable">False</property>
     <child>
       <placeholder/>
     </child>
