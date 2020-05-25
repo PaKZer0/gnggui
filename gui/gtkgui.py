@@ -585,6 +585,10 @@ class GnGGladeGui(AbstractGui):
                 txt_nombre = personaje.combo_str()
                 check_mostrar = Gtk.CheckButton(label=txt_nombre, xalign=0)
                 check_mostrar.set_active(False)
+
+                if personaje.id in self._stats_pjs:
+                    check_mostrar.set_active(True)
+
                 check_mostrar.connect("clicked", Handler.onDisplayPjStat,
                     {'id_personaje': personaje.id})
                 hbox.pack_start(check_mostrar, True, True, 0)
@@ -632,6 +636,7 @@ class GnGGladeGui(AbstractGui):
                 }
 
         list_personaje.show_all()
+        self.refrescar_pantalla_stats()
 
     def refrescar_lista_personajes(self):
         logger.debug('Refrescando lista personajes')
@@ -639,6 +644,9 @@ class GnGGladeGui(AbstractGui):
 
         self.load_list_personajes()
         self.refrescar_pantalla_stats()
+
+    def reiniciar_pjdict_stats(self):
+        self._stats_pjs = OrderedDict()
 
     def refrescar_pantalla_stats(self):
         listas_personajes = [
@@ -830,6 +838,9 @@ class Handler:
             gui.partida = con.get_partida(id_partida)
 
             gui.tabs_start(True)
+
+            # reiniciar datos
+            gui.reiniciar_pjdict_stats()
 
             # cargar widgets pestaña partida
             gui.load_partida_info()
