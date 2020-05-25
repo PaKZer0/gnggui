@@ -27,7 +27,6 @@ class GnGGladeGui(AbstractGui):
     _buttons_personajes = {}
 
     _stats_pjs = OrderedDict()
-    _stats_pnjs = OrderedDict()
 
     def get_mods_options(self, with_empty=True):
         mods = self.con.get_mods()
@@ -586,6 +585,8 @@ class GnGGladeGui(AbstractGui):
                 txt_nombre = personaje.combo_str()
                 check_mostrar = Gtk.CheckButton(label=txt_nombre, xalign=0)
                 check_mostrar.set_active(False)
+                check_mostrar.connect("clicked", Handler.onDisplayPjStat,
+                    {'id_personaje': personaje.id})
                 hbox.pack_start(check_mostrar, True, True, 0)
 
                 txt_stats = personaje.listapj_stats()
@@ -637,6 +638,40 @@ class GnGGladeGui(AbstractGui):
         list_personajes = self.get_object("list-personajes")
 
         self.load_list_personajes()
+        self.refrescar_pantalla_stats()
+
+    def refrescar_pantalla_stats(self):
+        listas_personajes = [
+            self.get_object("stats-list-pjs"),
+            self.get_object("stats-list-pnjs"),
+        ]
+
+        pjs_dict = self._stats_pjs
+
+        # pintar en pantalla
+        # limpiar
+        children = listas_personajes[0].get_children()
+        for child in children:
+            listas_personajes[0].remove(child)
+
+        children = listas_personajes[1].get_children()
+        for child in children:
+            listas_personajes[1].remove(child)
+
+        # mostrar
+        for pj_id, pj_dict in pjs_dict.items():
+            row = pj_dict['row']
+            personaje = self.con.get_personaje(pj_id)
+
+            if personaje.is_pj:
+                list_personaje = listas_personajes[0]
+            else:
+                list_personaje = listas_personajes[1]
+
+            list_personaje.add(row)
+
+        listas_personajes[0].show_all()
+        listas_personajes[1].show_all()
 
     def load_list_equipos_pj(self):
         self.refrescar_lista_equipos_pj(True)
@@ -2332,6 +2367,54 @@ class Handler:
 
         # borrar iniciativa
         Handler.borrarIniciativa()
+
+    def onDisplayPjStat(self, *args):
+        gui, con = get_utils()
+        id_personaje = args[0]['id_personaje']
+        pj = con.get_personaje(id_personaje)
+
+        pjs_dict = gui._stats_pjs
+        list_personaje = gui.get_object("stats-list-pjs")
+
+        if not pj.is_pj:
+            list_personaje = gui.get_object("stats-list-pnjs")
+
+        refrescar_personajes = False
+        add_row = self.get_active()
+
+        # en caso de marcar el check
+        if add_row:
+            # si no esta en el diccionario, pintar y añadir
+            if not pj.id in pjs_dict:
+                # crear row
+                row = Gtk.ListBoxRow()
+                hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+                hbox.set_homogeneous(True)
+                row.add(hbox)
+
+                txt_nombre = pj.combo_str()
+                label_nombre = Gtk.Label(label=txt_nombre, xalign=0)
+                hbox.pack_start(label_nombre, True, True, 0)
+
+                txt_stats = pj.listapj_stats()
+                label_stats = Gtk.Label(label=txt_stats, xalign=0)
+                hbox.pack_start(label_stats, True, True, 0)
+
+                # añadir a dict
+                pjs_dict[pj.id] = {
+                    'check': self,
+                    'row': row,
+                }
+
+                refrescar_personajes = True
+        else: # en caso de desmarcarlo
+            if pj.id in pjs_dict:
+                del pjs_dict[pj.id]
+                refrescar_personajes = True
+
+        if refrescar_personajes:
+            gui.refrescar_pantalla_stats()
+
 
     def voidCallback(self, *args):
         pass
