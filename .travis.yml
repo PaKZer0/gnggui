@@ -2,6 +2,9 @@ sudo: required
 dist: bionic
 language: python
 
+services:
+  - xvfb
+
 python:
   - 3.7
 
@@ -13,6 +16,4 @@ install:
   - pip3 install wheel peewee pygobject faker
 
 script:
-  - python3 -m unittest tests.controller
-  - python3 -m unittest tests.core
-  - python3 -m unittest tests.models
+  - python3 -m unittest tests
