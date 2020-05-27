@@ -204,6 +204,26 @@ class BaseConDatosGtkGui(BaseTestGtkGui):
 
                 i = i + 1
 
+    def comprobar_lista_personajes(self, id_partida=None):
+        if not id_partida:
+            id_partida = self.con.get_partidas()[0].id
+
+        list_personaje = self.gui.get_object("list-personajes")
+        personajes_partida = self.con.get_personajes(id_partida)
+
+        children = list_personaje.get_children()
+        i = 0
+
+        for child in children:
+            personaje = personajes_partida[i]
+            box = child.get_children()[0]
+            box_children = box.get_children()
+            txt_pjinlst = box_children[0].get_label()
+
+            self.assertEqual(personaje.combo_str(), txt_pjinlst)
+
+            i = i + 1
+
     def seleccionar_partida(self):
         # seleccionar fila
         cselpartida = self.gui.get_object("combo-partida")
