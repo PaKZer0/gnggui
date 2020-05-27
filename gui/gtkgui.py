@@ -27,6 +27,7 @@ class GnGGladeGui(AbstractGui):
     _buttons_personajes = {}
 
     _stats_pjs = OrderedDict()
+    _stats_label_attrs = None
 
     def get_mods_options(self, with_empty=True):
         mods = self.con.get_mods()
@@ -885,6 +886,19 @@ class Handler:
         ## combat window ##
         stats_window = gui.builder.get_object("stats_window")
         stats_window.show_all()
+
+        # delete example label
+        row = gui.builder.get_object("deleteme-row")
+        label = gui.builder.get_object("deleteme-label")
+
+        gui._stats_label_attrs = label.get_attributes()
+
+        # borrar
+        lista_personajes = gui.builder.get_object("stats-list-pjs")
+        children = lista_personajes.get_children()
+        for child in children:
+            lista_personajes.remove(child)
+
 
     def onEditPartida(self, *args):
         gui, con = get_utils()
@@ -2403,12 +2417,18 @@ class Handler:
                 hbox.set_homogeneous(True)
                 row.add(hbox)
 
-                txt_nombre = pj.combo_str()
+                txt_nombre = '{} lu {} ({})'.format(
+                    pj.nombre,
+                    pj.profesion,
+                    pj.raza.nombre
+                )
                 label_nombre = Gtk.Label(label=txt_nombre, xalign=0)
+                label_nombre.set_attributes(gui._stats_label_attrs.copy())
                 hbox.pack_start(label_nombre, True, True, 0)
 
                 txt_stats = pj.listapj_stats()
                 label_stats = Gtk.Label(label=txt_stats, xalign=0)
+                label_stats.set_attributes(gui._stats_label_attrs.copy())
                 hbox.pack_start(label_stats, True, True, 0)
 
                 # añadir a dict
