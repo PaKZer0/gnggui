@@ -81,7 +81,7 @@ class CrudPersonajeTest(BaseConDatosGtkGui):
         self.assertEqual(personaje.notas, pj_vars['notas'])
         self.assertEqual(personaje.is_pj, pj_vars['is_pj'])
 
-    def comprobar_pjform_cargado(self, pj_vars):
+    def comprobar_pjform_cargado(self, pj_vars, vacio=False):
         entry_nombre = self.gui.builder.get_object("entry-personaje-nombre")
         entry_profesion = self.gui.builder.get_object("entry-personaje-profesion")
         entry_pueblo = self.gui.builder.get_object("entry-personaje-pueblo")
@@ -105,34 +105,62 @@ class CrudPersonajeTest(BaseConDatosGtkGui):
         check_ispj = self.gui.builder.get_object("check-personaje-ispj")
         text_notas = self.gui.builder.get_object("text-personaje-notas")
 
-        self.assertEqual(entry_nombre.get_text(), pj_vars['nombre'])
-        self.assertEqual(entry_profesion.get_text(), pj_vars['profesion'])
-        self.assertEqual(entry_pueblo.get_text(), pj_vars['pueblo'])
+        check_nombre = pj_vars['nombre'] if not vacio else ''
+        check_profesion = pj_vars['profesion'] if not vacio else ''
+        check_pueblo = pj_vars['pueblo'] if not vacio else ''
+
+        check_hp = str(pj_vars['hp']) if not vacio else '1'
+        check_fuerza = str(pj_vars['fuerza']) if not vacio else '1'
+        check_agilidad = str(pj_vars['agilidad']) if not vacio else '1'
+        check_inteligencia = str(pj_vars['inteligencia']) if not vacio else '1'
+        check_carisma = str(pj_vars['carisma']) if not vacio else '1'
+
+        check_combate = str(pj_vars['combate']) if not vacio else '1'
+        check_ataque = str(pj_vars['combate']) if not vacio else '_'
+        check_defensa = str(pj_vars['combate']) if not vacio else '_'
+        check_conocimientos = str(pj_vars['conocimientos']) if not vacio else '1'
+        check_latrocinio = str(pj_vars['latrocinio']) if not vacio else '1'
+        check_magia = str(pj_vars['magia']) if not vacio else '1'
+        check_sociales = str(pj_vars['sociales']) if not vacio else '1'
+
+        check_is_pj = pj_vars['is_pj'] if not vacio else False
+        check_notas = pj_vars['notas'] if not vacio else ''
+
+        self.assertEqual(entry_nombre.get_text(), check_nombre)
+        self.assertEqual(entry_profesion.get_text(), check_profesion)
+        self.assertEqual(entry_pueblo.get_text(), check_pueblo)
 
         # TODO: No sé porqué la iteración de la raza no casa
-        active_iter = self.gui.pjraza_iters[pj_vars['raza'].id]
-        #self.assertEqual(combo_raza.get_active_iter(), active_iter)
+        if not vacio:
+            active_iter = self.gui.pjraza_iters[pj_vars['raza'].id]
+            #self.assertEqual(combo_raza.get_active_iter(), active_iter)
+        else:
+            self.assertEqual(combo_raza.get_active_iter(), None)
 
-        self.assertEqual(spin_hp.get_text(), str(pj_vars['hp']))
-        self.assertEqual(spin_fuerza.get_text(), str(pj_vars['fuerza']))
-        self.assertEqual(spin_agilidad.get_text(), str(pj_vars['agilidad']))
-        self.assertEqual(spin_inteligencia.get_text(), str(pj_vars['inteligencia']))
-        self.assertEqual(spin_carisma.get_text(), str(pj_vars['carisma']))
+        self.assertEqual(spin_hp.get_text(), check_hp)
+        self.assertEqual(spin_fuerza.get_text(), check_fuerza)
+        self.assertEqual(spin_agilidad.get_text(), check_agilidad)
+        self.assertEqual(spin_inteligencia.get_text(), check_inteligencia)
+        self.assertEqual(spin_carisma.get_text(), check_carisma)
 
-        self.assertEqual(spin_combate.get_text(), str(pj_vars['combate']))
-        self.assertEqual(label_ataque.get_text(), str(pj_vars['combate']))
-        self.assertEqual(label_defensa.get_text(), str(pj_vars['combate']))
+        self.assertEqual(spin_combate.get_text(), check_combate)
+        self.assertEqual(label_ataque.get_text(), check_ataque)
+        self.assertEqual(label_defensa.get_text(), check_defensa)
 
-        self.assertEqual(check_ispj.get_active(), pj_vars['is_pj'])
+        self.assertEqual(spin_conocimientos.get_text(), check_conocimientos)
+        self.assertEqual(spin_latrocinio.get_text(), check_latrocinio)
+        self.assertEqual(spin_magia.get_text(), check_magia)
+        self.assertEqual(spin_sociales.get_text(), check_sociales)
+
+        self.assertEqual(check_ispj.get_active(), check_is_pj)
 
         text_buffer = text_notas.get_buffer()
         start = text_buffer.get_start_iter()
         end = text_buffer.get_end_iter()
-        check_notas = text_buffer.get_text(start, end, False)
-        self.assertEqual(check_notas, pj_vars['notas'])
+        notas_value = text_buffer.get_text(start, end, False)
+        self.assertEqual(notas_value, check_notas)
 
-
-    def test_cud_personaje(self):
+    def test_acciones_personaje(self):
         self.seleccionar_partida()
 
         ## crear presonaje
@@ -178,3 +206,23 @@ class CrudPersonajeTest(BaseConDatosGtkGui):
 
         # comprobar lista de personajes
         self.comprobar_lista_personajes(partida_db.id)
+
+        ## vaciar form
+        # cargar personaje
+        bt_editarpj = self.gui._buttons_personajes[personaje.id]['edit']
+        bt_editarpj.clicked()
+        refresh_gui()
+
+        bt_vaciar = self.gui.builder.get_object("button-personaje-resetform")
+        bt_vaciar.clicked()
+        refresh_gui()
+
+        self.comprobar_pjform_cargado({}, vacio=True)
+
+        ## clonar
+
+        ## borrar (el clon)
+
+        ## multiplicar 1
+
+        ## multiplicar 2
