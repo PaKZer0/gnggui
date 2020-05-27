@@ -222,3 +222,4 @@ class BaseConDatosGtkGui(BaseTestGtkGui):
 
 from .partida import *
 from .equipo import *
+from .personaje import *
