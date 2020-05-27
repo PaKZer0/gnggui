@@ -137,6 +137,7 @@ class DatabaseCreator:
             'magia': habilidades[3],
             'sociales': habilidades[4],
             'notas': self.fake.paragraph(),
+            'is_pj': False,
         }
 
     def crear_personajes(self, id_partida=None):
