@@ -158,7 +158,7 @@ class CargarPartidaTest(BaseConDatosGtkGui):
             personaje = personajes_partida[i]
             box = child.get_children()[0]
             box_children = box.get_children()
-            txt_pjinlst = box_children[0].get_text()
+            txt_pjinlst = box_children[0].get_label()
 
             self.assertEqual(personaje.combo_str(), txt_pjinlst)
 
