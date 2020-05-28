@@ -160,6 +160,31 @@ class CrudPersonajeTest(BaseConDatosGtkGui):
         notas_value = text_buffer.get_text(start, end, False)
         self.assertEqual(notas_value, check_notas)
 
+    def get_boton_personaje(self, id_personaje, button_key):
+        return self.gui._buttons_personajes[id_personaje][button_key]
+
+    def comprobar_clon(self, pj, pjclon, nombre_contains=False):
+        if not nombre_contains:
+            self.assertEqual(pj.nombre, pjclon.nombre)
+        else:
+            self.assertTrue(pj.nombre in pjclon.nombre)
+
+        self.assertEqual(pj.profesion, pjclon.profesion)
+        self.assertEqual(pj.raza, pjclon.raza)
+        self.assertEqual(pj.pueblo, pjclon.pueblo)
+        self.assertEqual(pj.hp, pjclon.hp)
+        self.assertEqual(pj.fuerza, pjclon.fuerza)
+        self.assertEqual(pj.agilidad, pjclon.agilidad)
+        self.assertEqual(pj.inteligencia, pjclon.inteligencia)
+        self.assertEqual(pj.carisma, pjclon.carisma)
+        self.assertEqual(pj.combate, pjclon.combate)
+        self.assertEqual(pj.conocimientos, pjclon.conocimientos)
+        self.assertEqual(pj.latrocinio, pjclon.latrocinio)
+        self.assertEqual(pj.magia, pjclon.magia)
+        self.assertEqual(pj.sociales, pjclon.sociales)
+        self.assertEqual(pj.notas, pjclon.notas)
+        self.assertEqual(pj.is_pj, pjclon.is_pj)
+
     def test_acciones_personaje(self):
         self.seleccionar_partida()
 
@@ -180,7 +205,7 @@ class CrudPersonajeTest(BaseConDatosGtkGui):
 
         ## editar personaje
         # cargar personaje
-        bt_editarpj = self.gui._buttons_personajes[personaje.id]['edit']
+        bt_editarpj = self.get_boton_personaje(personaje.id, 'edit')
         bt_editarpj.clicked()
         refresh_gui()
 
@@ -209,7 +234,7 @@ class CrudPersonajeTest(BaseConDatosGtkGui):
 
         ## vaciar form
         # cargar personaje
-        bt_editarpj = self.gui._buttons_personajes[personaje.id]['edit']
+        bt_editarpj = self.get_boton_personaje(personaje.id, 'edit')
         bt_editarpj.clicked()
         refresh_gui()
 
@@ -220,9 +245,85 @@ class CrudPersonajeTest(BaseConDatosGtkGui):
         self.comprobar_pjform_cargado({}, vacio=True)
 
         ## clonar
+        bt_clonar = self.get_boton_personaje(personaje.id, 'clone')
+        bt_clonar.clicked()
+        refresh_gui()
+
+        # comprobar pj y clon en bd
+        personajes_partida = self.con.get_personajes(partida_db.id)
+        personaje = personajes_partida[-2]
+        clon_pj = personajes_partida[-1]
+        self.comprobar_clon(personaje, clon_pj)
 
         ## borrar (el clon)
+        bt_borrar = self.get_boton_personaje(clon_pj.id, 'delete')
+        bt_borrar.clicked()
+        refresh_gui()
+
+        ## comprobar que el clon ya no está presente
+        exception = False
+        try:
+            self.con.get_personaje(clon_pj.id)
+        except:
+            exception = True
+
+        self.assertTrue(exception)
+
+        personajes_partida = self.con.get_personajes(partida_db.id)
+        self.assertEqual(personaje.id, personajes_partida[-1].id)
 
         ## multiplicar 1
+        spin_multiplicar = \
+            self.gui.builder.get_object("spinner-personaje-multiplicar")
+
+        spin_multiplicar.set_value(2)
+
+        bt_multiplicar = self.get_boton_personaje(personaje.id, 'multi')
+        bt_multiplicar.clicked()
+        refresh_gui()
+
+        personajes_partida = self.con.get_personajes(partida_db.id)
+        clon_1 = personajes_partida[-2]
+        clon_2 = personajes_partida[-1]
+
+        # comprobar spin vacio
+        self.assertEqual(spin_multiplicar.get_value(), 0.0)
+
+        # comprobar clones
+        self.comprobar_clon(personaje, clon_1, True)
+        self.comprobar_clon(personaje, clon_2, True)
+
+        # borrarlos
+        for clon_id in (clon_1.id, clon_2.id):
+            bt_borrar = self.get_boton_personaje(clon_id, 'delete')
+            bt_borrar.clicked()
+            refresh_gui()
 
         ## multiplicar 2
+        bt_editarpj = self.get_boton_personaje(personaje.id, 'edit')
+        bt_editarpj.clicked()
+        refresh_gui()
+        
+        spin_multiplicar.set_value(2)
+        bt_multiplicar2 = \
+            self.gui.builder.get_object("button-personaje-multiplicar")
+
+        bt_multiplicar2.clicked()
+        refresh_gui()
+
+        personajes_partida = self.con.get_personajes(partida_db.id)
+        clon_1 = personajes_partida[-2]
+        clon_2 = personajes_partida[-1]
+
+        # comprobar spin vacio
+        self.assertEqual(spin_multiplicar.get_value(), 0.0)
+
+        # comprobar clones
+        self.comprobar_clon(personaje, clon_1, True)
+        self.comprobar_clon(personaje, clon_2, True)
+
+        # borrarlos
+        for clon_id in (clon_1.id, clon_2.id):
+            bt_borrar = self.get_boton_personaje(clon_id, 'delete')
+            bt_borrar.clicked()
+            refresh_gui()
