@@ -190,6 +190,13 @@ class Player(BaseModel):
             self.pueblo,
         )
 
+    def stats_str(self):
+        return '{} lu {} ({})'.format(
+            self.nombre,
+            self.profesion,
+            self.raza.nombre
+        )
+
     def listapj_stats(self):
         return 'HP{} FU{} AG{} IN{} CA{} CO{} CN{} LA{} MA{} SO{}'.format(
             self.hp,

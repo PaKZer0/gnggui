@@ -4,6 +4,7 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 import logging
 from pprint import pprint
+from collections import OrderedDict
 
 from core.controller import Controller
 from gui.abstractgui import AbstractGui
@@ -24,6 +25,9 @@ class GnGGladeGui(AbstractGui):
 
     _buttons_equipos = {}
     _buttons_personajes = {}
+
+    _stats_pjs = OrderedDict()
+    _stats_label_attrs = None
 
     def get_mods_options(self, with_empty=True):
         mods = self.con.get_mods()
@@ -346,6 +350,9 @@ class GnGGladeGui(AbstractGui):
         bshowcombates = self.builder.get_object("button-show-combates")
         bshowcombates.connect("clicked", Handler.onShowCombates)
 
+        bshowstats = self.builder.get_object("button-show-stats")
+        bshowstats.connect("clicked", Handler.onShowStats)
+
         ## tab partida ##
         beditpartida = self.builder.get_object("button-edit-partida")
         beditpartida.connect("clicked", Handler.onEditPartida)
@@ -577,8 +584,15 @@ class GnGGladeGui(AbstractGui):
                 row.add(hbox)
 
                 txt_nombre = personaje.combo_str()
-                label_nombre = Gtk.Label(label=txt_nombre, xalign=0)
-                hbox.pack_start(label_nombre, True, True, 0)
+                check_mostrar = Gtk.CheckButton(label=txt_nombre, xalign=0)
+                check_mostrar.set_active(False)
+
+                if personaje.id in self._stats_pjs:
+                    check_mostrar.set_active(True)
+
+                check_mostrar.connect("clicked", Handler.onDisplayPjStat,
+                    {'id_personaje': personaje.id})
+                hbox.pack_start(check_mostrar, True, True, 0)
 
                 txt_stats = personaje.listapj_stats()
                 label_stats = Gtk.Label(label=txt_stats, xalign=0)
@@ -620,15 +634,54 @@ class GnGGladeGui(AbstractGui):
                     'multi': button_multiplicar,
                     'clone': button_clonar,
                     'quitar': button_quitar,
+                    'stats': check_mostrar,
                 }
 
         list_personaje.show_all()
+        self.refrescar_pantalla_stats()
 
     def refrescar_lista_personajes(self):
         logger.debug('Refrescando lista personajes')
         list_personajes = self.get_object("list-personajes")
 
         self.load_list_personajes()
+        self.refrescar_pantalla_stats()
+
+    def reiniciar_pjdict_stats(self):
+        self._stats_pjs = OrderedDict()
+
+    def refrescar_pantalla_stats(self):
+        listas_personajes = [
+            self.get_object("stats-list-pjs"),
+            self.get_object("stats-list-pnjs"),
+        ]
+
+        pjs_dict = self._stats_pjs
+
+        # pintar en pantalla
+        # limpiar
+        children = listas_personajes[0].get_children()
+        for child in children:
+            listas_personajes[0].remove(child)
+
+        children = listas_personajes[1].get_children()
+        for child in children:
+            listas_personajes[1].remove(child)
+
+        # mostrar
+        for pj_id, pj_dict in pjs_dict.items():
+            row = pj_dict['row']
+            personaje = self.con.get_personaje(pj_id)
+
+            if personaje.is_pj:
+                list_personaje = listas_personajes[0]
+            else:
+                list_personaje = listas_personajes[1]
+
+            list_personaje.add(row)
+
+        listas_personajes[0].show_all()
+        listas_personajes[1].show_all()
 
     def load_list_equipos_pj(self):
         self.refrescar_lista_equipos_pj(True)
@@ -788,6 +841,9 @@ class Handler:
 
             gui.tabs_start(True)
 
+            # reiniciar datos
+            gui.reiniciar_pjdict_stats()
+
             # cargar widgets pestaña partida
             gui.load_partida_info()
             gui.load_list_personajes()
@@ -824,6 +880,26 @@ class Handler:
         ## combat window ##
         combat_window = gui.builder.get_object("combat_window")
         combat_window.show_all()
+
+    def onShowStats(self, *args):
+        gui, con = get_utils()
+
+        ## combat window ##
+        stats_window = gui.builder.get_object("stats_window")
+        stats_window.show_all()
+
+        # delete example label
+        row = gui.builder.get_object("deleteme-row")
+        label = gui.builder.get_object("deleteme-label")
+
+        gui._stats_label_attrs = label.get_attributes()
+
+        # borrar
+        lista_personajes = gui.builder.get_object("stats-list-pjs")
+        children = lista_personajes.get_children()
+        for child in children:
+            lista_personajes.remove(child)
+
 
     def onEditPartida(self, *args):
         gui, con = get_utils()
@@ -2317,6 +2393,64 @@ class Handler:
 
         # borrar iniciativa
         Handler.borrarIniciativa()
+
+    def onDisplayPjStat(self, *args):
+        gui, con = get_utils()
+        id_personaje = args[0]['id_personaje']
+        pj = con.get_personaje(id_personaje)
+
+        pjs_dict = gui._stats_pjs
+        list_personaje = gui.get_object("stats-list-pjs")
+
+        if not pj.is_pj:
+            list_personaje = gui.get_object("stats-list-pnjs")
+
+        refrescar_personajes = False
+        add_row = self.get_active()
+
+        # en caso de marcar el check
+        if add_row:
+            # si no esta en el diccionario, pintar y añadir
+            if not pj.id in pjs_dict:
+                # crear row
+                row = Gtk.ListBoxRow()
+                hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
+                hbox.set_homogeneous(True)
+                row.add(hbox)
+
+                txt_nombre = pj.stats_str()
+                label_nombre = Gtk.Label(label=txt_nombre, xalign=0)
+
+                # add style if available
+                if gui._stats_label_attrs:
+                    label_nombre.set_attributes(gui._stats_label_attrs.copy())
+
+                hbox.pack_start(label_nombre, True, True, 0)
+
+                txt_stats = pj.listapj_stats()
+                label_stats = Gtk.Label(label=txt_stats, xalign=0)
+
+                # add style if available
+                if gui._stats_label_attrs:
+                    label_stats.set_attributes(gui._stats_label_attrs.copy())
+
+                hbox.pack_start(label_stats, True, True, 0)
+
+                # añadir a dict
+                pjs_dict[pj.id] = {
+                    'check': self,
+                    'row': row,
+                }
+
+                refrescar_personajes = True
+        else: # en caso de desmarcarlo
+            if pj.id in pjs_dict:
+                del pjs_dict[pj.id]
+                refrescar_personajes = True
+
+        if refrescar_personajes:
+            gui.refrescar_pantalla_stats()
+
 
     def voidCallback(self, *args):
         pass

@@ -110,10 +110,14 @@ class DatabaseCreator:
             'descripcion': self.fake.paragraph(),
         }
 
-    def crear_partida(self):
+    def crear_partida(self, nombre=None, descripcion=None):
+        if not nombre:
+            nombre = self.default_values['partida']['nombre']
+            descripcion = self.default_values['partida']['descripcion']
+
         return self.con.crear_partida(
-            nombre=self.default_values['partida']['nombre'],
-            descripcion=self.default_values['partida']['descripcion'],
+            nombre=nombre,
+            descripcion=descripcion,
         )
 
     ## personaje ##
@@ -137,6 +141,7 @@ class DatabaseCreator:
             'magia': habilidades[3],
             'sociales': habilidades[4],
             'notas': self.fake.paragraph(),
+            'is_pj': False,
         }
 
     def crear_personajes(self, id_partida=None):
@@ -203,12 +208,32 @@ class BaseConDatosGtkGui(BaseTestGtkGui):
 
                 i = i + 1
 
-    def seleccionar_partida(self):
+    def comprobar_lista_personajes(self, id_partida=None):
+        if not id_partida:
+            id_partida = self.con.get_partidas()[0].id
+
+        list_personaje = self.gui.get_object("list-personajes")
+        personajes_partida = self.con.get_personajes(id_partida)
+
+        children = list_personaje.get_children()
+        i = 0
+
+        for child in children:
+            personaje = personajes_partida[i]
+            box = child.get_children()[0]
+            box_children = box.get_children()
+            txt_pjinlst = box_children[0].get_label()
+
+            self.assertEqual(personaje.combo_str(), txt_pjinlst)
+
+            i = i + 1
+
+    def seleccionar_partida(self, index=0):
         # seleccionar fila
         cselpartida = self.gui.get_object("combo-partida")
         #cselpartida.popup() # quizas no sea necesario ahora
         refresh_gui()
-        cselpartida.set_active(0)
+        cselpartida.set_active(index)
         refresh_gui()
         #cselpartida.popdown() # quizás no sea necesario
         refresh_gui()
@@ -221,3 +246,4 @@ class BaseConDatosGtkGui(BaseTestGtkGui):
 
 from .partida import *
 from .equipo import *
+from .personaje import *
