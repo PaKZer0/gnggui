@@ -634,6 +634,7 @@ class GnGGladeGui(AbstractGui):
                     'multi': button_multiplicar,
                     'clone': button_clonar,
                     'quitar': button_quitar,
+                    'stats': check_mostrar,
                 }
 
         list_personaje.show_all()
@@ -2417,11 +2418,7 @@ class Handler:
                 hbox.set_homogeneous(True)
                 row.add(hbox)
 
-                txt_nombre = '{} lu {} ({})'.format(
-                    pj.nombre,
-                    pj.profesion,
-                    pj.raza.nombre
-                )
+                txt_nombre = pj.stats_str()
                 label_nombre = Gtk.Label(label=txt_nombre, xalign=0)
 
                 # add style if available
@@ -2432,7 +2429,7 @@ class Handler:
 
                 txt_stats = pj.listapj_stats()
                 label_stats = Gtk.Label(label=txt_stats, xalign=0)
-                
+
                 # add style if available
                 if gui._stats_label_attrs:
                     label_stats.set_attributes(gui._stats_label_attrs.copy())
