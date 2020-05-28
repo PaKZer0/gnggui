@@ -2423,12 +2423,20 @@ class Handler:
                     pj.raza.nombre
                 )
                 label_nombre = Gtk.Label(label=txt_nombre, xalign=0)
-                label_nombre.set_attributes(gui._stats_label_attrs.copy())
+
+                # add style if available
+                if gui._stats_label_attrs:
+                    label_nombre.set_attributes(gui._stats_label_attrs.copy())
+
                 hbox.pack_start(label_nombre, True, True, 0)
 
                 txt_stats = pj.listapj_stats()
                 label_stats = Gtk.Label(label=txt_stats, xalign=0)
-                label_stats.set_attributes(gui._stats_label_attrs.copy())
+                
+                # add style if available
+                if gui._stats_label_attrs:
+                    label_stats.set_attributes(gui._stats_label_attrs.copy())
+
                 hbox.pack_start(label_stats, True, True, 0)
 
                 # añadir a dict
