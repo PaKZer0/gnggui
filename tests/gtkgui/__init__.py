@@ -110,10 +110,14 @@ class DatabaseCreator:
             'descripcion': self.fake.paragraph(),
         }
 
-    def crear_partida(self):
+    def crear_partida(self, nombre=None, descripcion=None):
+        if not nombre:
+            nombre = self.default_values['partida']['nombre']
+            descripcion = self.default_values['partida']['descripcion']
+
         return self.con.crear_partida(
-            nombre=self.default_values['partida']['nombre'],
-            descripcion=self.default_values['partida']['descripcion'],
+            nombre=nombre,
+            descripcion=descripcion,
         )
 
     ## personaje ##
@@ -224,12 +228,12 @@ class BaseConDatosGtkGui(BaseTestGtkGui):
 
             i = i + 1
 
-    def seleccionar_partida(self):
+    def seleccionar_partida(self, index=0):
         # seleccionar fila
         cselpartida = self.gui.get_object("combo-partida")
         #cselpartida.popup() # quizas no sea necesario ahora
         refresh_gui()
-        cselpartida.set_active(0)
+        cselpartida.set_active(index)
         refresh_gui()
         #cselpartida.popdown() # quizás no sea necesario
         refresh_gui()

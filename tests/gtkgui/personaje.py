@@ -303,7 +303,7 @@ class CrudPersonajeTest(BaseConDatosGtkGui):
         bt_editarpj = self.get_boton_personaje(personaje.id, 'edit')
         bt_editarpj.clicked()
         refresh_gui()
-        
+
         spin_multiplicar.set_value(2)
         bt_multiplicar2 = \
             self.gui.builder.get_object("button-personaje-multiplicar")
@@ -327,3 +327,86 @@ class CrudPersonajeTest(BaseConDatosGtkGui):
             bt_borrar = self.get_boton_personaje(clon_id, 'delete')
             bt_borrar.clicked()
             refresh_gui()
+
+    def test_panel_stats(self):
+        # seleccionar partida
+        self.seleccionar_partida()
+
+        # abrir panel de stats
+        bt_show_stats = self.gui.builder.get_object("button-show-stats")
+        bt_show_stats.clicked()
+        refresh_gui()
+
+        ## crear presonajes
+        # pj
+        pj_vars = self.db_creator.generar_personaje()
+        pj_vars['is_pj'] = True
+        self.rellenar_pj_guardar(pj_vars)
+
+        # pnj
+        pnj_vars = self.db_creator.generar_personaje()
+        self.rellenar_pj_guardar(pnj_vars)
+
+        partida_db = self.con.get_partidas()[0]
+        personajes_partida = self.con.get_personajes(partida_db.id)
+        pj = personajes_partida[-2]
+        pnj = personajes_partida[-1]
+
+        # marcar y comprobar que aparecen
+        check_show_pj = self.get_boton_personaje(pj.id, 'stats')
+        check_show_pnj = self.get_boton_personaje(pnj.id, 'stats')
+
+        check_show_pj.set_active(True)
+        check_show_pnj.set_active(True)
+        refresh_gui()
+
+        # comprobar pj
+        stats_list_pjs = self.gui.get_object("stats-list-pjs")
+        children = stats_list_pjs.get_children()
+        first_row = children[0]
+        label_pj_name = first_row.get_children()[0].get_children()[0]
+
+        self.assertEqual(label_pj_name.get_text(), pj.stats_str())
+
+        # comprobar pnj
+        stats_list_pnjs = self.gui.get_object("stats-list-pnjs")
+        children = stats_list_pnjs.get_children()
+        first_row = children[0]
+        label_pnj_name = first_row.get_children()[0].get_children()[0]
+
+        self.assertEqual(label_pnj_name.get_text(), pnj.stats_str())
+
+        # desmarcar y comprobar que desaparecen
+        check_show_pj.set_active(False)
+        check_show_pnj.set_active(False)
+        refresh_gui()
+
+        # comprobar pj
+        children = stats_list_pjs.get_children()
+        self.assertEqual(len(children), 0)
+
+        # comprobar pj
+        children = stats_list_pnjs.get_children()
+        self.assertEqual(len(children), 0)
+
+        # marcar de nuevo y cambiar de partida
+        check_show_pj.set_active(True)
+        check_show_pnj.set_active(True)
+        refresh_gui()
+
+        # crear nueva partida y seleccionarla
+        bt_crear_partida = self.gui.builder.get_object("button-new-partida")
+        txt_crear_partida = self.gui.builder.get_object("entry-partida")
+        txt_crear_partida.set_text("Otra partida")
+        bt_crear_partida.clicked()
+        refresh_gui()
+        self.seleccionar_partida(1)
+
+        # comprobar que desaparecen
+        # comprobar pj
+        children = stats_list_pjs.get_children()
+        self.assertEqual(len(children), 0)
+
+        # comprobar pj
+        children = stats_list_pnjs.get_children()
+        self.assertEqual(len(children), 0)
