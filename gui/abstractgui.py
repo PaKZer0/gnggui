@@ -73,9 +73,8 @@ class AbstractGui():
 
         # cargar combos
         self.load_partidas_combo()
-        self.load_mods_combo()
-        #self.load_mods_equipo_combo()
-        #self.load_mods_tirada_combo()
+        self.load_mods_equipo_combo()
+        self.load_mods_tirada_combo()
         self.load_razas_combo()
         self.load_equipos_combo()
         self.load_dificultades_combo()
