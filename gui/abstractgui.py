@@ -110,6 +110,24 @@ class AbstractGui():
             dificultades, 'id', fmt_func, 'dificultad')
         self.load_combo(dificultades_list, 'combo-dificultad-tirada')
     
+    def load_personajes_combo(self, id_combo):
+        def fmt_func(item):
+            return item.combo_str()
+        
+        personajes = self.con.get_personajes()
+        personajes_list = self.build_fmt_option_list(
+            personajes, 'id', fmt_func, 'personaje', False, 'pj_iters')
+        self.load_combo(personajes_list, id_combo)
+    
+    def load_personajes_combos(self):
+        self.load_personajes_combo('combo-pj-tirada')
+        self.load_personajes_combo('combo-pnj-tirada')
+        self.load_personajes_combo('combo-pj-combate')
+        self.load_personajes_combo('combo-pnj-combate')
+
+        self.id_pj_ini = None
+        self.id_pnj_ini = None
+    
     def build(self):
         '''
         Builds the basic gui

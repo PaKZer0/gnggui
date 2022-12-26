@@ -29,42 +29,6 @@ class GnGGladeGui(AbstractGui):
     _stats_pjs = OrderedDict()
     _stats_label_attrs = None
 
-    def get_personajes_options(self):
-        logger.debug('Cargando personajes de partida {}'.format(self.partida.id))
-        personajes = self.con.get_personajes(self.partida.id)
-        ret = Gtk.ListStore(int, str)
-
-        # iniciar iter list equipo pj
-        self.pj_iters = {}
-
-        for personaje in personajes:
-            txt_nombre = personaje.combo_str()
-            logger.debug('Cargando personaje id {} nombre {}'.format(
-                            personaje.id, txt_nombre))
-            new_iter = ret.append([personaje.id, txt_nombre])
-
-        return ret
-
-    def load_personajes_combos(self):
-        # cargar combo equipos
-        renderer_text = Gtk.CellRendererCombo()
-
-        combos_pj = []
-        combos_pj.append(self.builder.get_object("combo-pj-tirada"))
-        combos_pj.append(self.builder.get_object("combo-pnj-tirada"))
-        combos_pj.append(self.builder.get_object("combo-pj-combate"))
-        combos_pj.append(self.builder.get_object("combo-pnj-combate"))
-        pjs_store = self.get_personajes_options()
-
-        for combo in combos_pj:
-            combo.clear()
-            combo.set_model(pjs_store)
-            combo.pack_start(renderer_text, True)
-            combo.add_attribute(renderer_text, "text", 1)
-
-        self.id_pj_ini = None
-        self.id_pnj_ini = None
-
     def get_personajes_disponibles_options(self):
         logger.debug('Cargando personajes disponibles para {}'.format(self.partida.id))
         personajes = self.con.get_personajes_disponibles(self.partida.id)
