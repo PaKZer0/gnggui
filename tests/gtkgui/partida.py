@@ -148,18 +148,4 @@ class CargarPartidaTest(BaseConDatosGtkGui):
         self.comprobar_combos_personaje(partida_db.id)
 
         # comprobar que se carga la lista de personajes
-        list_personaje = self.gui.get_object("list-personajes")
-        personajes_partida = self.con.get_personajes(partida_db.id)
-
-        children = list_personaje.get_children()
-        i = 0
-
-        for child in children:
-            personaje = personajes_partida[i]
-            box = child.get_children()[0]
-            box_children = box.get_children()
-            txt_pjinlst = box_children[0].get_text()
-
-            self.assertEqual(personaje.combo_str(), txt_pjinlst)
-
-            i = i + 1
+        self.comprobar_lista_personajes(partida_db.id)
