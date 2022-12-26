@@ -1,4 +1,7 @@
+import logging
 from core.controller import Controller
+
+logger = logging.getLogger(__name__)
 
 class AbstractGui():
     instance = None
@@ -127,6 +130,16 @@ class AbstractGui():
 
         self.id_pj_ini = None
         self.id_pnj_ini = None
+    
+    def load_personajes_disponibles_combos(self):
+        def fmt_func(item):
+            return item.combo_str()
+        
+        logger.debug('Cargando personajes disponibles para {}'.format(self.partida.id))
+        personajes = self.con.get_personajes_disponibles(self.partida.id)
+        personajes_list = self.build_fmt_option_list(
+            personajes, 'id', fmt_func, 'personaje', False, 'pj_iters')
+        self.load_combo(personajes_list, 'combo-personaje-importar')
     
     def build(self):
         '''
