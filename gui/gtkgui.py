@@ -29,52 +29,6 @@ class GnGGladeGui(AbstractGui):
     _stats_pjs = OrderedDict()
     _stats_label_attrs = None
 
-    def get_equipos_options(self):
-        equipos = self.con.get_equipos()
-        ret = Gtk.ListStore(int, str)
-
-        # iniciar iter list equipo pj
-        self.pjequi_iters = {}
-
-        # añadir equipo vacío
-        empty_iter = ret.append([None, None])
-        self.pjequi_iters[-1] = empty_iter
-
-        for equipo in equipos:
-            texto_mod = ''
-            if equipo.mod:
-                if equipo.valor > 0:
-                    texto_mod = ' +{} en {}'.format(equipo.valor, equipo.mod.nombre)
-                elif equipo.valor <= 0:
-                    texto_mod = ' {} en {}'.format(equipo.valor, equipo.mod.nombre)
-
-            texto_nombre = '{}{}'.format(
-                equipo.nombre,
-                texto_mod,
-            )
-            logger.debug('Cargando equipo id {} nombre {}'.format(
-                            equipo.id, texto_nombre))
-            new_iter = ret.append([equipo.id, texto_nombre])
-            self.pjequi_iters[equipo.id] = new_iter
-
-        return ret
-
-    def load_equipos_combo(self):
-        # cargar combo equipos
-        renderer_text = Gtk.CellRendererCombo()
-        mods_store = self.get_equipos_options()
-
-        combos_mods = [
-            self.builder.get_object("combo-personaje-equipo"),
-            self.builder.get_object("combo-equipo-asociado"),
-        ]
-
-        for combo_mods in combos_mods:
-            combo_mods.clear()
-            combo_mods.set_model(mods_store)
-            combo_mods.pack_start(renderer_text, True)
-            combo_mods.add_attribute(renderer_text, "text", 1)
-
     def get_personajes_options(self):
         logger.debug('Cargando personajes de partida {}'.format(self.partida.id))
         personajes = self.con.get_personajes(self.partida.id)

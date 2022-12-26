@@ -56,7 +56,8 @@ class AbstractGui():
     
     def load_mods_equipo_combo(self):
         mods = self.con.get_mods()
-        mods_list = self.build_option_list(mods, 'id', 'nombre', 'mod', True, 'eqmod_iters')
+        mods_list = self.build_option_list(
+            mods, 'id', 'nombre', 'mod', True, 'eqmod_iters')
         self.load_combo(mods_list, 'combo-equipo-mod')
     
     def load_mods_tirada_combo(self):
@@ -64,10 +65,41 @@ class AbstractGui():
         mods_list = self.build_option_list(mods, 'id', 'nombre', 'mod')
         self.load_combo(mods_list, 'combo-mod-tirada')
     
+    def load_mods_combo(self):
+        self.load_mods_equipo_combo()
+        self.load_mods_tirada_combo()
+    
     def load_razas_combo(self):
         razas = self.con.get_razas()
-        razas_list = self.build_option_list(razas, 'id', 'nombre', 'raza', False, 'pjraza_iters')
+        razas_list = self.build_option_list(
+            razas, 'id', 'nombre', 'raza', False, 'pjraza_iters')
         self.load_combo(razas_list, 'combo-personaje-raza')
+    
+    def load_equipos_combo_gen(self, id_combo):
+        def fmt_func(item):
+            texto_mod = ''
+            if item.mod:
+                if item.valor > 0:
+                    texto_mod = f' +{item.valor} en {item.mod.nombre}'
+                elif item.valor <= 0:
+                    texto_mod = f' {item.valor} en {item.mod.nombre}'
+
+            return f'{item.nombre}{texto_mod}'
+        
+        equipos = self.con.get_equipos()
+        equipos_list = self.build_fmt_option_list(
+            equipos, 'id', fmt_func, 'equipo', True, 'pjequi_iters')
+        self.load_combo(equipos_list, id_combo)
+    
+    def load_equipos_pj_combo(self):
+        self.load_equipos_combo_gen('combo-personaje-equipo')
+    
+    def load_equipos_asociado_combo(self):
+        self.load_equipos_combo_gen('combo-equipo-asociado')
+    
+    def load_equipos_combo(self):
+        self.load_equipos_pj_combo()
+        self.load_equipos_asociado_combo()
     
     def build(self):
         '''
@@ -78,8 +110,7 @@ class AbstractGui():
 
         # cargar combos
         self.load_partidas_combo()
-        self.load_mods_equipo_combo()
-        self.load_mods_tirada_combo()
+        self.load_mods_combo()
         self.load_razas_combo()
         self.load_equipos_combo()
         self.load_dificultades_combo()
