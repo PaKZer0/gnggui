@@ -29,11 +29,7 @@ class GnGGladeGui(AbstractGui):
     _stats_pjs = OrderedDict()
     _stats_label_attrs = None
 
-    def load_spiners(self):
-        # get spinners
-        equipo_valor = self.get_object("spin-equipo-valor")
-        equipo_equipoasociado = self.get_object("spin-equipo-unidades")
-        pj_hp = self.get_object("spinner-personaje-hp")
+    def get_skill_spinners(self):
         pj_fuerza = self.get_object("spinner-personaje-fuerza")
         pj_agilidad = self.get_object("spinner-personaje-agilidad")
         pj_inteligencia = self.get_object("spinner-personaje-inteligencia")
@@ -43,37 +39,43 @@ class GnGGladeGui(AbstractGui):
         pj_latrocinio = self.get_object("spinner-personaje-latrocinio")
         pj_magia = self.get_object("spinner-personaje-magia")
         pj_sociales = self.get_object("spinner-personaje-sociales")
-        pj_multiplicar = self.get_object("spinner-personaje-multiplicar")
-        bonuspj_tirada = self.get_object("spinner-bonuspj-tirada")
-        bonuspnj_tirada = self.get_object("spinner-bonuspnj-tirada")
+
+        return [pj_fuerza, pj_agilidad, pj_inteligencia,
+                    pj_carisma, pj_combate, pj_conocimientos, 
+                    pj_latrocinio, pj_magia, pj_sociales]
+    
+    def get_hp_spinners(self):
+        pj_hp = self.get_object("spinner-personaje-hp")
         hppj_combate = self.get_object("spin-hppj-combate")
         hppnj_combate = self.get_object("spin-hppnj-combate")
+
+        return [pj_hp, hppj_combate, hppnj_combate]
+    
+    def get_other_spinners(self):
+        equipo_valor = self.get_object("spin-equipo-valor")
+        equipo_equipoasociado = self.get_object("spin-equipo-unidades")
+        bonuspj_tirada = self.get_object("spinner-bonuspj-tirada")
+        bonuspnj_tirada = self.get_object("spinner-bonuspnj-tirada")
         bonusinipj_combate = self.get_object("spin-bonusinipj-combate")
         bonusinipnj_combate = self.get_object("spin-bonusinipnj-combate")
         bonuscombpj_combate = self.get_object("spin-bonuscombpj-combate")
         bonuscombpnj_combate = self.get_object("spin-bonuscombpnj-combate")
+        pj_multiplicar = self.get_object("spinner-personaje-multiplicar")
 
-        skill_spiners = [pj_fuerza, pj_agilidad, pj_inteligencia,
-                            pj_inteligencia, pj_carisma, pj_combate,
-                            pj_conocimientos, pj_latrocinio, pj_magia,
-                            pj_sociales]
-
-        hp_spinners = [pj_hp, hppj_combate, hppnj_combate]
-
-        all_spiners = [ equipo_valor, equipo_equipoasociado,
-                            bonuspj_tirada, bonuspnj_tirada,
-                            bonusinipj_combate, bonusinipnj_combate,
-                            bonuscombpj_combate, bonuscombpnj_combate,
-                            pj_multiplicar
-                        ] + skill_spiners + hp_spinners
-
+        return [equipo_valor, equipo_equipoasociado,
+                    bonuspj_tirada, bonuspnj_tirada,
+                    bonusinipj_combate, bonusinipnj_combate,
+                    bonuscombpj_combate, bonuscombpnj_combate,
+                    pj_multiplicar]
+    
+    def init_all_spinners(self, all_spinners):
         # set all to integer spinners
-        for spiner in all_spiners:
+        for spiner in all_spinners:
             spiner.set_digits(0)
             spiner.set_numeric(True)
 
         # set adjustements
-        for spiner in all_spiners:
+        for spiner in all_spinners:
             #value, lower, upper, step_increment, page_increment, page_size
             adjustment = dict(
                 value=0,
@@ -84,8 +86,9 @@ class GnGGladeGui(AbstractGui):
                 page_size=0,
             )
             spiner.set_adjustment(Gtk.Adjustment(**adjustment))
-
-        for spiner in skill_spiners:
+    
+    def init_skill_spinners(self, skill_spinners):
+        for spiner in skill_spinners:
             adjustment = dict(
                 value=0,
                 lower=1,
@@ -95,7 +98,8 @@ class GnGGladeGui(AbstractGui):
                 page_size=0,
             )
             spiner.set_adjustment(Gtk.Adjustment(**adjustment))
-
+    
+    def init_hp_spinners(self, hp_spinners):
         for spiner in hp_spinners:
             adjustment = dict(
                 value=0,

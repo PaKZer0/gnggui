@@ -141,6 +141,17 @@ class AbstractGui():
             personajes, 'id', fmt_func, 'personaje', False, 'pj_iters')
         self.load_combo(personajes_list, 'combo-personaje-importar')
     
+    def load_spiners(self):
+        skill_spinners = self.get_skill_spinners()
+        hp_spinners = self.get_hp_spinners()
+        other_spinners = self.get_other_spinners()
+
+        all_spinners = skill_spinners + hp_spinners + other_spinners
+
+        self.init_all_spinners(all_spinners)
+        self.init_skill_spinners(skill_spinners)
+        self.init_hp_spinners(hp_spinners)
+    
     def build(self):
         '''
         Builds the basic gui
