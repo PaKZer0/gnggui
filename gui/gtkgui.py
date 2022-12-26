@@ -455,6 +455,8 @@ class GnGGladeGui(AbstractGui):
             exit()
         except SystemExit:
             pass
+        except NameError:
+            pass
 
         Gtk.main_quit()
 
