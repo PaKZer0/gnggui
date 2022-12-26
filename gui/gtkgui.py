@@ -28,31 +28,6 @@ class GnGGladeGui(AbstractGui):
 
     _stats_pjs = OrderedDict()
     _stats_label_attrs = None
-    
-    def get_razas_options(self):
-        razas = self.con.get_razas()
-        ret = Gtk.ListStore(int, str)
-
-        # iniciar iter list razas pj
-        self.pjraza_iters = {}
-
-        for raza in razas:
-            logger.debug('Cargando raza id {} nombre {}'.format(
-                            raza.id, raza.nombre))
-            new_iter = ret.append([raza.id, raza.nombre])
-            self.pjraza_iters[raza.id] = new_iter
-
-        return ret
-
-    def load_razas_combo(self):
-        # cargar combo partida
-        renderer_text = Gtk.CellRendererCombo()
-        mods_store = self.get_razas_options()
-        combo_mods = self.builder.get_object("combo-personaje-raza")
-        combo_mods.clear()
-        combo_mods.set_model(mods_store)
-        combo_mods.pack_start(renderer_text, True)
-        combo_mods.add_attribute(renderer_text, "text", 1)
 
     def get_equipos_options(self):
         equipos = self.con.get_equipos()
@@ -405,11 +380,11 @@ class GnGGladeGui(AbstractGui):
         option_name, with_empty=False, self_iters=None):
         ret = Gtk.ListStore(int, str)
 
-        # iniciar iter list mods equipo
+        # iniciar iter list
+        if self_iters:
+            setattr(self, self_iters,  {})
+        
         if with_empty:
-            if self_iters:
-                setattr(self, self_iters,  {})
-
             # append empty
             empty_iter = ret.append([-1, ''])
 
@@ -425,7 +400,7 @@ class GnGGladeGui(AbstractGui):
                 f'Cargando {option_name} id {id_value} nombre {str_value}')
             new_iter = ret.append([id_value, str_value])
 
-            if with_empty and self_iters:
+            if self_iters:
                 iters = getattr(self, self_iters)
                 iters[id_value] = new_iter
                 setattr(self, self_iters,  iters)

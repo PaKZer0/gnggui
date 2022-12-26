@@ -64,6 +64,11 @@ class AbstractGui():
         mods_list = self.build_option_list(mods, 'id', 'nombre', 'mod')
         self.load_combo(mods_list, 'combo-mod-tirada')
     
+    def load_razas_combo(self):
+        razas = self.con.get_razas()
+        razas_list = self.build_option_list(razas, 'id', 'nombre', 'raza', False, 'pjraza_iters')
+        self.load_combo(razas_list, 'combo-personaje-raza')
+    
     def build(self):
         '''
         Builds the basic gui
