@@ -376,7 +376,7 @@ class GnGGladeGui(AbstractGui):
 
         Gtk.main_quit()
     
-    def build_option_list(self, abstract_list, id_attr, str_attr, 
+    def build_fmt_option_list(self, abstract_list, id_attr, fmt_func, 
         option_name, with_empty=False, self_iters=None):
         ret = Gtk.ListStore(int, str)
 
@@ -395,7 +395,7 @@ class GnGGladeGui(AbstractGui):
 
         for item in abstract_list:
             id_value = getattr(item, id_attr)
-            str_value = getattr(item, str_attr)
+            str_value = fmt_func(item)
             logger.debug(
                 f'Cargando {option_name} id {id_value} nombre {str_value}')
             new_iter = ret.append([id_value, str_value])
@@ -406,6 +406,16 @@ class GnGGladeGui(AbstractGui):
                 setattr(self, self_iters,  iters)
 
         return ret
+    
+    def build_option_list(self, abstract_list, id_attr, str_attr, 
+        option_name, with_empty=False, self_iters=None):
+        def fmt_func(item):
+            return getattr(item, str_attr)
+
+        return self.build_fmt_option_list(
+            abstract_list, id_attr, fmt_func, 
+            option_name, with_empty, self_iters
+        )
 
     def load_combo(self, option_list, id_combo):
         renderer_text = Gtk.CellRendererCombo()
