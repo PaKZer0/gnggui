@@ -299,36 +299,12 @@ class GnGGladeGui(AbstractGui):
                 page_size=0,
             )
             spiner.set_adjustment(Gtk.Adjustment(**adjustment))
-
-    def build(self):
+    
+    def build_native(self):
         # build glade
         self.builder = Gtk.Builder()
         current_path = os.path.dirname(__file__)
         self.builder.add_from_file("{}/gngui.glade".format(current_path))
-
-        # cargar combos
-        self.load_partidas_combo()
-        self.load_mods_combo()
-        self.load_razas_combo()
-        self.load_equipos_combo()
-        self.load_dificultades_combo()
-        self.load_spiners()
-
-        # cargar lista equipo
-        self.load_list_equipo()
-
-        # set vars
-        self.partida             = None
-        self.id_personaje_sel    = None
-        self.id_pj_ini           = None
-        self.id_pnj_ini          = None
-        self.id_pj_ataca         = None
-        self.id_pj_defiende      = None
-        self.ataca_pj            = None
-        self.bt_asignar_activado = False
-        self.bt_reset_activado   = False
-        self.check_magia_ini     = False
-        self.check_magia_com     = False
 
     def bind_signals(self):
         ## window ##
@@ -459,27 +435,46 @@ class GnGGladeGui(AbstractGui):
             pass
 
         Gtk.main_quit()
-
-    def get_partidas_options(self):
-        partidas = self.con.get_partidas()
+    
+    def build_option_list(self, abstract_list, id_attr, str_attr, 
+        option_name, with_empty=False, self_iters=None):
         ret = Gtk.ListStore(int, str)
 
-        for partida in partidas:
-            logger.debug('Cargando partida id {} nombre {}'.format(
-                            partida.id, partida.nombre))
-            ret.append([partida.id, partida.nombre])
+        # iniciar iter list mods equipo
+        if with_empty:
+            if self_iters:
+                setattr(self, self_iters,  {})
+
+            # append empty
+            empty_iter = ret.append([-1, ''])
+
+            if self_iters:
+                iters = getattr(self, self_iters)
+                iters[-1] = empty_iter
+                setattr(self, self_iters,  iters)
+
+        for item in abstract_list:
+            id_value = getattr(item, id_attr)
+            str_value = getattr(item, str_attr)
+            new_iter = [id_value, str_value]
+            logger.debug(
+                f'Cargando {option_name} id {id_value} nombre {str_value}')
+            ret.append(new_iter)
+
+            if with_empty and self_iters:
+                iters = getattr(self, self_iters)
+                iters[id_value] = new_iter
+                setattr(self, self_iters,  iters)
 
         return ret
 
-    def load_partidas_combo(self):
-        # cargar combo partida
+    def load_combo(self, option_list, id_combo):
         renderer_text = Gtk.CellRendererCombo()
-        partidas_store = self.get_partidas_options()
-        combo_partidas = self.builder.get_object("combo-partida")
-        combo_partidas.clear()
-        combo_partidas.set_model(partidas_store)
-        combo_partidas.pack_start(renderer_text, True)
-        combo_partidas.add_attribute(renderer_text, "text", 1)
+        combo = self.builder.get_object(id_combo)
+        combo.clear()
+        combo.set_model(option_list)
+        combo.pack_start(renderer_text, True)
+        combo.add_attribute(renderer_text, "text", 1)
 
     def load_partida_info(self, partida=None):
         if not partida:
