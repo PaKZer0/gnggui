@@ -45,7 +45,7 @@ class GnGGladeGui(AbstractGui):
             if equipo.mod:
                 if equipo.valor > 0:
                     texto_mod = ' +{} en {}'.format(equipo.valor, equipo.mod.nombre)
-                elif equipo.valor < 0:
+                elif equipo.valor <= 0:
                     texto_mod = ' {} en {}'.format(equipo.valor, equipo.mod.nombre)
 
             texto_nombre = '{}{}'.format(

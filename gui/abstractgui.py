@@ -83,6 +83,8 @@ class AbstractGui():
         self.load_razas_combo()
         self.load_equipos_combo()
         self.load_dificultades_combo()
+
+        # load spinners
         self.load_spiners()
 
         # cargar lista equipo
