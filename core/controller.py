@@ -72,10 +72,12 @@ class Controller():
         return equipo
 
     def crear_equipo(self, nombre, descripcion = None, valor = None,
-                        id_mod = None):
+                        id_mod = None, unidades = None, equipo_asociado = None):
         equipo = Equipo()
         equipo.nombre = nombre
         equipo.descripcion = descripcion
+        equipo.unidades = unidades
+        equipo.equipo_asociado = equipo_asociado
 
         if valor:
             equipo.valor = valor
@@ -90,11 +92,17 @@ class Controller():
 
         return equipo
 
-    def editar_equipo(self, id_equipo, nombre, descripcion = None,
-                        valor = None, id_mod = None):
+    def editar_equipo(self, id_equipo, nombre = None, descripcion = None,
+                        valor = None, id_mod = None, unidades = None,
+                        equipo_asociado = None):
         equipo = Equipo.get(Equipo.id == id_equipo)
-        equipo.nombre = nombre
+
+        if nombre:
+            equipo.nombre = nombre
+        
         equipo.descripcion = descripcion
+        equipo.unidades = unidades
+        equipo.equipo_asociado = equipo_asociado
 
         if valor:
             equipo.valor = valor
@@ -200,6 +208,9 @@ class Controller():
         if 'notas' in datos:
             personaje.notas = datos['notas']
 
+        if 'is_pj' in datos:
+            personaje.is_pj = datos['is_pj']
+
         personaje.save()
 
         if 'partida' in datos:
@@ -256,6 +267,9 @@ class Controller():
 
         if 'notas' in datos:
             personaje.notas = datos['notas']
+
+        if 'is_pj' in datos:
+            personaje.is_pj = datos['is_pj']
 
         if 'partida' in datos:
             id_partida = datos['partida']
@@ -345,6 +359,7 @@ class Controller():
             magia = personaje.magia,
             sociales = personaje.sociales,
             notas = personaje.notas,
+            is_pj = personaje.is_pj,
         )
         clon.save()
 
