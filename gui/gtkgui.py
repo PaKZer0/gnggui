@@ -95,27 +95,6 @@ class GnGGladeGui(AbstractGui):
             combo.pack_start(renderer_text, True)
             combo.add_attribute(renderer_text, "text", 1)
 
-    def get_dificultades_options(self):
-        dificultades = self.con.get_dificultades()
-        ret = Gtk.ListStore(int, str)
-
-        for dificultad in dificultades:
-            txt_dificultad = '{} ({})'.format(dificultad.texto, dificultad.valor)
-            logger.debug('Cargando dificultad  {}'.format(txt_dificultad))
-            new_iter = ret.append([dificultad.id, txt_dificultad])
-
-        return ret
-
-    def load_dificultades_combo(self):
-        # cargar combo equipos
-        renderer_text = Gtk.CellRendererCombo()
-        mods_store = self.get_dificultades_options()
-        combo_mods = self.builder.get_object("combo-dificultad-tirada")
-        combo_mods.clear()
-        combo_mods.set_model(mods_store)
-        combo_mods.pack_start(renderer_text, True)
-        combo_mods.add_attribute(renderer_text, "text", 1)
-
     def load_spiners(self):
         # get spinners
         equipo_valor = self.get_object("spin-equipo-valor")

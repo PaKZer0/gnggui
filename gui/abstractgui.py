@@ -101,6 +101,15 @@ class AbstractGui():
         self.load_equipos_pj_combo()
         self.load_equipos_asociado_combo()
     
+    def load_dificultades_combo(self):
+        def fmt_func(item):
+            return f'{item.texto} ({item.valor})'
+        
+        dificultades = self.con.get_dificultades()
+        dificultades_list = self.build_fmt_option_list(
+            dificultades, 'id', fmt_func, 'dificultad')
+        self.load_combo(dificultades_list, 'combo-dificultad-tirada')
+    
     def build(self):
         '''
         Builds the basic gui
